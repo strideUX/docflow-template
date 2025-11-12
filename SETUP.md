@@ -7,8 +7,12 @@ This is a complete DocFlow template ready to be copied into any new project.
 ### 1. Copy Template to Your Project
 
 ```bash
+# Clone the template repository
+git clone git@github.com:strideUX/docflow-template.git
+
 # From your project root
 cp -r /path/to/docflow-template/* ./
+# Example: cp -r ~/Documents/Work/docflow-template/* ./
 ```
 
 Or manually copy these files/folders to your project root:
@@ -135,10 +139,13 @@ Check `/docflow/README.md` in your project for:
 
 ## Template Maintenance
 
-This template is maintained in the stride-docflow project. Updates should flow:
-1. Refine in a live project
-2. Extract improvements back to template
-3. Apply to other projects
+This template is maintained at: **git@github.com:strideUX/docflow-template.git**
 
-**Source of Truth**: The project using the latest refined DocFlow system
-**Template Location**: `/docflow-template/` in stride-docflow repo
+Updates should flow:
+1. Refine DocFlow in a live project (e.g., stride-website)
+2. Extract improvements back to this template repository
+3. Apply to other projects by copying from template
+
+**Update Workflow**: Live Project → Template Repo → Other Projects
+**GitHub Repository**: `git@github.com:strideUX/docflow-template.git`
+**Local Clone Example**: `~/Documents/Work/docflow-template/`
