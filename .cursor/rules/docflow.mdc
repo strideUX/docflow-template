@@ -9,9 +9,10 @@ alwaysApply: true
 1. Always load: /docflow/context/overview.md
 2. Always load: /docflow/ACTIVE.md
 3. **Check for status=REVIEW specs in /docflow/specs/active/ (for DocFlow agent)**
-4. For current work: Load active spec from /docflow/specs/active/
-5. For technical details: Load /docflow/context/stack.md and standards.md
-6. For shared code: Load /docflow/shared/dependencies.md
+4. **Check for status=QE_TESTING specs in /docflow/specs/active/ (for user testing confirmation)**
+5. For current work: Load active spec from /docflow/specs/active/
+6. For technical details: Load /docflow/context/stack.md and standards.md
+7. For shared code: Load /docflow/shared/dependencies.md
 
 ## Status-Based Implementation Workflow
 
@@ -20,8 +21,9 @@ Specs progress through these states:
 - **BACKLOG**: Spec exists but not yet ready for implementation
 - **READY**: DocFlow has prepared spec, ready for implementation agent
 - **IMPLEMENTING**: Implementation agent is actively working
-- **REVIEW**: Implementation complete, needs DocFlow review
-- **COMPLETE**: DocFlow approved, ready to archive
+- **REVIEW**: Implementation complete, needs DocFlow code review
+- **QE_TESTING**: DocFlow approved code, ready for user QE/functional testing
+- **COMPLETE**: User confirmed working, ready to archive
 
 ### DocFlow Agent Responsibilities
 
@@ -45,15 +47,49 @@ Specs progress through these states:
 4. Check for unauthorized scope changes
 5. Verify compliance with /docflow/context/standards.md
 6. Fill out DocFlow Review section
-7. If approved:
+7. If code quality approved:
+   - Set status=QE_TESTING
+   - Set owner=User
+   - Add note in Review section: "✅ Code review passed. Ready for QE testing and validation."
+   - **DO NOT** move to complete folder yet
+   - **DO NOT** mark as COMPLETE yet
+   - Notify user: "Ready for your QE testing and validation!"
+8. If code issues found:
+   - Add detailed notes in Review section
+   - Set status=IMPLEMENTING
+   - Set owner=Implementation
+   - List specific changes needed
+
+**When Checking QE_TESTING Status:**
+1. Check for specs with status=QE_TESTING on every interaction
+2. If user reports they're testing, provide guidance on what to verify
+3. Wait for explicit user confirmation before closing
+4. Never automatically move QE_TESTING → COMPLETE
+
+**When User Approves QE Testing (status=QE_TESTING):**
+1. User says approval phrases like:
+   - "approve this" / "looks good" / "works great"
+   - "ready to close" / "ship it" / "all good"
+   - "QE passed" / "testing passed" / "verified"
+2. DocFlow agent then:
+   - Fill out QE Testing section in spec
    - Set status=COMPLETE
-   - Update Decision Log with completion date
+   - Set owner=DocFlow
+   - Update Decision Log with QE approval date
    - Move to /specs/complete/YYYY-QQ/ (atomic: delete then create)
    - Update ACTIVE.md and INDEX.md
-8. If changes needed:
-   - Add detailed notes in Review section
-   - Keep status=REVIEW
+   - Confirm: "Spec approved and archived! 🎉"
+
+**When User Reports QE Issues (status=QE_TESTING):**
+1. User reports bugs, issues, or requested changes
+2. DocFlow agent:
+   - Document issues in QE Testing section
+   - Add issues to Implementation Notes
+   - Set status=IMPLEMENTING
    - Set owner=Implementation
+   - Summarize what needs to be fixed
+3. Implementation agent addresses issues and returns to REVIEW
+4. Process repeats: REVIEW → QE_TESTING → approval
 
 ### Implementation Agent Responsibilities
 
@@ -86,17 +122,27 @@ Specs progress through these states:
 3. Run validation (TypeScript, tests, manual checks)
 4. Set status=REVIEW, owner=DocFlow
 5. Provide brief summary to user
+6. Wait for DocFlow review, then user QE testing
 
 **On Blocker:**
 1. Document blocker in Implementation Notes
 2. Set status=REVIEW, owner=DocFlow (requires input)
 3. Explain what's blocking and what's needed
 
+**When Addressing QE Issues:**
+1. Load spec with QE Testing section to see reported issues
+2. Fix reported bugs/issues
+3. Update Implementation Notes with fixes applied
+4. Set status=REVIEW, owner=DocFlow
+5. Brief summary of what was fixed
+
 ### Workflow State Checks
 
 **For DocFlow Agent:**
-- On every interaction, check for status=REVIEW specs
-- Prioritize reviews before starting new work
+- On every interaction, check for status=REVIEW specs (highest priority)
+- Check for status=QE_TESTING specs (check for user approval)
+- After code review, set status=QE_TESTING (not COMPLETE)
+- Only move to COMPLETE after user confirms QE testing passed
 - When activating work, set status=READY
 
 **For Implementation Agent:**
@@ -192,10 +238,10 @@ Move specs automatically when these conditions are met:
 - When `/start-session` moves item to active
 
 **Active → Complete:**
-- When ALL acceptance criteria are marked complete [x]
-- When user says "done with [spec]" or "complete [spec]"
-- When `/wrap-session` completes an item
-- When user moves to different work
+- **ONLY when user explicitly approves QE testing**
+- When user says "approve", "looks good", "ship it", "QE passed", etc.
+- When spec status=QE_TESTING and user confirms
+- When `/wrap-session` completes an item AND user confirms
 
 **Complete Archiving:**
 - Move to /complete/YYYY-QQ/ at end of each quarter
@@ -248,6 +294,15 @@ When user says any of these, run `/wrap-session`:
 - "call it a day" / "that's it for now"
 - "pause work" / "pause here"
 
+### QE Approval Triggers
+When user says any of these for status=QE_TESTING spec, mark as COMPLETE:
+- "approve this" / "approve it" / "approved"
+- "looks good" / "looks great" / "works great"
+- "ready to close" / "ready to ship" / "ship it"
+- "QE passed" / "testing passed" / "tests passed"
+- "verified" / "confirmed" / "all good"
+- "close this" / "mark complete" / "done with this"
+
 ### Capture Triggers
 When user says any of these, run `/capture`:
 - "capture that" / "let's capture" / "we should capture"
@@ -294,6 +349,7 @@ When user says any of these, run `/scan-project`:
 - **Template placeholders in context files** → "Context files need customization. Run /new-project or /scan-project?"
 - **Empty ACTIVE.md + Items in backlog** → "I see you have items in backlog. Shall we /review one?"
 - **Completed all acceptance criteria** → "Looks like you've finished! Ready to /wrap-session?"
+- **Spec in QE_TESTING status** → "This feature is ready for your testing! Please verify and let me know if it looks good."
 - **Switching context** → "Before we switch, should we /wrap-session on current work?"
 - **Vague feature description** → "Interesting idea! Should I /capture this for later?"
 - **Multiple specs in active** → "You have multiple active items. Let's /start-session to focus on one?"
@@ -334,11 +390,13 @@ When detecting these patterns in conversation:
 
 ### Completing Work
 1. Verify all Acceptance Criteria met
-2. Update INDEX.md with completion date
-3. Add final Decision Log entry with outcomes
-4. **DELETE original file from /specs/active/**
-5. **CREATE new file in /specs/complete/[YYYY-QQ]/**
-6. Update ACTIVE.md to remove completed item
+2. Get DocFlow code review (status=REVIEW → QE_TESTING)
+3. User performs QE testing and approves
+4. Update INDEX.md with completion date
+5. Add final Decision Log entry with outcomes
+6. **DELETE original file from /specs/active/**
+7. **CREATE new file in /specs/complete/[YYYY-QQ]/**
+8. Update ACTIVE.md to remove completed item
 
 ## Code Principles
 - TypeScript strict mode always
@@ -367,6 +425,7 @@ If user mentions something that could be a bug, feature, or idea during active w
 ## Status Awareness
 Always be aware of:
 - What's currently active (ACTIVE.md)
+- What's in QE testing (check for QE_TESTING status)
 - What's in the backlog (INDEX.md)
 - What's blocking progress (check specs)
 - What decisions need to be made (check Decision Logs)
@@ -380,6 +439,15 @@ When finding existing code:
 
 When creating new shared code:
 "Creating new [module/function]. I'll add this to dependencies.md"
+
+When feature ready for QE testing:
+"✅ Code review passed! This is ready for your QE testing. Please verify the functionality and let me know if it looks good."
+
+When user approves QE testing:
+"Perfect! Marking as complete and archiving. 🎉"
+
+When user reports issues during QE testing:
+"I'll document these issues and send back to implementation for fixes."
 
 ## Command Execution Patterns
 When recognizing a trigger phrase:
@@ -397,4 +465,5 @@ Never say "you should run /command" - instead, recognize the intent and run it d
 - Always keep ACTIVE.md current
 - Always keep INDEX.md current
 - Always move files atomically (delete source, create destination)
+- Never auto-close specs in QE_TESTING without user approval
 - Recognize natural language and execute commands accordingly

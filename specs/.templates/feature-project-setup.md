@@ -1,5 +1,13 @@
 # Feature: Project Setup
 
+**Status**: BACKLOG  
+**Owner**: DocFlow  
+**AssignedTo**: Unassigned  
+**Priority**: Medium  
+**Estimated Time**: TBD  
+**Created**: YYYY-MM-DD  
+**Last Updated**: YYYY-MM-DD
+
 ## Context
 Initialize the [PROJECT NAME] project with [MAIN FRAMEWORK], [BACKEND], and core dependencies. This provides the foundation for building all subsequent features.
 

@@ -26,7 +26,8 @@ Save your progress and prepare for a clean resumption of work later.
 
 4. **Check Status-Specific Actions**
    - **IMPLEMENTING**: Ensure progress is documented in spec
-   - **REVIEW**: If you've completed review, follow review workflow
+   - **REVIEW**: If you've completed review, follow review workflow (set to QE_TESTING, not COMPLETE)
+   - **QE_TESTING**: Check if user has approved/reported issues
    - **READY**: No action needed (queued for implementation)
 
 5. **Update ACTIVE.md**

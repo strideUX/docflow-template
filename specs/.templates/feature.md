@@ -1,12 +1,20 @@
 # Feature: [Name]
 
+**Status**: BACKLOG  
+**Owner**: DocFlow  
+**AssignedTo**: Unassigned  
+**Priority**: Medium  
+**Estimated Time**: TBD  
+**Created**: YYYY-MM-DD  
+**Last Updated**: YYYY-MM-DD
+
 ## Context
 [Why does this feature exist? What problem does it solve?]
 
 ## User Story
-As a [type of user]
-I want [goal/desire]
-So that [benefit/value]
+**As a** [type of user]  
+**I want** [goal/desire]  
+**So that** [benefit/value]
 
 ## Acceptance Criteria
 - [ ] [Specific, testable criterion]
@@ -15,6 +23,7 @@ So that [benefit/value]
 - [ ] [Performance: Action completes in < X seconds]
 
 ## Technical Notes
+
 ### Approach
 [High-level implementation approach]
 
@@ -34,5 +43,23 @@ So that [benefit/value]
 - **Blocks**: [What future work depends on this]
 
 ## Decision Log
-- YYYY-MM-DD: Initial spec created
-- YYYY-MM-DD: [Decision made and reasoning]
+
+### YYYY-MM-DD - Initial Spec Created
+**Decision:** Created feature spec for [feature name]  
+**Rationale:** [Why this feature was proposed]
+
+## Implementation Notes
+
+[Implementation agent will fill this section when work begins]
+
+## Blockers
+
+None currently.
+
+## DocFlow Review
+
+[DocFlow agent will fill this section when reviewing implementation]
+
+## QE Testing & Validation
+
+[User will fill this section when testing the implementation]

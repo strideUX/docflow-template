@@ -5,9 +5,11 @@ Begin your work session by checking current progress and determining what to wor
 
 ## Steps
 
-1. **Check for Pending Reviews FIRST**
-   - Check /specs/active/ for any spec with status=REVIEW
-   - If found, prioritize reviewing before new work
+1. **Check for Pending Reviews & QE Testing FIRST**
+   - Check /specs/active/ for any spec with status=REVIEW (highest priority)
+   - Check /specs/active/ for any spec with status=QE_TESTING (needs user testing)
+   - If REVIEW found, prioritize reviewing before new work
+   - If QE_TESTING found, notify: "Spec [name] is ready for your QE testing. Please verify and approve."
    - Ask: "Spec [name] is ready for review. Review first or continue with other work?"
 
 2. **Check Active Work**
@@ -55,6 +57,7 @@ Begin your work session by checking current progress and determining what to wor
 
 ## Checklist
 - [ ] Checked for status=REVIEW specs
+- [ ] Checked for status=QE_TESTING specs
 - [ ] ACTIVE.md checked
 - [ ] INDEX.md reviewed
 - [ ] Current work status clear
