@@ -356,13 +356,30 @@ Update /docflow/INDEX.md and /docflow/ACTIVE.md immediately when:
 - Starting/stopping work on items
 
 ## Workflow Commands
-The following commands are available in `.cursor/commands/`:
-- `/new-project` - Set up new project through conversational flow
-- `/scan-project` - Analyze existing codebase and retrofit DocFlow
-- `/start-session` - Begin work session, check status, start new work
-- `/wrap-session` - Save progress and checkpoint current work
-- `/capture` - Quickly capture new ideas/features/bugs to backlog
-- `/review` - Review and refine backlog items for active work
+
+### Available Commands by Agent Role
+
+**PM/Planning Agent:**
+- `/start-session` - Begin planning session, check status
+- `/wrap-session` - End session, save state
+- `/capture` - Quick capture new work to backlog
+- `/review [spec]` - Refine backlog item
+- `/activate [spec]` - Ready spec for implementation
+- `/close [spec]` - Archive completed work
+
+**Implementation Agent:**
+- `/implement [spec]` - Pick up and build active spec
+- `/block` - Document blocker, hand back to PM
+
+**QE/Validation Agent:**
+- `/validate [spec]` - Test and validate with user
+
+**All Agents:**
+- `/status` - Check current state of work
+
+**System Setup (use sparingly):**
+- `/new-project` - Set up new project with DocFlow
+- `/scan-project` - Retrofit DocFlow to existing codebase
 
 Type `/` in chat to see and use these commands.
 

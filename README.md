@@ -46,6 +46,8 @@ docflow/
 
 ## Development Workflow
 
+**📖 See [WORKFLOW.md](WORKFLOW.md) for complete three-agent workflow model and command guide.**
+
 ### Cursor Slash Commands
 Type `/` in Cursor chat to see available commands:
 
