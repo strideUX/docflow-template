@@ -31,10 +31,13 @@ If not ready, suggest running `/review [spec]` first.
 - If assigned to someone else, warn: "This spec is assigned to [user]. Continue anyway?"
 
 ### 3. **Move the Spec**
-**Atomic file operation:**
-- DELETE spec file from /docflow/specs/backlog/
-- CREATE spec file in /docflow/specs/active/
+**Efficient file movement:**
+- Use terminal mv command:
+  ```bash
+  mv /docflow/specs/backlog/[spec-name].md /docflow/specs/active/[spec-name].md
+  ```
 - Verify file exists in active/ after move
+- Single operation, one approval
 
 ### 4. **Update Spec Metadata**
 Set in the spec:

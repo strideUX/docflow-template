@@ -180,8 +180,9 @@ Quick reference:
 - Reference docflow/knowledge/ for patterns
 - Avoid duplication
 
-⚠️ **Follow atomic file operations:**
-- When moving specs, delete source then create destination
+⚠️ **Move files efficiently:**
+- When moving specs, use terminal mv command (single operation)
+- Then update spec content (status, dates)
 - Update ACTIVE.md and INDEX.md in same operation
 
 ⚠️ **Load context situationally:**

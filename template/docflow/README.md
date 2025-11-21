@@ -199,10 +199,11 @@ Read it to find what knowledge exists, then load only what you need.
 ❌ NO: STATUS.md, SUMMARY.md, TODO.md in project root  
 ✅ YES: All tracking in ACTIVE.md and specs
 
-### Move Files Atomically
-1. DELETE source file
-2. CREATE destination file
-3. Update ACTIVE.md and INDEX.md in same operation
+### Move Files Efficiently
+1. Use terminal `mv` command (single operation)
+2. Update spec content (status, dates)
+3. Update ACTIVE.md and INDEX.md
+4. Faster and requires only one approval
 
 ### Search Before Creating
 - Use codebase_search to find existing code

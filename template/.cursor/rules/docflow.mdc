@@ -160,7 +160,7 @@ Specs progress through these states:
    - Set status=COMPLETE
    - Set owner=DocFlow
    - Update Decision Log with QE approval date
-   - Move to /docflow/specs/complete/YYYY-QQ/ (atomic: delete then create)
+   - Move to /docflow/specs/complete/YYYY-QQ/ (use mv command)
    - Update /docflow/ACTIVE.md and /docflow/INDEX.md
    - Confirm: "Spec approved and archived! 🎉"
 
@@ -307,11 +307,30 @@ Required spec sections:
 - [ ] Deleted source spec file if moved (atomic move)
 - [ ] Did NOT create ANY .md files in project root
 
-### Rule 1: Always Move Files Atomically
-When moving specs between folders, ALWAYS:
-1. **Delete the source file FIRST**
-2. **Then create the destination file**
-3. **NEVER copy without deleting** (this creates duplicates)
+### Rule 1: Efficient File Movement
+When moving specs between folders, use the MOST EFFICIENT approach:
+
+**Preferred (single operation):**
+1. **Use terminal mv command** to move the file
+   ```bash
+   mv /docflow/specs/backlog/feature-x.md /docflow/specs/active/feature-x.md
+   ```
+2. **Then update spec content** using search_replace (status, dates, etc.)
+3. **Then update tracking files** (ACTIVE.md, INDEX.md)
+
+**Why:** Single mv operation, requires one approval, most efficient.
+
+**Alternative (if mv not available):**
+1. **Read source file** content
+2. **Update content** (status, metadata)
+3. **Write to destination** with updated content
+4. **Delete source** file
+5. **All in same tool call batch** (one approval cycle)
+
+**Never:**
+- ❌ Delete then create as separate operations (requires two approvals)
+- ❌ Copy without deleting (creates duplicates)
+- ❌ Move without updating tracking files
 
 ### Rule 2: Update INDEX.md IMMEDIATELY
 Every time you move a spec file, update /docflow/INDEX.md in the SAME operation:
@@ -560,9 +579,9 @@ If you discover complex patterns or shared systems while searching:
 3. User performs QE testing and approves
 4. Update /docflow/INDEX.md with completion date
 5. Add final Decision Log entry with outcomes
-6. **DELETE original file from /docflow/specs/active/**
-7. **CREATE new file in /docflow/specs/complete/[YYYY-QQ]/**
-8. Update /docflow/ACTIVE.md to remove completed item
+6. **Move spec file** from active to complete using terminal mv command
+7. **Update spec content** (set status=COMPLETE, add completion date)
+8. **Update /docflow/ACTIVE.md** to remove completed item
 9. Clean up or archive spec assets from /docflow/specs/assets/[spec-name]/ if present
 
 ## Code Principles
@@ -640,7 +659,7 @@ Never say "you should run /command" - instead, recognize the intent and run it d
 - Always update decision logs with reasoning
 - Always keep /docflow/ACTIVE.md current
 - Always keep /docflow/INDEX.md current
-- Always move files atomically (delete source, create destination)
+- Always move spec files with single mv operation, then update content
 - Never auto-close specs in QE_TESTING without user approval
 - Recognize natural language and execute commands accordingly
 - Document architectural decisions in /docflow/knowledge/decisions/

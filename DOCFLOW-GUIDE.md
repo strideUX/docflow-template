@@ -931,10 +931,11 @@ DocFlow works across AI tools:
 ❌ **Forbidden:** STATUS.md, SUMMARY.md, TODO.md in project root  
 ✅ **Use:** docflow/ACTIVE.md and specs instead
 
-### Move Files Atomically
-1. DELETE source file
-2. CREATE destination file
-3. Update ACTIVE.md and INDEX.md in same operation
+### Move Files Efficiently
+1. Use terminal `mv` command (single operation)
+2. Update spec content with search_replace (status, dates)
+3. Update ACTIVE.md and INDEX.md
+4. Preferred over delete/create (requires fewer approvals)
 
 ### Search Before Creating
 - Use codebase_search for existing functionality

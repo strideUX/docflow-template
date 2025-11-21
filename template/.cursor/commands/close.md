@@ -35,12 +35,15 @@ Before archiving:
 ```
 
 ### 3. **Move to Archive**
-**Atomic file operation:**
+**Efficient file movement:**
 - Determine quarter folder: YYYY-QQ (e.g., 2024-Q4)
 - Create folder if doesn't exist: /docflow/specs/complete/YYYY-QQ/
-- DELETE spec file from /docflow/specs/active/
-- CREATE spec file in /docflow/specs/complete/YYYY-QQ/
+- Use terminal mv command:
+  ```bash
+  mv /docflow/specs/active/[spec-name].md /docflow/specs/complete/YYYY-QQ/[spec-name].md
+  ```
 - Verify file moved successfully
+- Single operation, one approval
 
 **Set final metadata:**
 ```markdown

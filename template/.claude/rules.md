@@ -12,7 +12,7 @@ This file contains the complete DocFlow system. **You MUST read it** to understa
 - Three-agent orchestration model
 - Command system and natural language triggers
 - Context loading strategy (situational, not auto-load)
-- File movement rules (atomic operations)
+- File movement rules (efficient mv operations)
 - Spec lifecycle management
 - Knowledge base usage
 
@@ -82,7 +82,7 @@ Use fresh chats for:
 ### File Operations
 - Claude can create/update specs
 - Claude can move files between folders
-- Follow atomic movement rules (delete then create)
+- Use terminal mv command for efficiency (single operation)
 
 ---
 
@@ -116,7 +116,7 @@ BACKLOG → ACTIVE → COMPLETE
 Read `.cursor/rules/docflow.mdc` for complete rules. Key ones:
 
 1. ❌ Never create root-level status files
-2. ✅ Always move files atomically (delete → create)
+2. ✅ Use terminal mv command to move files (efficient, single operation)
 3. ✅ Search before creating code (avoid duplicates)
 4. ✅ Load context situationally (not everything)
 5. ✅ Follow spec templates (inline instructions)

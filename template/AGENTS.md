@@ -175,10 +175,11 @@ Each template includes comprehensive agent instructions.
 - ❌ NO STATUS.md, SUMMARY.md, TODO.md in project root
 - ✅ ALL tracking in /docflow/ACTIVE.md and specs
 
-### Always Move Files Atomically
-1. DELETE source file
-2. CREATE destination file
-3. Update ACTIVE.md and INDEX.md in same operation
+### Move Files Efficiently
+1. Use terminal `mv` command (single operation)
+2. Update spec content (status, dates)
+3. Update ACTIVE.md and INDEX.md
+4. Preferred over delete/create (faster, fewer approvals)
 
 ### Search Before Creating
 - Use codebase_search to find existing code
