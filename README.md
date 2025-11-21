@@ -99,7 +99,7 @@ Cursor recognizes these phrases:
 - `docflow/context/overview.md` - Product vision and goals
 - `docflow/context/stack.md` - Technical stack and architecture
 - `docflow/context/standards.md` - Code quality and development standards
-- `docflow/specs/templates/` - Spec templates (feature, bug, idea)
+- `docflow/specs/templates/` - Spec templates (feature, bug, chore, idea)
 - `docflow/knowledge/` - Architecture decisions and feature documentation
 
 ## Architecture Highlights

@@ -18,12 +18,21 @@ alwaysApply: true
 
 ### Status States
 Specs progress through these states:
+
+**Full Workflow (Features & Bugs):**
 - **BACKLOG**: Spec exists but not yet ready for implementation
 - **READY**: DocFlow has prepared spec, ready for implementation agent
 - **IMPLEMENTING**: Implementation agent is actively working
 - **REVIEW**: Implementation complete, needs DocFlow code review
 - **QE_TESTING**: DocFlow approved code, ready for user QE/functional testing
 - **COMPLETE**: User confirmed working, ready to archive
+
+**Simplified Workflow (Chores & Ideas):**
+- **BACKLOG**: Captured but not started
+- **ACTIVE**: Currently working on it
+- **COMPLETE**: User approved, ready to archive
+
+**Note:** Chores skip formal review/QE steps but still require user approval before closing.
 
 ### DocFlow Agent Responsibilities
 
@@ -66,7 +75,7 @@ Specs progress through these states:
 3. Wait for explicit user confirmation before closing
 4. Never automatically move QE_TESTING → COMPLETE
 
-**When User Approves QE Testing (status=QE_TESTING):**
+**When User Approves QE Testing (status=QE_TESTING for Features/Bugs):**
 1. User says approval phrases like:
    - "approve this" / "looks good" / "works great"
    - "ready to close" / "ship it" / "all good"
@@ -79,6 +88,17 @@ Specs progress through these states:
    - Move to /docflow/specs/complete/YYYY-QQ/ (atomic: delete then create)
    - Update /docflow/ACTIVE.md and /docflow/INDEX.md
    - Confirm: "Spec approved and archived! 🎉"
+
+**When User Approves Chores (status=ACTIVE):**
+1. For chores, agent can suggest completion but must wait for user approval
+2. Agent suggests: "This chore looks complete. Ready to close?"
+3. User approval phrases same as above
+4. On approval:
+   - Fill out User Approval section
+   - Set status=COMPLETE
+   - Move to /docflow/specs/complete/YYYY-QQ/
+   - Update /docflow/ACTIVE.md and /docflow/INDEX.md
+   - Confirm: "Chore complete and archived! 🎉"
 
 **When User Reports QE Issues (status=QE_TESTING):**
 1. User reports bugs, issues, or requested changes
@@ -94,7 +114,7 @@ Specs progress through these states:
 ### Implementation Agent Responsibilities
 
 **On Startup:**
-1. Check /docflow/specs/active/ for any spec with status=READY
+1. Check /docflow/specs/active/ for any spec with status=READY or status=ACTIVE (for chores)
 2. **Filter by assignment:**
    - Get current developer username (git config github.user || git config user.name || "Developer")
    - If spec.AssignedTo = Unassigned: Available to work on

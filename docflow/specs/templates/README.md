@@ -5,7 +5,7 @@ This folder contains templates for creating new specs. Each template has inline 
 ## Available Templates
 
 ### 📋 feature.md - Feature Specs
-**Use for:** New functionality, enhancements, user-facing changes
+**Use for:** New functionality, enhancements, significant user-facing changes
 
 **When to use:**
 - Building a new feature or capability
@@ -69,17 +69,46 @@ This folder contains templates for creating new specs. Each template has inline 
 
 ---
 
+### 🔧 chore.md - Maintenance & Improvements
+**Use for:** Technical debt, refactoring, iterative improvements, cleanup work
+
+**When to use:**
+- UI polish and cleanup
+- Code refactoring
+- Performance improvements
+- Technical debt reduction
+- Dependency updates
+- "While I'm here" improvements
+- Iterative enhancements
+- Maintenance work
+
+**What's included:**
+- Lightweight context (why it matters)
+- Evolving task checklist (add as you discover)
+- Work notes section (track progress)
+- Simple completion criteria
+- Agent completion check (suggest when done)
+- User approval (no formal QE)
+
+**Template structure:** Task-focused, can be ongoing, simplified workflow
+
+---
+
 ## How to Use These Templates
 
 ### 1. Choose the Right Template
-- **Feature**: Well-defined work that adds/changes functionality
+- **Feature**: Well-defined work that adds/changes functionality (requires user story)
 - **Bug**: Something is broken and needs fixing
+- **Chore**: Maintenance, cleanup, refactoring, iterative improvements
 - **Idea**: Rough concept that needs validation/refinement
 
 ### 2. Copy to Backlog
 ```bash
 # Example: Creating a new feature spec
 cp docflow/specs/templates/feature.md docflow/specs/backlog/feature-user-dashboard.md
+
+# Example: Creating a chore for cleanup work
+cp docflow/specs/templates/chore.md docflow/specs/backlog/chore-ui-polish.md
 ```
 
 ### 3. Fill Out the Template
@@ -159,9 +188,17 @@ These templates will evolve based on real-world usage. If you find:
 
 | Template | Purpose | Size | When to Use |
 |----------|---------|------|-------------|
-| `feature.md` | New functionality | Comprehensive | Planned development work |
+| `feature.md` | New functionality | Comprehensive | Planned development with user story |
 | `bug.md` | Fix defects | Focused | Something is broken |
+| `chore.md` | Maintenance/cleanup | Task-based | Refactoring, polish, improvements |
 | `idea.md` | Capture concepts | Lightweight | Brainstorming, future work |
+
+### Decision Tree
+
+**Is something broken?** → Use `bug.md`  
+**Are you building new functionality?** → Use `feature.md`  
+**Are you improving/cleaning/refactoring existing code?** → Use `chore.md`  
+**Are you exploring a rough concept?** → Use `idea.md`
 
 **Remember:** Templates are guides, not straitjackets. Adapt as needed, but maintain consistency across your project.
 
