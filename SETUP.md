@@ -45,13 +45,13 @@ Update these project-specific files in `/docflow/context/`:
 ### 3. Initialize Your First Spec
 
 Choose one of the templates in `/docflow/specs/templates/`:
-- `feature.md` - For new features
-- `bug.md` - For bug fixes
-- `idea.md` - For exploratory work
-- `spec-full.md` - For comprehensive specs
-- `feature-project-setup.md` - For initial project setup
+- `feature.md` - For new features (comprehensive, full workflow)
+- `bug.md` - For bug fixes (includes root cause analysis)
+- `idea.md` - For quick idea capture (lightweight, can be refined later)
 
 Copy to `/docflow/specs/backlog/` and customize.
+
+Each template includes inline agent instructions to guide consistent, high-quality spec creation.
 
 ### 4. Start Your First Session
 
