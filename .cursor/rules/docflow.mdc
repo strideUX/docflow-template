@@ -5,14 +5,74 @@ alwaysApply: true
 ---
 # DocFlow Workflow Rules
 
-## Context Loading Priority
-1. Always load: /docflow/context/overview.md
-2. Always load: /docflow/ACTIVE.md
-3. **Check for status=REVIEW specs in /docflow/specs/active/ (for DocFlow agent)**
-4. **Check for status=QE_TESTING specs in /docflow/specs/active/ (for user testing confirmation)**
-5. For current work: Load active spec from /docflow/specs/active/
-6. For technical details: Load /docflow/context/stack.md and standards.md
-7. For project knowledge: Load relevant docs from /docflow/knowledge/ on-demand
+## Context Loading Strategy
+
+The rules file (this file) is always loaded. Use it to decide what additional context to load based on the task.
+
+### On Every Interaction
+1. **Check** /docflow/ACTIVE.md (quick scan - know current state)
+2. **Scan for priority work:**
+   - Check /docflow/specs/active/ for status=REVIEW specs (DocFlow agent priority)
+   - Check /docflow/specs/active/ for status=QE_TESTING specs (user testing ready)
+
+### When Starting/Planning New Work
+**Load these to understand scope and priorities:**
+- /docflow/context/overview.md (project vision and goals)
+- /docflow/INDEX.md (what exists, what's in backlog, priorities)
+- Active spec being planned (if transitioning from backlog)
+
+**Why:** Need to understand the big picture before creating or activating work.
+
+### When Implementing (status=IMPLEMENTING or status=ACTIVE)
+**Load these for execution context:**
+- Current active spec (completely - all sections)
+- /docflow/context/stack.md (technical patterns and architecture)
+- /docflow/context/standards.md (code quality and conventions)
+
+**Don't load unless needed:**
+- overview.md (already know the project at this point)
+- Other active specs (unless checking for conflicts)
+
+**Why:** Focus on technical execution with clear quality standards.
+
+### When Reviewing Code (status=REVIEW)
+**Load these for quality assessment:**
+- Spec being reviewed (completely - verify against criteria)
+- /docflow/context/standards.md (code quality checklist)
+- Implementation Notes section (what was built and why)
+
+**Why:** Need to verify implementation matches spec and follows standards.
+
+### When Searching for Existing Code
+**Use tools, not blanket loading:**
+- Use `codebase_search` to find patterns by meaning
+- Use `grep` to find exact code patterns
+- Load /docflow/knowledge/features/ if agent finds relevant docs through search
+
+**Why:** Search is more efficient than loading all knowledge docs speculatively.
+
+### When Creating New Specs
+**Load for context and consistency:**
+- /docflow/context/overview.md (ensure alignment with vision)
+- /docflow/INDEX.md (check for similar/related work)
+- Use codebase_search to find existing implementations
+
+**Why:** Avoid duplicate work and ensure new specs fit the project strategy.
+
+### Knowledge Base (/docflow/knowledge/)
+**Never auto-load. Load only when:**
+- Agent searches and determines a doc is relevant
+- Spec references a specific decision or feature doc
+- User explicitly mentions needing context from knowledge base
+
+**Why:** Knowledge grows over time. Loading everything is wasteful. Trust search and references.
+
+### Summary: Load Minimum Viable Context
+- **Rules file**: Always present (you're reading it now)
+- **ACTIVE.md**: Check on every interaction (it's small)
+- **Everything else**: Load based on task being performed
+- **Knowledge base**: Search, don't auto-load
+- **Trust the agent**: You can read more if you determine you need it
 
 ## Status-Based Implementation Workflow
 
