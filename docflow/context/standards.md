@@ -14,7 +14,7 @@ When initializing any project:
 5. **Verify you're not nesting: pwd should show /projectname not /projectname/projectname**
 
 ## General Principles
-- **DRY**: Don't repeat yourself - check dependencies.md first
+- **DRY**: Don't repeat yourself - search for existing code first
 - **Separation of Concerns**: UI, business logic, and data separate
 - **Type Safety**: TypeScript strict mode, no `any` types
 - **Error Handling**: All async operations have error states

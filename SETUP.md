@@ -113,7 +113,7 @@ docflow/
 ## Key Features
 
 ### Status-Based Workflow
-- **BACKLOG** → **READY** → **IMPLEMENTING** → **REVIEW** → **COMPLETE**
+- **BACKLOG** → **READY** → **IMPLEMENTING** → **REVIEW** → **QE_TESTING** → **COMPLETE**
 - Automatic assignment tracking via git username
 - Multi-developer coordination support
 
@@ -157,13 +157,9 @@ Check `/docflow/README.md` in your project for:
 
 ## Template Maintenance
 
-This template is maintained at: **git@github.com:strideUX/docflow-template.git**
-
 Updates should flow:
-1. Refine DocFlow in a live project (e.g., stride-website)
+1. Refine DocFlow in a live project
 2. Extract improvements back to this template repository
 3. Apply to other projects by copying from template
 
 **Update Workflow**: Live Project → Template Repo → Other Projects
-**GitHub Repository**: `git@github.com:strideUX/docflow-template.git`
-**Local Clone Example**: `~/Documents/Work/docflow-template/`
