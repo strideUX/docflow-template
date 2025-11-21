@@ -1,711 +1,353 @@
-# DocFlow - Spec-Driven Development Workflow
+# DocFlow Template
 
-**A complete workflow system for AI-assisted development.**
+**A complete spec-driven development workflow system for AI-assisted development.**
 
-DocFlow transforms your AI coding assistant into a project manager, implementation partner, and QA validator through a structured three-agent orchestration model.
-
----
-
-## 🚀 What is DocFlow?
-
-**DocFlow is a lightweight, spec-driven development workflow** that helps you:
-- ✅ Plan and refine work before building
-- ✅ Implement features with clear acceptance criteria
-- ✅ Review and validate implementations systematically
-- ✅ Document decisions and maintain project knowledge
-- ✅ Orchestrate multiple AI agents for different roles
-- ✅ Keep context focused and efficient
-
-**Built for Cursor, works everywhere** - Portable across AI tools with platform adapters.
+**Version:** 2.1 | **Released:** Nov 21, 2024 | **[Release Notes](releases/2.1.md)**
 
 ---
 
-## 📖 Documentation
+## What is DocFlow?
 
-**Start here:**
-1. **[SETUP.md](SETUP.md)** - Installation and first steps
-2. **[WORKFLOW.md](WORKFLOW.md)** - Three-agent model and command guide
-3. **[docflow/README.md](docflow/README.md)** - Quick reference for daily use
+DocFlow is a **lightweight, structured workflow system** that transforms your AI coding assistant into a complete development partner with three specialized roles:
 
-**Complete rules:**
-- **`.cursor/rules/docflow.mdc`** - Source of truth for all workflow rules
+- **🎯 PM/Planning Agent** - Plans, refines, and orchestrates work
+- **💻 Implementation Agent** - Builds features with focused context
+- **✅ QE/Validation Agent** - Tests and validates iteratively with you
 
----
+### The Problem It Solves
 
-## 🎯 Three-Agent Workflow Model
+Working with AI assistants without structure leads to:
+- ❌ Lost context across conversations
+- ❌ Incomplete implementations
+- ❌ Scattered documentation
+- ❌ Duplicated effort
+- ❌ No systematic testing
 
-DocFlow uses specialized agent roles for efficient work:
+### What DocFlow Provides
 
-### PM/Planning Agent (Orchestrator)
-**Role:** Planning, refining, activating work, closing completed specs  
-**Thread:** Long-running session thread  
-**Commands:** start-session, wrap-session, capture, review, activate, close
-
-### Implementation Agent (Builder)
-**Role:** Build features, fix bugs, work on chores  
-**Thread:** Fresh, focused per spec  
-**Commands:** implement, block  
-**Auto-completes:** Marks for review when done (no manual wrap)
-
-### QE/Validation Agent (Validator)
-**Role:** Code review + iterative user testing  
-**Thread:** Fresh per validation  
-**Commands:** validate  
-**Iterates:** Works with you until approved
-
-**See [WORKFLOW.md](WORKFLOW.md) for visual diagrams and examples.**
+- ✅ **Structured specs** with clear acceptance criteria
+- ✅ **Three specialized agents** for different workflow phases
+- ✅ **Progressive documentation** that stays current
+- ✅ **Knowledge base** that grows with your project
+- ✅ **Efficient context** loading (2K-7K tokens typical)
+- ✅ **Natural language** interface (no command memorization)
+- ✅ **Cross-platform** compatible (Cursor, Claude, Copilot, etc.)
 
 ---
 
-## 📁 Directory Structure
+## Quick Start
 
-```
-docflow/
-├── ACTIVE.md                    # Current work state
-├── INDEX.md                     # Master inventory
-│
-├── context/                     # Project fundamentals
-│   ├── overview.md              # Vision, goals, users
-│   ├── stack.md                 # Tech stack & patterns
-│   └── standards.md             # Code conventions
-│
-├── specs/                       # Spec lifecycle
-│   ├── templates/               # 4 spec types
-│   │   ├── feature.md           # New functionality (S/M/L/XL)
-│   │   ├── bug.md               # Fix defects (S/M/L/XL)
-│   │   ├── chore.md             # Maintenance (no complexity)
-│   │   └── idea.md              # Quick exploration
-│   ├── active/                  # Currently implementing
-│   ├── backlog/                 # Planned work
-│   ├── complete/                # Archived by quarter
-│   └── assets/                  # Spec-specific resources
-│       └── [spec-name]/
-│
-└── knowledge/                   # Project knowledge base
-    ├── INDEX.md                 # Lightweight index (scan first)
-    ├── decisions/               # Architecture decisions (ADRs)
-    ├── features/                # Complex feature docs
-    ├── notes/                   # Technical discoveries
-    └── product/                 # Personas, user flows, UX
+### 1. Copy Template to Your Project
+
+```bash
+# Copy the template folder to your project root
+cp -r /path/to/docflow-template/template/* /path/to/your-project/
+
+# This copies:
+# - .cursor/ (rules and commands)
+# - .claude/ (Claude Desktop adapter)
+# - .github/ (GitHub Copilot adapter)
+# - docflow/ (complete folder structure)
+# - AGENTS.md (universal AI instructions)
 ```
 
+### 2. Initialize DocFlow
+
+**For a brand new project:**
+```bash
+# In your AI tool (Cursor, Claude Desktop, etc.)
+/docflow-new
+```
+**Agent conversation (~10-15 min):**
+- Describe your project vision
+- Choose or confirm tech stack
+- Create initial backlog
+- Generate custom project-scaffolding spec
+
+**For an existing project:**
+```bash
+/docflow-scan
+```
+**Agent analysis (~15-30 min):**
+- Analyzes your existing code
+- Fills context files from detected stack
+- Documents existing features
+- Migrates old specs if present
+
+### 3. Start Working
+
+```bash
+/start-session
+```
+
+Agent shows current state and helps you pick what to work on.
+
+**That's it!** DocFlow is ready to use.
+
 ---
 
-## 🔧 Commands (12 Total)
+## Three-Agent Workflow
 
-### Daily Workflow (9 commands)
+```
+🎯 PM Agent        💻 Implementation      ✅ QE Agent         🎯 PM Agent
+   Plans              Builds                Validates           Closes
+     ↓                  ↓                       ↓                  ↓
+  /activate        /implement             /validate           /close
+     ↓                  ↓                       ↓                  ↓
+  READY          IMPLEMENTING          QE_TESTING          COMPLETE
+```
+
+**Key insight:** Different agents, different threads, different contexts = focused and efficient work.
+
+**See [DOCFLOW-GUIDE.md](DOCFLOW-GUIDE.md) for detailed examples and workflows.**
+
+---
+
+## Commands (12 Total)
+
+### Daily Workflow
 
 **PM/Planning Agent:**
-```bash
-/start-session     # Begin work session, check status
-/capture           # Quick capture new work to backlog
-/review [spec]     # Refine backlog item for activation
-/activate [spec]   # Ready spec for implementation (handoff)
-/close [spec]      # Archive completed work
-/wrap-session      # End session, save state
-```
+- `/start-session` - Begin session
+- `/capture` - Quick capture work
+- `/review` - Refine backlog item
+- `/activate` - Ready for implementation
+- `/close` - Archive completed work
+- `/wrap-session` - End session
 
 **Implementation Agent:**
-```bash
-/implement [spec]  # Pick up and build active spec
-/block             # Document blocker, hand back to PM
-```
+- `/implement` - Pick up and build
+- `/block` - Document blocker
 
 **QE/Validation Agent:**
-```bash
-/validate [spec]   # Review code and test with user
-```
+- `/validate` - Test and validate
 
 **Any Agent:**
-```bash
-/status            # Check current state of all work
-```
+- `/status` - Check current state
 
-### System Setup (2 commands)
-```bash
-/docflow-new       # Set up brand new project
-/docflow-scan      # Retrofit or update existing project
-```
+### System Setup (Once Per Project)
+- `/docflow-new` - New project setup
+- `/docflow-scan` - Existing project retrofit
 
-**See `.cursor/commands/` for detailed command documentation.**
+**Natural language works too!** Say "let's start", "build this", "test it" - agents understand.
 
 ---
 
-## 🗣️ Natural Language Support
-
-**You don't need to type /commands!** Agents recognize natural phrases:
-
-- "let's start" → `/start-session`
-- "capture that idea" → `/capture`
-- "review the dashboard spec" → `/review`
-- "ready to build this" → `/activate`
-- "let's work on login" → `/implement`
-- "test this feature" → `/validate`
-- "looks good! approve it" → Approves QE
-- "close the spec" → `/close`
-- "where are we?" → `/status`
-- "let's wrap" → `/wrap-session`
-
-**Just talk naturally - the agent understands context.**
-
----
-
-## 📋 Spec Templates
-
-Four types for different work:
+## Spec Templates (4 Types)
 
 | Template | Use Case | Workflow | Complexity |
 |----------|----------|----------|------------|
-| **feature** | New functionality | Full (6 states) | S/M/L/XL |
-| **bug** | Fix defects | Full (6 states) | S/M/L/XL |
-| **chore** | Maintenance/cleanup | Simple (3 states) | Ongoing |
-| **idea** | Quick exploration | Simple (3 states) | Rough |
+| **feature.md** | New functionality | Full (6 states) | S/M/L/XL |
+| **bug.md** | Fix defects | Full (6 states) | S/M/L/XL |
+| **chore.md** | Maintenance/cleanup | Simple (3 states) | Ongoing |
+| **idea.md** | Quick exploration | Simple (3 states) | Rough |
 
-**Each template includes:**
-- Comprehensive inline agent instructions
-- Clear section purposes and examples
-- Progress tracking checklists
-- Decision logging
-- Workflow phases appropriate to type
-
-**Complexity sizing:**
-- **S** - Few hours
-- **M** - 1-2 days
-- **L** - 3-5 days
-- **XL** - ~1 week (max - break larger work into smaller specs)
+**All templates include inline agent instructions for consistency.**
 
 ---
 
-## 🔄 Workflow States
+## What's Included
 
-### Features & Bugs (Full Workflow)
+### Core System (`template/` folder)
 ```
-BACKLOG → READY → IMPLEMENTING → REVIEW → QE_TESTING → COMPLETE
+template/
+├── .cursor/              # Cursor rules and 12 commands
+├── .claude/              # Claude Desktop adapter
+├── .github/              # GitHub Copilot adapter
+├── AGENTS.md             # Universal AI instructions
+│
+└── docflow/              # Complete workflow structure
+    ├── ACTIVE.md         # Current work
+    ├── INDEX.md          # Master inventory
+    ├── context/          # Project fundamentals
+    ├── specs/            # Spec lifecycle + templates
+    └── knowledge/        # Project knowledge base
 ```
 
-### Chores & Ideas (Simplified Workflow)
-```
-BACKLOG → ACTIVE → COMPLETE
-```
-
-**Handoff points:**
-- **PM → Implementation:** `/activate` sets status=READY
-- **Implementation → QE:** Auto-sets status=REVIEW when done
-- **QE → PM:** User approval triggers `/close`
+### Documentation (This Repository)
+- `README.md` - This file (quick start)
+- `DOCFLOW-GUIDE.md` - Complete reference guide
+- `releases/` - Version history and release notes
 
 ---
 
-## 🧠 Context Loading Strategy
+## Key Features
 
-**Efficient and situational** - don't auto-load everything!
+### Efficient Context Management
+- Situational loading based on task
+- Knowledge base index-first
+- Search before auto-load
+- Typical usage: 2K-7K tokens (96%+ headroom)
 
-### Always Loaded
-- `.cursor/rules/docflow.mdc` (automatic in Cursor)
+### Three-Agent Orchestration
+- PM agent orchestrates (long-running thread)
+- Implementation builds (fresh, focused thread)
+- QE validates iteratively (fresh thread with user)
+- Clear handoff points between agents
 
-### On Every Interaction
-- Check `docflow/ACTIVE.md` (quick scan)
-- Scan for priority work (REVIEW, QE_TESTING specs)
+### Progressive Documentation
+- Specs evolve through workflow
+- Decision logs track rationale
+- Implementation notes capture process
+- Knowledge base grows organically
 
-### Load Based on Task
-- **Planning:** overview.md, INDEX.md, knowledge/INDEX.md
-- **Implementing:** spec, stack.md, standards.md
-- **Reviewing:** spec, standards.md
-- **User-facing features:** product/personas.md, user-flows.md
-
-### Search, Don't Auto-Load
-- Knowledge base (scan INDEX.md first)
-- Existing code (use codebase_search)
-- Related specs (use INDEX.md to find)
-
-**Typical context usage:** 2K-7K tokens per session (very efficient!)
-
----
-
-## 📚 Knowledge Base
-
-**`docflow/knowledge/`** grows with your project:
-
-- **INDEX.md** - Lightweight index (~500 tokens) - always scan this first
-- **decisions/** - Architecture Decision Records (numbered ADRs)
-- **features/** - How complex features work
-- **notes/** - Technical gotchas and discoveries
-- **product/** - User personas, flows, design guidelines
-
-**Load selectively based on need** - never auto-load everything.
-
----
-
-## 🎨 Key Features
-
-### ✅ Three-Agent Orchestration
-- **PM Agent** plans and orchestrates (long-running thread)
-- **Implementation Agent** builds (fresh, focused thread)
-- **QE Agent** validates iteratively (fresh thread with user)
-
-### ✅ Spec-Driven Development
-- Four template types (feature, bug, chore, idea)
-- Clear acceptance criteria
-- Progressive documentation
-- Decision logging throughout
-
-### ✅ Natural Language Interface
-- No need to memorize commands
-- Talk naturally, agent understands
-- Conversational workflow
-
-### ✅ Atomic File Operations
-- Safe spec movement between folders
-- Automatic tracking file updates
-- No duplicate files
-
-### ✅ Efficient Context Loading
-- Situational, not blanket auto-load
-- Knowledge base with index-first approach
-- Search before loading
-- 2K-7K tokens typical (plenty of headroom)
-
-### ✅ Cross-Platform Compatible
-- Optimized for Cursor (primary)
+### Cross-Platform Compatible
+- Optimized for Cursor
 - Works with Claude Desktop
 - Works with GitHub Copilot
-- Universal adapter for other AI tools
+- Universal adapter for any AI tool
 
-### ✅ Knowledge Management
-- Architecture decisions tracked (ADRs)
-- Complex features documented
-- Technical discoveries captured
-- Product/UX artifacts organized
-
----
-
-## 🚀 Getting Started
-
-### For a New Project
-1. **Copy this template** to your project directory
-2. **Run `/docflow-new`** in Cursor
-3. **Agent guides you** through vision, stack, initial backlog
-4. **First task created:** Project scaffolding (custom to your stack)
-5. **Start building:** `/implement project-scaffolding`
-
-### For an Existing Project
-1. **Copy this template** to your project directory
-2. **Run `/docflow-scan`** in Cursor
-3. **Agent analyzes** your code and creates DocFlow documentation
-4. **Migrates old specs** if they exist (archives then converts)
-5. **Ready to use:** Start with `/start-session`
-
-**See [SETUP.md](SETUP.md) for detailed installation instructions.**
+### Natural Language Interface
+- No command memorization needed
+- Conversational triggers
+- Agents understand context
+- "looks good" approves work
 
 ---
 
-## 🔍 How It Works
+## Directory Structure (After Installation)
 
-### Typical Day
 ```
-Morning:
-  PM Agent: /start-session
-  → Shows: QE approvals, reviews, active work, backlog
-
-Planning:
-  PM Agent: /review feature-x
-  PM Agent: /activate feature-x
-
-Implementation:
-  Implementation Agent: /implement
-  → Builds feature-x
-  → Auto-marks for review when complete
-
-Validation:
-  QE Agent: /validate feature-x
-  → Reviews code
-  → Tests with you
-  → Iterates until approved
-
-Closure:
-  PM Agent: /close feature-x
-  → Archives, queues next work
-
-Evening:
-  PM Agent: /wrap-session
-  → Summary and checkpoint
-```
-
-**See [WORKFLOW.md](WORKFLOW.md) for complete examples.**
-
----
-
-## ⚠️ Critical Rules
-
-### Rule 0: Never Create Root-Level Status Files
-**FORBIDDEN:**
-- ❌ NO STATUS.md, SUMMARY.md, TODO.md in project root
-- ❌ NO PHASE_*_STATUS.md, CHECKLIST.md, NOTES.md in root
-
-**REQUIRED:**
-- ✅ ALL tracking in `docflow/ACTIVE.md` and specs
-- ✅ ALL knowledge in `docflow/knowledge/`
-- ✅ ALL decisions in spec Decision Logs or knowledge/decisions/
-
-### Atomic File Movement
-When moving specs between folders:
-1. DELETE source file
-2. CREATE destination file
-3. Update ACTIVE.md and INDEX.md in same operation
-
-### Search Before Creating
-- Use `codebase_search` to find existing code
-- Check `docflow/knowledge/` for documented patterns
-- Avoid duplicating functionality
-
-### Update Progressively
-- Check off acceptance criteria: `[ ]` → `[x]`
-- Fill Implementation Notes as you work
-- Update Last Updated timestamps
-- Keep ACTIVE.md current
-
----
-
-## 🛠️ Platform Support
-
-**This template works across AI tools:**
-
-### Cursor (Primary Platform)
-✅ Optimized experience  
-✅ Rules auto-load from `.cursor/rules/docflow.mdc`  
-✅ Commands available natively  
-✅ Full feature support  
-
-### Claude Desktop
-✅ Read `.claude/rules.md` for integration  
-✅ Points to `.cursor/rules/docflow.mdc`  
-✅ Great for PM and QE agents (long conversations)  
-
-### VS Code with Copilot
-✅ Read `.github/copilot-instructions.md`  
-✅ Code suggestions follow standards.md  
-✅ Chat can use DocFlow commands  
-
-### Other AI Tools
-✅ Read `AGENTS.md` for universal instructions  
-✅ Points to complete system  
-✅ Same workflow everywhere  
-
-**Single source of truth** (`.cursor/rules/docflow.mdc`), lightweight adapters for each platform.
-
----
-
-## 📦 What's Included
-
-### Core System
-- `.cursor/rules/docflow.mdc` - Complete workflow rules (648 lines)
-- `.cursor/commands/` - 12 command implementation files
-- `docflow/` - Complete directory structure with templates
-
-### Documentation
-- `WORKFLOW.md` - Three-agent model guide
-- `SETUP.md` - Installation instructions
-- `AGENTS.md` - Universal AI agent instructions
-- `docflow/README.md` - Quick daily reference
-
-### Platform Adapters
-- `.claude/rules.md` - Claude Desktop integration
-- `.github/copilot-instructions.md` - GitHub Copilot integration
-
-### Templates & Guides
-- 4 spec templates (feature, bug, chore, idea)
-- Knowledge base templates (personas, user flows)
-- README files in each folder explaining usage
-
----
-
-## 🎯 Key Principles
-
-### Simplicity First
-- 4 spec types (not dozens)
-- 12 commands (not overwhelming)
-- Clear folder structure (no overlap)
-- Natural language (no memorization needed)
-
-### Efficiency
-- Context: 2K-7K tokens typical (not auto-loading everything)
-- Search-first approach (find existing code)
-- Knowledge base with index (scan then load selectively)
-- Clean agent handoffs (fresh threads when needed)
-
-### Consistency
-- All templates have agent instructions
-- All commands follow same format
-- All paths use `/docflow/` prefix
-- Decision logging throughout
-- Update as you go
-
-### Flexibility
-- Works solo or with teams
-- Assignment tracking via git username
-- Can be ongoing (chores) or time-boxed (features)
-- Adapts to your workflow
-
----
-
-## 🔄 Workflow Execution
-
-### Feature Implementation (Happy Path)
-```
-1. PM: /start-session → Check priorities
-2. PM: /review feature-x → Refine spec
-3. PM: /activate feature-x → Ready for implementation
-
-4. Implementation: /implement → Build it
-   → Auto-marks REVIEW when done
-
-5. QE: /validate → Review & test with user
-   → User approves: "looks good!"
-
-6. PM: /close → Archive & queue next
-```
-
-### With Feedback Loop
-```
-5. QE: /validate → Find issues
-   → Documents & sends back to IMPLEMENTING
-
-6. Implementation: /implement → Fix issues
-   → Auto-marks REVIEW
-
-7. QE: /validate → Test again
-   → User approves
-
-8. PM: /close → Done!
+your-project/
+├── .cursor/              ← Cursor rules and commands
+├── .claude/              ← Claude Desktop adapter
+├── .github/              ← GitHub Copilot adapter
+├── AGENTS.md             ← Universal AI instructions
+│
+└── docflow/              ← DocFlow workspace
+    ├── ACTIVE.md         ← Current state (check first!)
+    ├── INDEX.md          ← Master inventory
+    ├── README.md         ← Quick daily reference
+    │
+    ├── context/          ← Project fundamentals
+    │   ├── overview.md
+    │   ├── stack.md
+    │   └── standards.md
+    │
+    ├── specs/            ← Spec lifecycle
+    │   ├── templates/    ← 4 spec types
+    │   ├── active/       ← Currently implementing
+    │   ├── backlog/      ← Planned work
+    │   ├── complete/     ← Archived by quarter
+    │   └── assets/       ← Spec-specific resources
+    │
+    └── knowledge/        ← Project knowledge
+        ├── INDEX.md      ← Scan first!
+        ├── decisions/
+        ├── features/
+        ├── notes/
+        └── product/
 ```
 
 ---
 
-## 📊 System Characteristics
+## Example: Feature Implementation
+
+```
+1. PM: "let's start"              → Shows status
+2. PM: "review dashboard spec"    → Refines spec
+3. PM: "ready to build"           → Activates for impl
+
+4. Impl: "implement dashboard"    → Builds feature
+   [Auto-completes when done]     → Marks REVIEW
+
+5. QE: "validate dashboard"       → Reviews & tests
+   User tests...
+   User: "looks great!"           → Approves
+
+6. PM: /start-session             → Sees approved work
+7. PM: "close it"                 → Archives, queues next
+```
+
+**Simple, clean, systematic.**
+
+---
+
+## System Characteristics
 
 **Lightweight:**
-- ~600 lines of adapters
-- ~650 lines of core rules
-- ~1,200 lines of templates
-- Total: ~2,500 lines for complete system
+- 4 spec types
+- 12 commands
+- ~6,350 lines total system
 
-**Efficient Context:**
-- Typical usage: 2K-7K tokens
-- Max scenario: ~17K tokens
-- Available: 200K+ tokens
-- Headroom: 90%+ unused capacity
+**Efficient:**
+- 2K-7K tokens typical usage
+- 96%+ context headroom
+- Search-first approach
 
-**Well-Documented:**
-- Inline agent instructions in templates
-- Comprehensive command files
-- Visual workflow guides
-- Cross-platform adapters
-- Knowledge base structure
+**Complete:**
+- All workflow phases covered
+- All agent roles defined
+- All handoffs explicit
+- All scenarios handled
 
----
-
-## 🎨 Spec Templates
-
-### feature.md - New Functionality
-- User story driven
-- Comprehensive workflow (6 states)
-- Technical planning sections
-- Implementation tracking
-- Code review + QE testing
-- S/M/L/XL complexity
-
-### bug.md - Fix Defects
-- Reproduction steps
-- Root cause analysis
-- Fix approach planning
-- Regression testing
-- Prevention recommendations
-- S/M/L/XL complexity
-
-### chore.md - Maintenance & Cleanup
-- Task-based checklist (evolving)
-- Work notes (loose format)
-- Simple workflow (3 states)
-- No complexity (can be ongoing)
-- User approval to close
-
-### idea.md - Quick Exploration
-- Brain dump format
-- Value assessment
-- Questions to answer
-- Research checklist
-- Path to refinement
-
-**All templates include inline `<!-- AGENT INSTRUCTIONS -->` for consistency.**
+**Portable:**
+- Works across AI tools
+- Single source of truth
+- Lightweight adapters
+- Tool-agnostic design
 
 ---
 
-## 🧠 Context Loading Philosophy
+## Documentation
 
-**Load minimum viable context based on task:**
+### Quick Start
+- **[README.md](README.md)** - This file (overview and setup)
+- **`template/docflow/README.md`** - Quick daily reference (after copying)
 
-**Planning new work:**
-- Load: overview.md, INDEX.md, knowledge/INDEX.md
-- Why: Understand vision and avoid duplicates
+### Complete Reference
+- **[DOCFLOW-GUIDE.md](DOCFLOW-GUIDE.md)** - Comprehensive guide
+  - Three-agent model details
+  - All 12 commands with examples
+  - All 4 templates explained
+  - Workflow states and transitions
+  - Knowledge base usage
+  - Best practices and troubleshooting
 
-**Implementing:**
-- Load: spec, stack.md, standards.md
-- Why: Build correctly with clear quality bar
+### Source Files
+- **`template/.cursor/rules/docflow.mdc`** - Complete workflow rules (648 lines)
+- **`template/.cursor/commands/`** - 12 command implementation files
+- **`template/docflow/specs/templates/`** - 4 spec templates with instructions
 
-**Reviewing:**
-- Load: spec, standards.md
-- Why: Verify quality and completeness
-
-**Searching:**
-- Use: codebase_search, grep
-- Then: Load only relevant findings
-- Why: More efficient than guessing
-
-**Knowledge base:**
-- Scan: knowledge/INDEX.md (~500 tokens)
-- Load: Only relevant docs
-- Why: Knowledge grows, can't load everything
-
----
-
-## 📚 Knowledge Base
-
-**Grows with your project:**
-
-### INDEX.md - Lightweight Index
-Scan this first (~500 tokens) to find what exists, then load selectively.
-
-### decisions/ - Architecture Decisions
-- Format: `NNN-decision-title.md` (numbered ADRs)
-- When: Making architectural choices
-- Example: "001-why-convex.md"
-
-### features/ - Complex Feature Docs
-- When: Feature is architecturally complex
-- Documents how internals work
-- Onboarding for future devs/agents
-
-### notes/ - Real-Time Discoveries
-- API quirks, library limitations, workarounds
-- Quick captures that might become decisions
-
-### product/ - UX Artifacts
-- User personas and profiles
-- User flows and journeys
-- Design system guidelines
-
-**Load when creating user-facing features** to ensure alignment with user needs.
+### Platform Adapters
+- **`template/AGENTS.md`** - Universal AI instructions
+- **`template/.claude/rules.md`** - Claude Desktop
+- **`template/.github/copilot-instructions.md`** - GitHub Copilot
 
 ---
 
-## ⚠️ Critical Rules
+## Version History
 
-### Never Create Root-Level Status Files
-❌ **Forbidden:**
-- STATUS.md, SUMMARY.md, TODO.md
-- PHASE_*_STATUS.md, CHECKLIST.md
-- Any tracking files in project root
+**Current:** 2.1 (Nov 21, 2024)
+- Complete system refactoring
+- Three-agent model formalized
+- Knowledge base added
+- Context optimization
+- Cross-platform support
 
-✅ **Required:**
-- All tracking in `docflow/ACTIVE.md`
-- All work in `docflow/specs/`
-- All knowledge in `docflow/knowledge/`
-
-### Always Move Files Atomically
-1. DELETE source file
-2. CREATE destination file
-3. Update ACTIVE.md and INDEX.md in same operation
-
-### Search Before Creating
-- Use codebase_search for existing functionality
-- Check knowledge base for patterns
-- Avoid duplicating code
-
-### Update Progressively
-- Check off acceptance criteria as you complete
-- Fill Implementation Notes while working
-- Update timestamps when modifying
-- Keep ACTIVE.md current
-
-### Wait for Approval
-- Implementation agent: marks REVIEW, doesn't close
-- QE agent: approves, doesn't close
-- PM agent: only one who closes via `/close`
+**See [releases/](releases/) for detailed release notes.**
 
 ---
 
-## 🔌 Cross-Platform Compatibility
+## Next Steps
 
-**DocFlow is tool-agnostic** - works everywhere:
-
-### File Structure
-```
-.cursor/                    # Cursor-specific (source of truth)
-.claude/                    # Claude Desktop adapter
-.github/copilot-instructions.md  # GitHub Copilot adapter
-AGENTS.md                   # Universal adapter
-```
-
-**Maintenance:** Update Cursor files, adapters rarely change (they just point to source).
-
-### Supported Platforms
-- ✅ **Cursor** (optimized)
-- ✅ **Claude Desktop** (via .claude/rules.md)
-- ✅ **VS Code Copilot** (via .github/copilot-instructions.md)
-- ✅ **Any AI tool** (via AGENTS.md)
-
-**Same workflow, same commands, any tool.**
+1. **Copy `template/` to your project**
+2. **Run `/docflow-new` or `/docflow-scan`**
+3. **Start working with `/start-session`**
+4. **Read [DOCFLOW-GUIDE.md](DOCFLOW-GUIDE.md) for deep dive**
 
 ---
 
-## 🎓 Learning Resources
+## Questions?
 
-### Getting Started
-1. [SETUP.md](SETUP.md) - Installation and initialization
-2. [WORKFLOW.md](WORKFLOW.md) - Three-agent model and commands
-3. [docflow/README.md](docflow/README.md) - Daily quick reference
-
-### Deep Dive
-1. `.cursor/rules/docflow.mdc` - Complete rules (source of truth)
-2. `.cursor/commands/` - Detailed command implementations
-3. `docflow/specs/templates/README.md` - Template guide
-4. `docflow/knowledge/README.md` - Knowledge base guide
-
-### For Other AI Tools
-1. [AGENTS.md](AGENTS.md) - Universal instructions
-2. `.claude/rules.md` - Claude Desktop
-3. `.github/copilot-instructions.md` - GitHub Copilot
+- **Complete guide:** [DOCFLOW-GUIDE.md](DOCFLOW-GUIDE.md)
+- **Release notes:** [releases/2.1.md](releases/2.1.md)
+- **Daily reference:** `template/docflow/README.md`
+- **Templates guide:** `template/docflow/specs/templates/README.md`
+- **Knowledge guide:** `template/docflow/knowledge/README.md`
 
 ---
 
-## 🤝 Contributing & Feedback
+**Ready to build better software with AI assistance?**
 
-**This is a living system** that evolves based on real-world usage.
-
-### Template Maintenance
-```
-1. Refine DocFlow in a live project
-2. Extract improvements back to this template
-3. Apply to other projects
-```
-
-**Updates flow:** Live Project → Template Repo → Other Projects
-
-### Found an Improvement?
-- Update templates with better patterns
-- Enhance commands with clearer steps
-- Add to knowledge base structure
-- Improve documentation
-
----
-
-## 📞 Questions?
-
-- Check `docflow/ACTIVE.md` for current work
-- Check `WORKFLOW.md` for agent model
-- Check `.cursor/commands/` for command details
-- Check `AGENTS.md` for tool-agnostic instructions
-- Use `/status` to see current state
-
----
-
-**DocFlow: AI-first development workflow for focused, efficient building.**
+Copy `template/` to your project and let DocFlow guide you through structured, efficient development.
