@@ -54,14 +54,28 @@ Copy to `/docflow/specs/backlog/` and customize.
 
 Each template includes inline agent instructions to guide consistent, high-quality spec creation.
 
-### 4. Start Your First Session
+### 4. Initialize DocFlow
 
-In Cursor, type:
+**For a brand new project:**
+```
+/docflow-new
+```
+Agent will guide you through vision, stack selection, and initial backlog creation.
+
+**For an existing project:**
+```
+/docflow-scan
+```
+Agent will analyze your code and set up DocFlow based on what exists.
+
+### 5. Start Your First Session
+
+After DocFlow is initialized, begin working:
 ```
 /start-session
 ```
 
-DocFlow will guide you through starting work!
+DocFlow will guide you through the workflow!
 
 ## What's Included
 

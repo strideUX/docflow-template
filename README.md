@@ -51,12 +51,20 @@ docflow/
 ### Cursor Slash Commands
 Type `/` in Cursor chat to see available commands:
 
-- `/start-session` - Begin work session, check status
-- `/wrap-session` - Save progress, checkpoint work
-- `/capture` - Quickly add idea/feature/bug to backlog
-- `/review` - Review and refine backlog items
-- `/new-project` - Set up new projects
-- `/scan-project` - Analyze existing codebases
+**Daily Workflow:**
+- `/start-session` - Begin work session (PM agent)
+- `/wrap-session` - End work session (PM agent)
+- `/capture` - Quick capture new work (PM agent)
+- `/review` - Refine backlog items (PM agent)
+- `/activate` - Ready spec for implementation (PM agent)
+- `/implement` - Pick up and build (Implementation agent)
+- `/validate` - Test and review (QE agent)
+- `/close` - Archive completed work (PM agent)
+- `/status` - Check current state (any agent)
+
+**DocFlow Setup (once per project):**
+- `/docflow-new` - Set up new project with DocFlow
+- `/docflow-scan` - Retrofit or update existing projects
 
 ### Natural Language Commands
 Cursor recognizes these phrases:

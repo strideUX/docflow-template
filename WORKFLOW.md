@@ -300,23 +300,28 @@ You **don't need to type /commands** explicitly. Agents recognize natural langua
 
 ---
 
-## System Setup Commands
+## DocFlow System Setup Commands
 
-These are for setting up DocFlow initially, not day-to-day work:
+These are for setting up DocFlow initially, not day-to-day workflow:
 
-**`/new-project`** - Set up new project with DocFlow
+**`/docflow-new`** - Set up brand new project
+- **Scenario:** Empty project, starting fresh
 - Interactive setup conversation
-- Creates all DocFlow structure
-- Fills out context files
+- Fills context files from user vision
 - Creates initial backlog
+- Generates project scaffolding spec (custom to their stack)
+- First task: Framework setup + git init
 
-**`/scan-project`** - Retrofit DocFlow to existing codebase
+**`/docflow-scan`** - Retrofit or update existing projects
+- **Scenario 2a:** Code exists, no DocFlow → Creates from code analysis
+- **Scenario 2b:** Code exists, old DocFlow → Migrates and updates
 - Analyzes existing code
-- Documents what's there
-- Creates spec for existing features
-- Sets up DocFlow structure
+- Fills context files from detected stack
+- Documents existing features as completed specs
+- Migrates old spec systems (archives then converts)
+- Asks before making changes to existing DocFlow
 
-Use these once per project, then use the workflow commands above for daily work.
+**Use these once per project**, then use the workflow commands above for daily work.
 
 ---
 

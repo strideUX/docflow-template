@@ -377,9 +377,9 @@ Update /docflow/INDEX.md and /docflow/ACTIVE.md immediately when:
 **All Agents:**
 - `/status` - Check current state of work
 
-**System Setup (use sparingly):**
-- `/new-project` - Set up new project with DocFlow
-- `/scan-project` - Retrofit DocFlow to existing codebase
+**DocFlow System Setup (use sparingly):**
+- `/docflow-new` - Set up new project with DocFlow
+- `/docflow-scan` - Retrofit or update DocFlow in existing projects
 
 Type `/` in chat to see and use these commands.
 
@@ -490,27 +490,28 @@ When user says any of these, run `/block`:
 - "this won't work" / "hit a wall"
 
 ### New Project Triggers
-When user says any of these, run `/new-project`:
+When user says any of these, run `/docflow-new`:
 - "let's start a new project" / "initialize project" / "set up a new project"
 - "new project setup" / "create new project"
 - Opening a project with only `/docflow/` and `.cursor/` directories
 - Context files contain template placeholders like `[Project Name]`
 
 ### Scan Project Triggers
-When user says any of these, run `/scan-project`:
+When user says any of these, run `/docflow-scan`:
 - "scan the project" / "scan this project"
 - "analyze this codebase" / "analyze the code"
 - "what does this project do?" / "help me understand this code"
 - "add DocFlow to this project" / "retrofit DocFlow"
 - "migrate to DocFlow" / "I inherited this codebase"
 - Finding existing code but DocFlow is missing or incomplete
+- Finding existing code but DocFlow is missing or incomplete
 
 ## Automatic Command Suggestions
 
 ### Contextual Suggestions
-- **Empty project with only DocFlow template** → "Looks like a new project! Shall we /new-project to set it up?"
-- **Existing code but no context files** → "I see existing code. Should I /scan-project to understand what you have?"
-- **Template placeholders in context files** → "Context files need customization. Run /new-project or /scan-project?"
+- **Empty project with only DocFlow template** → "Looks like a new project! Shall we /docflow-new to set it up?"
+- **Existing code but no context files** → "I see existing code. Should I /docflow-scan to understand what you have?"
+- **Template placeholders in context files** → "Context files need customization. Run /docflow-new or /docflow-scan?"
 - **Empty /docflow/ACTIVE.md + Items in backlog** → "I see you have items in backlog. Shall we /review one?"
 - **Completed all acceptance criteria** → "Looks like you've finished! Ready to /wrap-session?"
 - **Spec in QE_TESTING status** → "This feature is ready for your testing! Please verify and let me know if it looks good."
