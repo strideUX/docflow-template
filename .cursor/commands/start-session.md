@@ -1,65 +1,102 @@
-# Start Session
+# Start Session (PM/Planning Agent)
 
 ## Overview
-Begin your work session by checking current progress and determining what to work on next.
+Begin your planning session by checking current progress and determining priorities.
+
+**Agent Role:** PM/Planning Agent (orchestrator)  
+**Frequency:** Start of each work session
+
+---
 
 ## Steps
 
-1. **Check for Pending Reviews & QE Testing FIRST**
-   - Check /docflow/specs/active/ for any spec with status=REVIEW (highest priority)
-   - Check /docflow/specs/active/ for any spec with status=QE_TESTING (needs user testing)
-   - If REVIEW found, prioritize reviewing before new work
-   - If QE_TESTING found, notify: "Spec [name] is ready for your QE testing. Please verify and approve."
-   - Ask: "Spec [name] is ready for review. Review first or continue with other work?"
+### 1. **Check for Completed QE Work FIRST (Highest Priority)**
+- Check /docflow/specs/active/ for specs with status=QE_TESTING
+- These are ready for user approval
+- List them prominently: "Ready for your approval:"
+- Wait for user to approve or provide feedback
 
-2. **Check Active Work**
-   - Review /docflow/ACTIVE.md for any work in progress
-   - Check status of active specs:
-     - READY = Queued for implementation
-     - IMPLEMENTING = Currently being worked on
-   - If active work exists, summarize current status
-   - Ask: "Continue with [current work] or switch to something else?"
+### 2. **Check for Code Review Work**
+- Check /docflow/specs/active/ for specs with status=REVIEW
+- These need DocFlow code review before QE
+- List them: "Ready for code review:"
+- Offer to review now or continue with planning
 
-3. **Check Backlog** (if no active work)
-   - Review /docflow/INDEX.md for backlog items
-   - Check if project setup is complete
-   - If not, prioritize phase-1-foundation first
-   - Identify top priority item
-   - Ask: "Ready to start on [item]? Let's review it first."
+### 3. **Check Active Implementation Work**
+- Review /docflow/ACTIVE.md for current state
+- Check specs with status=IMPLEMENTING
+- Show who's working on what
+- Note any blockers
 
-4. **Review Item** (if starting new work)
-   - Load spec from /docflow/specs/backlog/
-   - Check for completeness:
-     - Clear acceptance criteria?
-     - Patterns to follow documented?
-     - Dependencies identified?
-   - Identify any missing information
-   - Ask clarifying questions if needed
+### 4. **Check Backlog Priorities**
+- Review /docflow/INDEX.md for backlog priorities
+- Identify top items ready for refinement
+- Show what could be activated next
 
-5. **Activate Work**
-   - Check spec's AssignedTo field
-   - If assigned to someone else, warn: "This spec is assigned to [user]. Continue anyway?"
-   - DELETE spec file from /docflow/specs/backlog/
-   - CREATE spec file in /docflow/specs/active/
-   - **Get current developer username:**
-     - Try: `git config github.user`
-     - Fallback: `git config user.name`
-     - If neither available: use "Developer"
-   - **Set status=READY, owner=Implementation, AssignedTo=@username in spec**
-   - Verify file exists in /docflow/specs/active/ after move
-   - Update /docflow/ACTIVE.md with current focus
-   - Update /docflow/INDEX.md to reflect active status
-   - Tell user: "Spec assigned to @username and ready for Implementation agent."
+### 5. **Summarize Current State**
+Present a clear summary:
+```
+📊 Session Status:
 
-6. **No Work Available**
-   - If backlog is empty, offer to capture new work
-   - Ask: "No active work or backlog items. Would you like to capture a new idea/feature/bug?"
+✅ Ready for Approval (QE_TESTING):
+   - [spec-name] - [brief description]
+
+🔍 Ready for Review (REVIEW):
+   - [spec-name] - [brief description]
+
+💻 In Progress (IMPLEMENTING):
+   - [spec-name] - assigned to @username
+
+📋 Top Backlog Priorities:
+   1. [spec-name] - [status: needs review / ready to activate]
+   2. [spec-name]
+   3. [spec-name]
+
+🚫 Blockers:
+   - [any blocked work]
+   OR: None
+```
+
+### 6. **Ask What to Work On**
+Based on the state, suggest next action:
+- If QE work exists: "Ready to approve [spec]?"
+- If review work exists: "Should I review [spec]?"
+- If backlog items need refinement: "Want to refine [spec]?"
+- If nothing urgent: "What would you like to work on?"
+
+---
+
+## Context to Load
+- /docflow/ACTIVE.md (current state)
+- Scan /docflow/specs/active/ (check statuses, don't load full specs yet)
+- /docflow/INDEX.md (backlog priorities)
+- /docflow/context/overview.md (if creating new specs)
+
+---
+
+## Natural Language Triggers
+User might say:
+- "let's start" / "what's next"
+- "where are we" / "status check"
+- "what should I work on"
+- "resume work" / "continue"
+
+**Just run this command automatically.**
+
+---
+
+## Outputs
+- Clear status summary
+- Prioritized list of what needs attention
+- Suggested next action
+- Ready to execute next command (capture, review, activate, close)
+
+---
 
 ## Checklist
-- [ ] Checked for status=REVIEW specs
-- [ ] Checked for status=QE_TESTING specs
-- [ ] /docflow/ACTIVE.md checked
-- [ ] /docflow/INDEX.md reviewed
-- [ ] Current work status clear
-- [ ] Spec moved to active with status=READY (if starting new)
-- [ ] All tracking files updated
+- [ ] Checked for QE_TESTING specs (priority!)
+- [ ] Checked for REVIEW specs
+- [ ] Reviewed ACTIVE.md
+- [ ] Reviewed INDEX.md priorities
+- [ ] Summarized current state
+- [ ] Suggested next action

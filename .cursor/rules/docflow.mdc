@@ -428,7 +428,7 @@ When user says any of these, run `/capture`:
 - "TODO" / "FIXME" (in conversation)
 - When user describes something that sounds like a feature/bug/idea, ask: "Should I /capture this?"
 
-### Review Triggers
+### Review Triggers (PM Agent)
 When user says any of these, run `/review`:
 - "review [item]" / "let's review"
 - "refine [item]" / "prepare [item]"
@@ -437,6 +437,57 @@ When user says any of these, run `/review`:
 - "what needs work" / "what needs refinement"
 - "get [item] ready" / "prep [item]"
 - "audit backlog" / "clean up backlog"
+
+### Activate Triggers (PM Agent)
+When user says any of these, run `/activate`:
+- "activate [spec]" / "let's start [spec]"
+- "ready to build [spec]" / "begin [spec]"
+- "queue [spec] for implementation"
+- "move [spec] to active"
+- "ready for dev" / "ready to implement"
+- "send [spec] to implementation"
+
+### Implement Triggers (Implementation Agent)
+When user says any of these, run `/implement`:
+- "implement [spec]" / "build [spec]"
+- "let's work on [spec]" / "start working"
+- "pick up [spec]" / "take [spec]"
+- "what's ready to build" / "what should I implement"
+- "start implementation" / "begin coding"
+- "let's code [spec]" / "work on this"
+
+### Validate Triggers (QE Agent)
+When user says any of these, run `/validate`:
+- "validate [spec]" / "test [spec]"
+- "review the implementation" / "check the code"
+- "let's test this" / "ready to test"
+- "QE [spec]" / "quality check"
+- "verify implementation" / "test the changes"
+- "check if this works"
+
+### Close Triggers (PM Agent)
+When user says any of these for completed work, run `/close`:
+- "close [spec]" / "archive [spec]"
+- "mark complete" / "this is done"
+- "finalize [spec]" / "complete [spec]"
+- "wrap up [spec]" / "finish [spec]"
+
+### Status Triggers (All Agents)
+When user says any of these, run `/status`:
+- "status" / "what's the status"
+- "where are we" / "current state"
+- "what's in progress" / "what's active"
+- "show me what's happening"
+- "what's ready" / "what needs work"
+- "check status" / "give me an update"
+
+### Block Triggers (Implementation Agent)
+When user says any of these, run `/block`:
+- "I'm blocked" / "this is blocked"
+- "can't proceed" / "need help"
+- "blocker" / "stuck on this"
+- "need PM input" / "need guidance"
+- "this won't work" / "hit a wall"
 
 ### New Project Triggers
 When user says any of these, run `/new-project`:

@@ -1,78 +1,173 @@
-# Capture
+# Capture (PM/Planning Agent)
 
 ## Overview
-Quickly capture a new idea, feature, or bug to the backlog without context switching.
+Quickly capture new work to the backlog without context switching from current work.
+
+**Agent Role:** PM/Planning Agent (orchestrator)  
+**Frequency:** Anytime inspiration strikes or issues are discovered
+
+---
 
 ## Steps
 
-1. **Identify Type**
-   - Ask: "Is this a feature, bug, chore, or idea?"
-   - Features: New functionality with user story
-   - Bugs: Issues to fix
-   - Chores: Maintenance, cleanup, refactoring, improvements
-   - Ideas: Rough concepts for later
+### 1. **Identify Type**
+Ask: "Is this a feature, bug, chore, or idea?"
 
-2. **Gather Context**
-   - For Features: What user problem does this solve?
-   - For Bugs: What's broken? How to reproduce?
-   - For Chores: What needs cleaning up or improving?
-   - For Ideas: What's the value proposition?
+**Type Guide:**
+- **Feature**: New functionality with clear user story
+- **Bug**: Something broken that needs fixing
+- **Chore**: Maintenance, cleanup, refactoring, improvements
+- **Idea**: Rough concept to explore or validate later
 
-3. **Create Spec File**
-   - Format: `feature-[name].md`, `bug-[name].md`, `chore-[name].md`, or `idea-[name].md`
-   - Use kebab-case naming
-   - Save in /docflow/specs/backlog/
+**If unclear:** Infer from context or ask user to clarify
 
-4. **Write Minimal Spec**
-   For features/bugs/chores:
-   ```markdown
-   # [Type]: [Name]
+### 2. **Gather Minimum Viable Context**
+**For Features:**
+- What user problem does this solve?
+- Who is it for? (persona)
+- What's the desired outcome?
 
-   ## Context
-   [Quick description]
+**For Bugs:**
+- What's broken?
+- How to reproduce?
+- How severe/urgent?
 
-   ## User Story / Bug Description / Task List
-   [As a... I want... OR When... Then... OR Task checklist]
+**For Chores:**
+- What needs improving?
+- What areas are affected?
+- Why does this matter?
 
-   ## Acceptance Criteria / Completion Criteria
-   - [ ] Key criteria
+**For Ideas:**
+- What's the concept?
+- Why might this be valuable?
+- What needs to be figured out?
 
-   ## Dependencies
-   - Uses: [what it depends on]
-   - Blocks: [what depends on this]
+### 3. **Create Spec File**
+**Use correct template:**
+- Copy from /docflow/specs/templates/[type].md
+- Name: `[type]-[kebab-case-name].md`
+- Save in /docflow/specs/backlog/
 
-   ## Decision Log
-   - [DATE]: Initial capture
-   ```
+**Examples:**
+- `feature-user-dashboard.md`
+- `bug-login-error.md`
+- `chore-ui-polish.md`
+- `idea-ai-search.md`
 
-   For ideas:
-   ```markdown
-   # Idea: [Name]
+### 4. **Fill Minimal Spec**
+**Don't overthink it** - just capture enough to remember and refine later.
 
-   ## Sketch
-   [Brain dump - no structure required]
+**For Features/Bugs/Chores:**
+```markdown
+# [Type]: [Name]
 
-   ## Potential Value
-   [Why this might be worth doing]
+**Status**: BACKLOG
+**Priority**: [High/Medium/Low - ask or infer]
+**Complexity**: [S/M/L/XL - rough guess or TBD]
+**Created**: YYYY-MM-DD
 
-   ## Questions
-   - [ ] Things to figure out
-   ```
+## Context
+[Why this matters - 1-2 sentences]
 
-5. **Update INDEX.md**
-   - Add to Backlog Priority section
-   - Include brief description
+## [User Story / Bug Description / Task List]
+[Quick description of what/why/how]
 
-## Confirmation
-"Captured [type]: [name] to backlog. You can refine it later with /review."
+## Acceptance Criteria
+- [ ] [Key criterion 1]
+- [ ] [Key criterion 2]
+- [ ] [Key criterion 3]
 
-**Note:** 
-- Features/Bugs use full workflow (BACKLOG → READY → IMPLEMENTING → REVIEW → QE_TESTING → COMPLETE)
-- Chores use simplified workflow (BACKLOG → ACTIVE → COMPLETE)
-- Ideas stay lightweight until refined into another type
+## Decision Log
+### YYYY-MM-DD - Initial Capture
+**Decision:** Captured [type] for [reason]
+**Priority:** [Why this priority level]
+```
+
+**For Ideas:**
+```markdown
+# Idea: [Name]
+
+**Status**: BACKLOG
+**Created**: YYYY-MM-DD
+
+## Sketch
+[Brain dump of the idea]
+
+## Potential Value
+[Why this might be worth doing]
+
+## Questions
+- [ ] [What needs researching]
+- [ ] [What needs validating]
+```
+
+### 5. **Update INDEX.md**
+Add to Backlog Priority section:
+```markdown
+## Backlog Priority
+1. [spec-name] - [one-line description] - [Priority]
+```
+
+Place based on priority (high at top).
+
+### 6. **Confirmation**
+"✅ Captured [type]: [name] to backlog!
+
+**Location:** /docflow/specs/backlog/[spec-filename]  
+**Priority:** [Level]  
+**Next step:** Refine with /review when ready to build
+
+You can continue with current work."
+
+---
+
+## Quick Capture Mode
+
+If user is in flow and just mentions something quickly:
+
+**User:** "oh we should add dark mode"  
+**Agent:** "Should I /capture that as a feature?"  
+**User:** "yes"  
+**Agent:** [Quickly creates feature-dark-mode.md with minimal info]
+
+**Don't interrupt flow** - capture quickly and move on.
+
+---
+
+## Context to Load
+- /docflow/INDEX.md (to update)
+- /docflow/specs/templates/[type].md (to copy)
+- Minimal - keep it fast
+
+---
+
+## Natural Language Triggers
+User might say:
+- "capture that" / "add to backlog"
+- "I have an idea" / "found a bug"
+- "we should add [x]"
+- "make a note"
+- "TODO" / "FIXME" (in conversation)
+
+**Run this command when detected.**
+
+---
+
+## Outputs
+- New spec in backlog
+- INDEX.md updated
+- Quick confirmation
+- User continues current work (no context switch)
+
+---
 
 ## Checklist
-- [ ] Type identified (feature, bug, chore, or idea)
-- [ ] Spec file created in backlog with correct template structure
+- [ ] Type identified (feature/bug/chore/idea)
+- [ ] Minimal context gathered
+- [ ] Correct template copied
+- [ ] Spec file created in backlog
+- [ ] Basic sections filled
+- [ ] Priority set
 - [ ] INDEX.md updated
+- [ ] Confirmation provided
 - [ ] User can continue current work
