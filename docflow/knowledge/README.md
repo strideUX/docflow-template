@@ -4,6 +4,15 @@ This directory contains project-wide knowledge that doesn't fit in the core cont
 
 ## Structure
 
+### `INDEX.md` - Knowledge Base Index
+**Quick reference to all knowledge docs.** Scan this first (~500 tokens) to find what you need, then load selectively.
+
+Agents should:
+1. Read INDEX.md on every knowledge lookup
+2. Use descriptions to assess relevance
+3. Load only applicable docs
+4. Never auto-load the entire knowledge base
+
 ### `/decisions/` - Architecture Decision Records (ADRs)
 Key architectural and technical decisions with rationale.
 
@@ -49,6 +58,22 @@ Deep technical explanations of how complex features work.
 - `sprint-capacity-calculation.md`
 - `document-section-architecture.md`
 - `real-time-sync-strategy.md`
+
+### `/product/` - Product & UX Documentation
+User context, personas, flows, and design guidelines.
+
+**What goes here:**
+- User personas and profiles
+- User journey maps and flows
+- Design system guidelines
+- Accessibility requirements
+- UX principles and patterns
+
+**When to reference:**
+- Creating user-facing features
+- Planning UX improvements
+- Understanding user context
+- Ensuring feature alignment with user needs
 
 ### `/notes/` - Real-Time Discoveries
 Quick notes, gotchas, workarounds, and discoveries made during development.

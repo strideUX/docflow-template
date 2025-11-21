@@ -55,17 +55,32 @@ The rules file (this file) is always loaded. Use it to decide what additional co
 **Load for context and consistency:**
 - /docflow/context/overview.md (ensure alignment with vision)
 - /docflow/INDEX.md (check for similar/related work)
+- /docflow/knowledge/INDEX.md (scan for related decisions/features)
 - Use codebase_search to find existing implementations
 
-**Why:** Avoid duplicate work and ensure new specs fit the project strategy.
+**For user-facing features, also load:**
+- /docflow/knowledge/product/personas.md (understand target users)
+- /docflow/knowledge/product/user-flows.md (check related journeys)
+
+**Why:** Avoid duplicate work, ensure specs fit project strategy, and align with user needs.
 
 ### Knowledge Base (/docflow/knowledge/)
-**Never auto-load. Load only when:**
-- Agent searches and determines a doc is relevant
-- Spec references a specific decision or feature doc
-- User explicitly mentions needing context from knowledge base
+**Scan the INDEX first:**
+- /docflow/knowledge/INDEX.md (~500 tokens) provides overview of all knowledge docs
+- Use descriptions to assess relevance before loading full docs
 
-**Why:** Knowledge grows over time. Loading everything is wasteful. Trust search and references.
+**Load selectively based on task:**
+- **Creating user-facing features** → Load product/personas.md and relevant user-flows.md
+- **Making architectural decisions** → Check decisions/ for existing ADRs
+- **Implementing complex features** → Check features/ for technical docs
+- **Debugging or discovering issues** → Check notes/ for gotchas
+
+**Never auto-load everything:**
+- Knowledge grows over time
+- Trust the INDEX for discovery
+- Load only what's relevant to current task
+
+**Why:** Efficient context loading. Scan index (tiny), load what matters (targeted).
 
 ### Summary: Load Minimum Viable Context
 - **Rules file**: Always present (you're reading it now)
