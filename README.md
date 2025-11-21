@@ -5,9 +5,9 @@ This project uses DocFlow, a spec-driven development workflow. Start here to und
 ## Quick Start
 
 ### For Development Work
-1. **Check what's active**: Read `ACTIVE.md` to see current focus
+1. **Check what's active**: Read `docflow/ACTIVE.md` to see current focus
 2. **Start a session**: Type `/start-session` in Cursor chat
-3. **Work on active spec**: Follow acceptance criteria in `specs/active/`
+3. **Work on active spec**: Follow acceptance criteria in `docflow/specs/active/`
 4. **Wrap when done**: Type `/wrap-session` to checkpoint progress
 
 ### For Understanding the Project
@@ -15,7 +15,7 @@ This project uses DocFlow, a spec-driven development workflow. Start here to und
    - `overview.md` - What we're building and why
    - `stack.md` - Technologies and architecture
    - `standards.md` - How we write code
-2. **Check the plan**: `INDEX.md` shows all work items
+2. **Check the plan**: `docflow/INDEX.md` shows all work items
 
 ## Project Structure
 
@@ -24,20 +24,24 @@ docflow/
 ├── ACTIVE.md                          # Current focus (updated frequently)
 ├── INDEX.md                           # Master inventory of all work
 │
-├── context/                           # Project context (stable)
+├── context/                           # Project fundamentals
 │   ├── overview.md                    # Product vision, goals, success criteria
 │   ├── stack.md                       # Tech stack, architecture patterns
 │   └── standards.md                   # Coding standards, best practices
 │
-├── specs/                             # All features and work items
+├── specs/                             # Spec lifecycle
+│   ├── templates/                     # Spec templates (feature, bug, idea, etc.)
 │   ├── active/                        # Currently implementing
 │   ├── backlog/                       # Planned work (priority ordered)
 │   ├── complete/                      # Finished work (archived by quarter)
 │   │   └── YYYY-QQ/
-│   └── reference/                     # Historical docs and decisions
+│   └── assets/                        # Spec-specific resources (screenshots, etc.)
+│       └── [spec-name]/
 │
-└── shared/                            # Cross-cutting concerns
-    └── dependencies.md                # Track shared code (prevent duplication)
+└── knowledge/                         # Project knowledge base
+    ├── decisions/                     # Architecture Decision Records (ADRs)
+    ├── features/                      # Complex feature documentation
+    └── notes/                         # Real-time discoveries and gotchas
 ```
 
 ## Development Workflow
@@ -82,22 +86,21 @@ Cursor recognizes these phrases:
 ## Key Principles
 
 1. **Follow existing patterns**: Check stack.md for established patterns
-2. **Check dependencies.md**: Before creating new shared code
+2. **Search before creating**: Use codebase search to find existing functionality
 3. **Update as you go**: Keep ACTIVE.md and acceptance criteria current
-4. **Document decisions**: Use Decision Log in specs
+4. **Document decisions**: Use Decision Logs in specs and knowledge/decisions/
 5. **TypeScript strict mode**: All code fully typed
 6. **Real-time first**: Leverage Convex subscriptions throughout
 
 ## Important Files
 
-- `ACTIVE.md` - What's being worked on right now
-- `INDEX.md` - Complete inventory of work items
-- `context/overview.md` - Product vision and goals
-- `context/stack.md` - Technical stack and architecture
-- `context/standards.md` - Code quality and development standards
-- `shared/dependencies.md` - Shared code tracking
-- `specs/reference/qe-testing-workflow.md` - QE testing phase guide
-- `specs/.templates/` - All spec templates (spec-full, feature, bug, idea)
+- `docflow/ACTIVE.md` - What's being worked on right now
+- `docflow/INDEX.md` - Complete inventory of work items
+- `docflow/context/overview.md` - Product vision and goals
+- `docflow/context/stack.md` - Technical stack and architecture
+- `docflow/context/standards.md` - Code quality and development standards
+- `docflow/specs/templates/` - All spec templates (spec-full, feature, bug, idea)
+- `docflow/knowledge/` - Architecture decisions and feature documentation
 
 ## Architecture Highlights
 
@@ -118,8 +121,8 @@ Cursor recognizes these phrases:
 
 ## Questions?
 
-- Check the spec in `specs/active/` for current work
-- Check `context/` files for project context
-- Check `INDEX.md` for complete work list
-- Check `shared/dependencies.md` for existing code
-- Check `specs/reference/` for historical documentation
+- Check the spec in `docflow/specs/active/` for current work
+- Check `docflow/context/` files for project context
+- Check `docflow/INDEX.md` for complete work list
+- Check `docflow/knowledge/` for architectural decisions and feature docs
+- Use codebase search to find existing code patterns

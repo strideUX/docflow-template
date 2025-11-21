@@ -44,10 +44,11 @@ Update these project-specific files in `/docflow/context/`:
 
 ### 3. Initialize Your First Spec
 
-Choose one of the templates in `/docflow/specs/.templates/`:
+Choose one of the templates in `/docflow/specs/templates/`:
 - `feature.md` - For new features
 - `bug.md` - For bug fixes
 - `idea.md` - For exploratory work
+- `spec-full.md` - For comprehensive specs
 - `feature-project-setup.md` - For initial project setup
 
 Copy to `/docflow/specs/backlog/` and customize.
@@ -75,22 +76,23 @@ DocFlow will guide you through starting work!
 docflow/
 ├── ACTIVE.md              # Current work (update frequently)
 ├── INDEX.md               # Master inventory
-├── README.md              # Quick reference guide
 │
-├── context/               # Project context (stable)
+├── context/               # Project fundamentals
 │   ├── overview.md        # Product vision, goals
 │   ├── stack.md           # Tech stack details
 │   └── standards.md       # Coding standards
 │
-├── specs/                 # All work items
-│   ├── .templates/        # Spec templates
+├── specs/                 # Spec lifecycle
+│   ├── templates/         # Spec templates
 │   ├── active/            # Currently implementing
 │   ├── backlog/           # Planned work
 │   ├── complete/          # Finished (archive by quarter)
-│   └── reference/         # Supporting docs
+│   └── assets/            # Spec-specific resources
 │
-└── shared/
-    └── dependencies.md    # Shared code tracking
+└── knowledge/             # Project knowledge base
+    ├── decisions/         # Architecture decisions (ADRs)
+    ├── features/          # Complex feature docs
+    └── notes/             # Real-time discoveries
 ```
 
 ## Key Features
@@ -111,13 +113,14 @@ Cursor recognizes these phrases:
 DocFlow prevents clutter by forbidding status files in project root:
 - ❌ NO STATUS.md, SUMMARY.md, TODO.md in root
 - ✅ ALL tracking in /docflow/ACTIVE.md and specs
+- ✅ Knowledge in /docflow/knowledge/ (not scattered docs)
 
 ### Two Documentation Patterns
 **Option A: Small changes**
 → Add "Recently Completed" section to ACTIVE.md
 
 **Option B: Large features**
-→ Create spec, work on it, move to /specs/complete/
+→ Create spec, work on it, move to /docflow/specs/complete/
 
 ## First Steps Checklist
 

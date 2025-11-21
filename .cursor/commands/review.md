@@ -6,7 +6,7 @@ Review and refine a backlog item to prepare it for active work.
 ## Steps
 
 1. **Select Item**
-   - Show items from /specs/backlog/
+   - Show items from /docflow/specs/backlog/
    - Ask: "Which item would you like to review?"
 
 2. **Check Completeness**
@@ -35,7 +35,7 @@ Review and refine a backlog item to prepare it for active work.
    - If no: Note what's still needed
 
 6. **Update Priority**
-   - If priorities changed, update INDEX.md
+   - If priorities changed, update /docflow/INDEX.md
    - Ensure backlog is ordered correctly
 
 ## Confirmation

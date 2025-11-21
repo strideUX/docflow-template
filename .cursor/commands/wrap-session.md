@@ -6,7 +6,7 @@ Save your progress and prepare for a clean resumption of work later.
 ## Steps
 
 1. **Review Current Work**
-   - Check all specs in /specs/active/
+   - Check all specs in /docflow/specs/active/
    - Note the status of each spec
    - Identify what was accomplished this session
 
@@ -30,7 +30,7 @@ Save your progress and prepare for a clean resumption of work later.
    - **QE_TESTING**: Check if user has approved/reported issues
    - **READY**: No action needed (queued for implementation)
 
-5. **Update ACTIVE.md**
+5. **Update /docflow/ACTIVE.md**
    - Update "Last Updated" date
    - Add brief status note if needed
    - Update Primary/Secondary Focus based on status changes
@@ -47,5 +47,5 @@ Save your progress and prepare for a clean resumption of work later.
 - [ ] Spec status current and accurate
 - [ ] Acceptance criteria updated
 - [ ] Decision log updated
-- [ ] ACTIVE.md current
+- [ ] /docflow/ACTIVE.md current
 - [ ] Dependencies documented

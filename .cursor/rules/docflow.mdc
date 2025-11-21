@@ -12,7 +12,7 @@ alwaysApply: true
 4. **Check for status=QE_TESTING specs in /docflow/specs/active/ (for user testing confirmation)**
 5. For current work: Load active spec from /docflow/specs/active/
 6. For technical details: Load /docflow/context/stack.md and standards.md
-7. For shared code: Load /docflow/shared/dependencies.md
+7. For project knowledge: Load relevant docs from /docflow/knowledge/ on-demand
 
 ## Status-Based Implementation Workflow
 
@@ -38,7 +38,7 @@ Specs progress through these states:
 5. Ensure all acceptance criteria are clear and testable
 6. Document patterns to follow in Technical Notes
 7. Set owner=Implementation
-8. Update ACTIVE.md and INDEX.md
+8. Update /docflow/ACTIVE.md and /docflow/INDEX.md
 
 **When Reviewing Implementations (status=REVIEW):**
 1. Check for specs with status=REVIEW regularly (prioritize on session start)
@@ -76,8 +76,8 @@ Specs progress through these states:
    - Set status=COMPLETE
    - Set owner=DocFlow
    - Update Decision Log with QE approval date
-   - Move to /specs/complete/YYYY-QQ/ (atomic: delete then create)
-   - Update ACTIVE.md and INDEX.md
+   - Move to /docflow/specs/complete/YYYY-QQ/ (atomic: delete then create)
+   - Update /docflow/ACTIVE.md and /docflow/INDEX.md
    - Confirm: "Spec approved and archived! 🎉"
 
 **When User Reports QE Issues (status=QE_TESTING):**
@@ -94,7 +94,7 @@ Specs progress through these states:
 ### Implementation Agent Responsibilities
 
 **On Startup:**
-1. Check /specs/active/ for any spec with status=READY
+1. Check /docflow/specs/active/ for any spec with status=READY
 2. **Filter by assignment:**
    - Get current developer username (git config github.user || git config user.name || "Developer")
    - If spec.AssignedTo = Unassigned: Available to work on
@@ -111,6 +111,7 @@ Specs progress through these states:
 3. Document key decisions and why
 4. Note any deviations from original spec with justification
 5. Update Last Updated timestamp
+6. If spec needs visual/reference assets, create /docflow/specs/assets/[spec-name]/
 
 **On Completion:**
 1. Verify all acceptance criteria checked off
@@ -218,13 +219,13 @@ When moving specs between folders, ALWAYS:
 3. **NEVER copy without deleting** (this creates duplicates)
 
 ### Rule 2: Update INDEX.md IMMEDIATELY
-Every time you move a spec file, update INDEX.md in the SAME operation:
+Every time you move a spec file, update /docflow/INDEX.md in the SAME operation:
 - Remove from old section (Active/Backlog/Completed)
 - Add to new section with status and date
 - Update priority order if needed
 
 ### Rule 3: Update ACTIVE.md IMMEDIATELY
-Every time you move a spec file, update ACTIVE.md in the SAME operation:
+Every time you move a spec file, update /docflow/ACTIVE.md in the SAME operation:
 - Remove completed items from Primary Focus/Secondary
 - Add new active items to Primary Focus/Secondary
 - Update Last Updated timestamp
@@ -253,7 +254,7 @@ Move specs automatically when these conditions are met:
 - If moving, delete source before creating destination
 
 ### Rule 6: Incremental Updates
-Update INDEX.md and ACTIVE.md immediately when:
+Update /docflow/INDEX.md and /docflow/ACTIVE.md immediately when:
 - Adding new specs to backlog
 - Moving specs between folders
 - Completing acceptance criteria
@@ -347,7 +348,7 @@ When user says any of these, run `/scan-project`:
 - **Empty project with only DocFlow template** → "Looks like a new project! Shall we /new-project to set it up?"
 - **Existing code but no context files** → "I see existing code. Should I /scan-project to understand what you have?"
 - **Template placeholders in context files** → "Context files need customization. Run /new-project or /scan-project?"
-- **Empty ACTIVE.md + Items in backlog** → "I see you have items in backlog. Shall we /review one?"
+- **Empty /docflow/ACTIVE.md + Items in backlog** → "I see you have items in backlog. Shall we /review one?"
 - **Completed all acceptance criteria** → "Looks like you've finished! Ready to /wrap-session?"
 - **Spec in QE_TESTING status** → "This feature is ready for your testing! Please verify and let me know if it looks good."
 - **Switching context** → "Before we switch, should we /wrap-session on current work?"
@@ -365,20 +366,21 @@ When detecting these patterns in conversation:
 ## Before Creating ANY New Code
 
 ### Check Existing Code
-1. Review /docflow/shared/dependencies.md for existing functionality
-2. Check existing modules and utilities in the codebase
-3. Check if similar component or function exists
+1. Use `codebase_search` to find existing functionality (e.g., "How do we handle authentication?")
+2. Use `grep` to search for similar patterns or components
+3. Check existing modules and utilities in the codebase
+4. Avoid creating duplicate functionality
 
-### If Creating New Shared Code
-1. Add entry to /docflow/shared/dependencies.md immediately
-2. Note which feature/spec created it
-3. Document who uses it
+### Document Discoveries
+If you discover complex patterns or shared systems while searching:
+- Document in /docflow/knowledge/features/ for future reference
+- Add notes about gotchas in /docflow/knowledge/notes/
 
 ## When Working on Specs
 
 ### Starting New Work
 1. Spec must exist in /docflow/specs/active/
-2. Update ACTIVE.md with current focus
+2. Update /docflow/ACTIVE.md with current focus
 3. Review dependencies in the spec
 4. Create feature branch matching spec name
 
@@ -386,34 +388,44 @@ When detecting these patterns in conversation:
 1. Update spec's Decision Log with key decisions and pivots
 2. Update Dependencies if new connections found
 3. Keep Acceptance Criteria current
-4. If blocked, note in spec and ACTIVE.md
+4. If blocked, note in spec and /docflow/ACTIVE.md
 
 ### Completing Work
 1. Verify all Acceptance Criteria met
 2. Get DocFlow code review (status=REVIEW → QE_TESTING)
 3. User performs QE testing and approves
-4. Update INDEX.md with completion date
+4. Update /docflow/INDEX.md with completion date
 5. Add final Decision Log entry with outcomes
-6. **DELETE original file from /specs/active/**
-7. **CREATE new file in /specs/complete/[YYYY-QQ]/**
-8. Update ACTIVE.md to remove completed item
+6. **DELETE original file from /docflow/specs/active/**
+7. **CREATE new file in /docflow/specs/complete/[YYYY-QQ]/**
+8. Update /docflow/ACTIVE.md to remove completed item
+9. Clean up or archive spec assets from /docflow/specs/assets/[spec-name]/ if present
 
 ## Code Principles
 - TypeScript strict mode always
 - Follow existing patterns defined in /docflow/context/stack.md
-- No duplicate functions - check dependencies.md first
-- No duplicate components - check existing code first
-- Every shared module tracked in dependencies.md
+- No duplicate functions - search codebase first
+- No duplicate components - search codebase first
 - Follow standards.md for all code conventions
+- Document complex patterns in /docflow/knowledge/ for reuse
 
 ## Decision Documentation
-When making technical decisions, always update the Decision Log:
+When making technical decisions:
+
+### In Specs (Spec Decision Log)
+Document implementation-specific decisions:
+- How this feature was built
+- Deviations from original plan
+- Technical approaches chosen
+
+### In Knowledge Base (/docflow/knowledge/decisions/)
+Document architectural decisions that affect the entire project:
 - Architecture choices (why X over Y)
-- Scope changes (what was cut and why)
-- Performance trade-offs
-- Security considerations
-- Breaking changes
-- External dependencies added
+- Breaking changes or major refactors
+- Technology selection rationale
+- Security or performance strategies
+
+**Format:** NNN-decision-title.md (numbered ADRs)
 
 ## Natural Capture During Work
 If user mentions something that could be a bug, feature, or idea during active work:
@@ -424,21 +436,21 @@ If user mentions something that could be a bug, feature, or idea during active w
 
 ## Status Awareness
 Always be aware of:
-- What's currently active (ACTIVE.md)
+- What's currently active (/docflow/ACTIVE.md)
 - What's in QE testing (check for QE_TESTING status)
-- What's in the backlog (INDEX.md)
+- What's in the backlog (/docflow/INDEX.md)
 - What's blocking progress (check specs)
 - What decisions need to be made (check Decision Logs)
 
 ## Response Patterns
 Before creating code, always state:
-"Let me check dependencies.md for existing [functionality]..."
+"Let me search for existing [functionality]..."
 
 When finding existing code:
-"Found existing [module/function] in dependencies.md that handles this"
+"Found existing [module/function] that handles this"
 
-When creating new shared code:
-"Creating new [module/function]. I'll add this to dependencies.md"
+When discovering important patterns:
+"This is complex/reusable. I'll document this in /docflow/knowledge/features/"
 
 When feature ready for QE testing:
 "✅ Code review passed! This is ready for your QE testing. Please verify the functionality and let me know if it looks good."
@@ -462,8 +474,10 @@ Never say "you should run /command" - instead, recognize the intent and run it d
 - Always follow patterns in stack.md
 - Always follow conventions in standards.md
 - Always update decision logs with reasoning
-- Always keep ACTIVE.md current
-- Always keep INDEX.md current
+- Always keep /docflow/ACTIVE.md current
+- Always keep /docflow/INDEX.md current
 - Always move files atomically (delete source, create destination)
 - Never auto-close specs in QE_TESTING without user approval
 - Recognize natural language and execute commands accordingly
+- Document architectural decisions in /docflow/knowledge/decisions/
+- Search for existing code before creating new functionality
