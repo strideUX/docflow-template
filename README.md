@@ -68,11 +68,23 @@ cp -r /path/to/docflow-template/template/* /path/to/your-project/
 ```bash
 /docflow-scan
 ```
-**Agent analysis (~15-30 min):**
+**Agent analysis (~5-10 min):**
 - Analyzes your existing code
+- Identifies documentation gaps
+- Suggests capture opportunities
+- Provides health score (if DocFlow exists)
+- Recommends next action
+
+**Then install/upgrade:**
+```bash
+/docflow-upgrade
+```
+**Agent setup (~15-30 min):**
+- Installs DocFlow 2.1 (if new)
+- Upgrades from 1.x → 2.1 (if old version)
+- Migrates from other systems
 - Fills context files from detected stack
 - Documents existing features
-- Migrates old specs if present
 
 ### 3. Start Working
 
@@ -103,7 +115,7 @@ Agent shows current state and helps you pick what to work on.
 
 ---
 
-## Commands (12 Total)
+## Commands (13 Total)
 
 ### Daily Workflow
 
@@ -127,7 +139,8 @@ Agent shows current state and helps you pick what to work on.
 
 ### System Setup (Once Per Project)
 - `/docflow-new` - New project setup
-- `/docflow-scan` - Existing project retrofit
+- `/docflow-scan` - Analyze project & suggest gaps (read-only)
+- `/docflow-upgrade` - Install or upgrade DocFlow
 
 **Natural language works too!** Say "let's start", "build this", "test it" - agents understand.
 
@@ -151,7 +164,7 @@ Agent shows current state and helps you pick what to work on.
 ### Core System (`template/` folder)
 ```
 template/
-├── .cursor/              # Cursor rules and 12 commands
+├── .cursor/              # Cursor rules and 13 commands
 ├── .claude/              # Claude Desktop adapter
 ├── .github/              # GitHub Copilot adapter
 ├── AGENTS.md             # Universal AI instructions
@@ -267,7 +280,7 @@ your-project/
 
 **Lightweight:**
 - 4 spec types
-- 12 commands
+- 13 commands
 - ~6,350 lines total system
 
 **Efficient:**
@@ -298,7 +311,7 @@ your-project/
 ### Complete Reference
 - **[DOCFLOW-GUIDE.md](DOCFLOW-GUIDE.md)** - Comprehensive guide
   - Three-agent model details
-  - All 12 commands with examples
+  - All 13 commands with examples
   - All 4 templates explained
   - Workflow states and transitions
   - Knowledge base usage

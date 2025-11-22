@@ -1,15 +1,12 @@
-# DocFlow Scan (System Setup)
+# DocFlow Scan (Analysis & Recommendations)
 
 ## Purpose
-Analyze existing codebase and retrofit or update DocFlow documentation.
+Analyze existing project and provide actionable recommendations for documentation gaps, spec opportunities, and DocFlow health.
 
-**Handles three scenarios:**
-- **2a:** Code exists, no DocFlow → Create DocFlow from scratch
-- **2b:** Code exists, old DocFlow → Migrate and update
-- **2c:** Code exists, broken DocFlow → Fix and align
+**This is a read-only analysis command.** It reviews the current state and suggests actions but makes no file changes.
 
 **Agent Role:** PM/Planning Agent  
-**Frequency:** Once per existing project (or when DocFlow needs refresh)
+**Frequency:** On-demand (can run anytime for health checks)
 
 ---
 
@@ -17,335 +14,410 @@ Analyze existing codebase and retrofit or update DocFlow documentation.
 
 ### Automatic Detection
 Run when:
-- User says "scan this project", "analyze codebase", "add DocFlow"
-- Finding existing code but DocFlow is missing/incomplete
-- Context files don't match actual codebase
+- User says "scan this project", "analyze codebase", "review documentation"
+- User asks "what's missing", "documentation gaps", "what should I capture"
+- User wants a DocFlow health check
 
-### Smart Detection
-Check project state and route to appropriate path:
+---
+
+## Analysis Flow
+
+### Phase 1: Project Detection (30 sec)
+
+**Identify project type:**
+1. Check package management (package.json, requirements.txt, Gemfile, etc.)
+2. Identify framework and language
+3. Scan directory structure
+4. Count source files and estimate size
+5. Check git status (if available)
+
+**Output:**
 ```
-if (no /docflow/ folder exists)
-  → Path A: Create DocFlow from Scratch (Scenario 2a)
-  
-else if (context files are templates OR empty)
-  → Path B: Fill Empty DocFlow (Scenario 2b variant)
-  
-else if (old spec system detected in different location)
-  → Path C: Migrate Old Spec System (Scenario 2b)
-  
-else if (DocFlow exists but seems outdated)
-  → Path D: Update Existing DocFlow (Scenario 2b)
+📊 Project Scan Starting...
+
+**Project Type:** [Framework] [Language]
+**Size:** [N] source files
+**Structure:** [Directory layout summary]
 ```
 
 ---
 
-## Path A: Create DocFlow from Scratch (No DocFlow Exists)
+### Phase 2: DocFlow State Detection (1 min)
 
-### Phase 1: Initial Assessment (1-2 min)
+**Check for DocFlow presence:**
 
-**Detect project:**
-1. Check package management (package.json, requirements.txt, etc.)
-2. Identify framework (Next.js, React, Django, etc.)
-3. Scan directory structure
-4. Count source files (assess size)
+**Scenario A: No DocFlow Found**
+- No `/docflow/` folder exists
+- **Recommendation:** Run `/docflow-upgrade` to install DocFlow 2.1
 
-**Message user:**
-"I found a [framework] project with [X files]. Let me analyze it to understand what you've built..."
+**Scenario B: DocFlow 1.x Detected**
+- Has `/docflow/` but old structure detected:
+  - `shared/` folder exists (removed in 2.1)
+  - `reference/` folder exists (removed in 2.1)
+  - `dependencies.md` exists (removed in 2.1)
+  - `.templates` folder exists (renamed in 2.1)
+  - Specs missing Complexity field (added in 2.1)
+- **Recommendation:** Run `/docflow-upgrade` to migrate to version 2.1
 
-### Phase 2: Deep Code Analysis (5-10 min)
+**Scenario C: DocFlow 2.1 Present**
+- Has correct folder structure
+- Context files exist
+- Templates folder present
+- **Continue to health check**
 
-**Scan systematically:**
-1. Read README/docs (if exists)
-2. Analyze entry points (main files, routes)
-3. Map features by directory/module
-4. Detect patterns and conventions
-5. Identify tech stack components
-6. Find data models/schemas
-7. Note external integrations
+**Scenario D: Other Spec System**
+- Found specs in non-standard location
+- Different format/structure
+- **Recommendation:** Run `/docflow-upgrade` to migrate to DocFlow 2.1
+
+**Scenario E: Broken/Incomplete DocFlow**
+- Folder exists but missing key files
+- Context files are still templates/placeholders
+- Empty or corrupted structure
+- **Recommendation:** Run `/docflow-upgrade` to repair
+
+---
+
+### Phase 3: Codebase Analysis (3-8 min)
+
+**Systematically analyze code:**
+
+**Entry Points:**
+- Main files (index, app, main)
+- Route definitions
+- API endpoints
+
+**Feature Discovery:**
+- Scan by directory/module
+- Identify user-facing features
+- Note internal systems (auth, data, integrations)
+- Map component hierarchy (if UI app)
+
+**Architecture & Patterns:**
+- State management approach
+- Data layer patterns
+- API/backend integration
+- Authentication/authorization
+- Real-time features (if any)
+
+**Dependencies & Integrations:**
+- External services
+- Third-party libraries
+- Database/ORM
+- Deployment setup
 
 **Progress updates:**
-- "Found authentication using [X]..."
-- "Detected [N] main features..."
-- "Using [database] with [patterns]..."
+- "Analyzing authentication system..."
+- "Found 12 API routes..."
+- "Detected real-time features using [X]..."
 
-### Phase 3: Ask Clarifying Questions (2-3 min)
+---
 
-**Fill gaps:**
-- Project purpose (if not clear)
-- Target users
-- Incomplete features (in progress or abandoned?)
-- Technical decisions (why X approach?)
-- Current priorities
-- Known issues or tech debt
+### Phase 4: DocFlow Comparison (2-3 min)
 
-### Phase 4: Fill Context Files
+**If DocFlow exists, check for drift:**
 
-**Auto-generate from code analysis:**
+**Context Files vs Code:**
+- Does `stack.md` match actual stack?
+- Does `overview.md` reflect current vision?
+- Do `standards.md` match code patterns?
 
-**`overview.md`:**
-- Extract from README or generate from code
-- List discovered features
-- Note user types if detectable
+**Specs vs Features:**
+- Which features exist in code but not documented?
+- Which specs are marked incomplete but code looks done?
+- Which specs are outdated or abandoned?
 
-**`stack.md`:**
-- Document detected stack
-- List patterns found in code
-- Note deployment setup
+**Knowledge Base:**
+- Are complex features documented in knowledge/?
+- Are architectural decisions captured?
+- Are technical gotchas noted?
 
-**`standards.md`:**
-- Document existing conventions
-- Keep best practices from template
+---
 
-### Phase 5: Document Existing Features
+### Phase 5: Gap Analysis
 
-**For each major feature found:**
+**Undocumented Features:**
+```
+📝 Features Found in Code (not in specs):
+1. [Feature name] - [Brief description]
+   Location: [File paths]
+   Complexity: [Estimate S/M/L]
+   
+2. [Feature name] - [Brief description]
+   ...
 
-Create in `/docflow/specs/complete/YYYY-QQ/`:
-```markdown
-# Feature: [Feature Name]
-
-**Status**: COMPLETE (Discovered during scan)
-**Completed**: [Before scan - estimate or ask]
-
-## Context
-[What this feature does from code analysis]
-
-## Implementation
-**Key Files:**
-- [List main files]
-
-**Patterns:**
-- [Patterns discovered]
-
-## Decision Log
-- [Scan Date]: Feature discovered and documented during project scan
+**Suggestion:** Create completed specs in /docflow/specs/complete/[quarter]/
+to document these for future reference.
 ```
 
-### Phase 6: Populate Knowledge Base
+**Missing Context:**
+```
+⚠️ Context Gaps:
+- stack.md says [X] but code uses [Y]
+- overview.md missing [important aspect]
+- standards.md doesn't mention [pattern used everywhere]
 
-**If complex systems found:**
-- Document in /docflow/knowledge/features/
-- Example: "sprint-planning-algorithm.md"
-
-**If interesting patterns:**
-- Document in /docflow/knowledge/notes/
-- Example: "real-time-sync-gotchas.md"
-
-### Phase 7: Update Tracking Files
-
-**Initialize:**
-- /docflow/ACTIVE.md with timestamp
-- /docflow/INDEX.md with:
-  - Completed: All discovered features
-  - Backlog: Next features from conversation
-
-**Suggest next work:**
-- Identify incomplete features
-- Capture planned features from discussion
-- Create specs in backlog
-
----
-
-## Path B: Migrate Old Spec System (Existing Specs)
-
-### Phase 1: Detect Old System
-
-**Check for:**
-- Old spec folders (./specs/, .specs/, docs/specs/)
-- Different file formats
-- Old tracking systems (BACKLOG.md, TODO.md)
-
-**Analyze structure:**
-- What format are they using?
-- Which specs are current vs outdated?
-- What's valuable to preserve?
-
-### Phase 2: Ask Before Changes
-
-**⚠️ IMPORTANT: Get user approval first**
-
-"I found an existing spec system in [location]:
-- [N] specs in old format
-- Last updated: [date from git or files]
-
-Options:
-1. **Archive and start fresh** - Save old system, create new DocFlow
-2. **Migrate and update** - Convert to new format, preserve history
-3. **Leave as-is** - Don't touch old system
-
-What would you like to do?"
-
-**Wait for user decision.**
-
-### Phase 3: Archive Old System
-
-**If user approves migration:**
-
-1. Create `/docflow/specs/archived-[YYYY-MM-DD]/`
-2. Copy entire old system there
-3. Create `MIGRATION.md`:
-```markdown
-# Migration from Old Spec System
-
-**Date**: YYYY-MM-DD
-**Old Location**: [where it was]
-**Old Format**: [description]
-
-## What Was Migrated
-- [N] specs converted to new format
-- [N] specs archived (outdated/complete)
-
-## What Was Preserved
-- All decision history
-- All implementation notes
-- All completion dates
-
-## New Location
-- Active work: /docflow/specs/active/
-- Backlog: /docflow/specs/backlog/
-- Completed: /docflow/specs/complete/[quarters]/
+**Suggestion:** Update context files to match current reality.
 ```
 
-### Phase 4: Convert Relevant Specs
+**Knowledge Opportunities:**
+```
+💡 Capture Opportunities:
+- Complex feature: [Name] could be documented in knowledge/features/
+- Architectural decision: [Decision] should be in knowledge/decisions/
+- Technical gotcha: [Issue] worth noting in knowledge/notes/
+- User flow: [Flow] could be mapped in knowledge/product/
 
-**For each valuable spec:**
-1. Determine status (complete, in-progress, planned)
-2. Convert to appropriate template
-3. Preserve all content and history
-4. Place in correct folder:
-   - Complete → complete/[quarter]/
-   - In progress → active/ with status=IMPLEMENTING
-   - Planned → backlog/
+**Suggestion:** Document these to help future work.
+```
 
-**Update format but keep content:**
-- Keep decision logs
-- Keep implementation notes
-- Update to new status system
-- Add missing sections
+**Incomplete Specs:**
+```
+🔄 Specs Needing Attention:
+- feature-X.md (status=IMPLEMENTING, last updated 2 weeks ago)
+- feature-Y.md (status=READY, code looks complete)
 
-### Phase 5: Fill Context Files
+**Suggestion:** Review and update status or complete implementation.
+```
 
-**Use code + old specs:**
-- Extract context from old specs
-- Combine with code analysis
-- Fill overview.md, stack.md, standards.md
-- Update with current reality (not just what specs say)
+**Stale Work:**
+```
+🗑️ Potentially Stale:
+- chore-Z.md (ACTIVE for 3 months)
+- idea-Q.md (no updates, may no longer be relevant)
 
----
-
-## Path C: Update Existing DocFlow
-
-### Phase 1: Compare DocFlow to Code
-
-**Check for drift:**
-- Context files vs actual stack
-- Completed specs vs actual features
-- Standards vs actual code patterns
-
-**Ask user:**
-"I see some differences between DocFlow and the actual code:
-- stack.md says [X], but code uses [Y]
-- Feature [A] is marked incomplete, but looks done in code
-- [Other drifts found]
-
-Should I update DocFlow to match the current code?"
-
-**Wait for approval.**
-
-### Phase 2: Update Context Files
-
-If approved:
-- Update stack.md to match actual code
-- Update standards.md to match actual patterns
-- Refresh overview.md if project evolved
-
-### Phase 3: Sync Spec States
-
-**Check active specs:**
-- Verify status matches reality
-- Mark actually-complete specs as COMPLETE
-- Archive old completed work
-- Update priorities based on current work
-
-### Phase 4: Populate Knowledge
-
-**If knowledge/ is empty:**
-- Extract decisions from old specs
-- Document complex features
-- Add technical notes discovered
+**Suggestion:** Review and close or update.
+```
 
 ---
 
-## Phase Final: Summary & Handoff (All Paths)
+### Phase 6: Health Score (if DocFlow 2.1 exists)
 
-**Provide comprehensive summary:**
+**Calculate health metrics:**
+
+```
+📊 DocFlow Health Score: [X]/100
+
+✅ Structure: [score]/25
+   - Correct folder layout
+   - Templates present
+   - Platform adapters exist
+
+✅ Context: [score]/25
+   - Context files filled and current
+   - Matches actual codebase
+   - Standards documented
+
+✅ Specs: [score]/25
+   - Active work tracked
+   - Completed work documented
+   - No stale specs
+
+✅ Knowledge: [score]/25
+   - Decisions captured
+   - Complex features documented
+   - Technical notes present
+```
+
+---
+
+### Phase 7: Final Report & Recommendations
+
+**Provide comprehensive analysis:**
+
 ```
 📊 DocFlow Scan Complete!
 
-**Project**: [Name]
-**Type**: [Framework] [project type]
-**Features**: [X existing, Y planned]
-
-✅ DocFlow Setup:
-   - Context files: [Created/Updated]
-   - Stack documented: [Summary]
-   - Standards captured: [Summary]
-
-📁 Specs:
-   - [N] existing features in complete/
-   - [N] planned in backlog/
-   - [Migration: N old specs archived] (if applicable)
-
-📚 Knowledge Base:
-   - [N] decisions documented
-   - [N] features documented
-   - [N] technical notes
-
-🎯 Next Steps:
-   Ready to start working! Run /start-session to begin.
-   
-   Suggested first action: [what makes sense]
-```
+**Project:** [Name]
+**Type:** [Framework] [Language]
+**DocFlow Version:** [None / 1.x / 2.1 / Other]
+**Health Score:** [X]/100 (if 2.1 exists)
 
 ---
 
-## Tools to Use
-- `list_dir` - Map directory structure
-- `read_file` - Read files (README, configs, source)
-- `grep` - Search for patterns
-- `codebase_search` - Find implementations
-- `glob_file_search` - Find files by type
-- `run_terminal_cmd` - Git commands (if needed)
+## Summary
+
+**What You Have:**
+- [N] features in codebase
+- [N] documented in specs (if DocFlow exists)
+- [Tech stack summary]
+
+**What's Missing:**
+- [N] undocumented features
+- [N] context gaps
+- [N] knowledge capture opportunities
+
+---
+
+## Recommended Actions
+
+### Immediate (Do Now):
+1. [Most important action based on state]
+   - If no DocFlow: `/docflow-upgrade` to install
+   - If old version: `/docflow-upgrade` to migrate
+   - If healthy: Capture [specific gap]
+
+### Soon (This Week):
+2. [Second priority]
+3. [Third priority]
+
+### Ongoing (As You Work):
+- Document features as you build (/capture)
+- Note decisions in knowledge/decisions/
+- Keep context files current
+
+---
+
+## Next Steps
+
+[Specific command or action to take]
+```
 
 ---
 
 ## Key Principles
 
-### Be Thorough But Efficient
-Focus on entry points, main features, shared utilities, configs. Don't read every file.
+### Read-Only Analysis
+- **Never write files** - only analyze and recommend
+- User decides what actions to take
+- Safe to run anytime without risk
 
-### Ask Before Changing
-For scenario 2b (existing DocFlow), always ask before updating.
+### Actionable Output
+- Specific recommendations, not vague suggestions
+- Clear priority order
+- Exact commands/actions to take next
 
-### Preserve History
-If migrating, archive carefully. Don't delete anything.
+### Works for Any Project
+- Projects without DocFlow
+- Projects with old DocFlow
+- Projects with DocFlow 2.1 (health check)
+- Projects with other systems
 
-### Document What Exists
-Describe objectively what's there. Don't critique during scan.
+### Honest Assessment
+- Show gaps objectively
+- Don't critique during scan
+- Focus on opportunities, not failures
 
-### Make It Actionable
-End with clear next steps. User should know exactly what to do.
+### Efficient Discovery
+- Focus on main features and patterns
+- Don't read every file
+- Use search and sampling
+
+---
+
+## Tools to Use
+
+- `list_dir` - Map directory structure
+- `read_file` - Read configs, key files, specs
+- `grep` - Search for patterns
+- `codebase_search` - Find implementations by meaning
+- `glob_file_search` - Find files by type
+- `run_terminal_cmd` - Git commands (read-only, like git log)
+
+---
+
+## Output Format
+
+Always end with:
+1. **Summary** (what was found)
+2. **Gaps** (what's missing)
+3. **Health score** (if DocFlow 2.1 exists)
+4. **Recommended actions** (ordered by priority)
+5. **Next step** (specific command or action)
+
+---
+
+## Detection Patterns for DocFlow Versions
+
+### DocFlow 1.x Indicators:
+- `/docflow/shared/` exists
+- `/docflow/reference/` exists
+- `/docflow/dependencies.md` exists
+- `.templates` folder (hidden)
+- Specs have `Estimated Time` field
+- No `knowledge/` folder
+- No `specs/assets/` folder
+- No `AGENTS.md` in root
+- No `.claude/` or `.github/` folders
+
+### DocFlow 2.1 Indicators:
+- `/docflow/templates/` exists (not hidden)
+- `/docflow/knowledge/` with subfolders
+- `/docflow/specs/assets/` exists
+- Specs have `Complexity` field (S/M/L/XL)
+- `AGENTS.md` in root
+- Platform adapters (`.claude/`, `.github/`)
+- No `shared/`, `reference/`, `dependencies.md`
+
+---
+
+## Example Scans
+
+### Healthy Project with DocFlow 2.1:
+```
+📊 Health Score: 92/100
+
+Structure ✅ 25/25
+Context ✅ 23/25 (stack.md slightly outdated)
+Specs ✅ 22/25 (2 stale chores)
+Knowledge ✅ 22/25 (missing some decisions)
+
+**Recommended Actions:**
+1. Update stack.md to reflect new caching strategy
+2. Close or update 2 stale chores
+3. Document authentication decision in knowledge/decisions/
+```
+
+### Project with No DocFlow:
+```
+**DocFlow:** Not installed
+
+**What I Found:**
+- Next.js 14 app with App Router
+- 23 features implemented
+- Convex backend, Clerk auth
+- Well-structured codebase
+
+**Recommended Actions:**
+1. Run `/docflow-upgrade` to install DocFlow 2.1
+   - I'll document your 23 existing features
+   - Fill context from your stack
+   - Set up knowledge base
+   - Create backlog for planned work
+
+Ready when you are!
+```
+
+### Project with DocFlow 1.x:
+```
+**DocFlow:** Version 1.x detected
+
+**Issues Found:**
+- Using old folder structure (shared/, reference/)
+- Specs missing Complexity field
+- No knowledge base
+- Missing platform adapters
+
+**Recommended Actions:**
+1. Run `/docflow-upgrade` to migrate to 2.1
+   - Preserves all your specs and history
+   - Migrates to new structure
+   - Adds knowledge base
+   - Converts metadata format
+
+This is non-destructive (old version archived).
+```
 
 ---
 
 ## Checklist
-- [ ] Detected which scenario (2a, 2b, 2c)
-- [ ] Code analyzed appropriately
-- [ ] User questions asked and answered
-- [ ] Context files filled/updated
-- [ ] Existing features documented
-- [ ] Old specs migrated (if applicable)
-- [ ] Knowledge base populated
-- [ ] Tracking files initialized
-- [ ] Clear summary provided
-- [ ] Next steps identified
+
+- [ ] Project type detected
+- [ ] DocFlow state identified
+- [ ] Codebase analyzed
+- [ ] Features discovered
+- [ ] Gaps identified
+- [ ] Health score calculated (if applicable)
+- [ ] Specific recommendations provided
+- [ ] Next action clear
+- [ ] No files written (read-only)

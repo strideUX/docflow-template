@@ -90,7 +90,7 @@ DocFlow uses a **three-agent orchestration model** for efficient, focused work:
 
 ## Commands Reference
 
-### PM/Planning Agent Commands (6)
+### PM/Planning Agent Commands (7)
 
 #### `/start-session` - Begin Planning Session
 **Purpose:** Check current state and identify priorities
@@ -239,7 +239,7 @@ DocFlow uses a **three-agent orchestration model** for efficient, focused work:
 
 ---
 
-### System Setup Commands (2)
+### System Setup Commands (3)
 
 #### `/docflow-new` - Set Up New Project
 **Purpose:** Initialize DocFlow in empty project
@@ -253,18 +253,32 @@ DocFlow uses a **three-agent orchestration model** for efficient, focused work:
 
 **When to use:** Brand new project, starting from scratch
 
-#### `/docflow-scan` - Retrofit Existing Project
-**Purpose:** Add DocFlow to existing codebase
+#### `/docflow-scan` - Analyze Project
+**Purpose:** Review codebase and suggest documentation gaps (read-only)
 
 **What it does:**
-- Analyzes existing code (~15-30 min)
-- Detects: no DocFlow / old DocFlow / broken DocFlow
+- Analyzes existing code (~5-10 min)
+- Identifies documentation gaps
+- Suggests capture opportunities
+- Provides health score (if DocFlow exists)
+- Detects DocFlow version or other systems
+- **Makes no file changes** - only analyzes and recommends
+
+**When to use:** Anytime for health checks, gap analysis, or before upgrading
+
+#### `/docflow-upgrade` - Install or Upgrade DocFlow
+**Purpose:** Set up, migrate, or repair DocFlow (write operations)
+
+**What it does:**
+- Installs DocFlow 2.1 (if new)
+- Upgrades from DocFlow 1.x → 2.1
+- Migrates from other spec systems
+- Repairs broken DocFlow installations
 - Fills context files from detected stack
 - Documents existing features as completed specs
-- Migrates old spec systems (archives then converts)
-- **Asks before changing existing DocFlow**
+- **Always asks before making changes**
 
-**When to use:** Existing codebase, need to add or update DocFlow
+**When to use:** First-time setup, version upgrades, migrations, repairs
 
 ---
 
@@ -616,7 +630,7 @@ BACKLOG → ACTIVE → COMPLETE
 
 ---
 
-### System Setup (2 Commands)
+### System Setup (3 Commands)
 
 #### /docflow-new
 **Purpose:** Set up brand new project  
@@ -624,9 +638,14 @@ BACKLOG → ACTIVE → COMPLETE
 **Duration:** ~10-15 min conversation  
 
 #### /docflow-scan
-**Purpose:** Retrofit or update existing project  
-**Use once:** Per existing project  
-**Duration:** ~15-30 min analysis  
+**Purpose:** Analyze project and suggest documentation gaps (read-only)  
+**Use anytime:** Health checks, gap analysis  
+**Duration:** ~5-10 min analysis  
+
+#### /docflow-upgrade
+**Purpose:** Install, upgrade, or migrate DocFlow (write operations)  
+**Use once:** Per project or version upgrade  
+**Duration:** ~15-30 min setup/migration  
 
 ---
 
