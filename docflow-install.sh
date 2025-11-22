@@ -143,6 +143,17 @@ download_file "docflow/knowledge/README.md" "docflow/knowledge/README.md"
 download_file "docflow/knowledge/product/personas.md" "docflow/knowledge/product/personas.md"
 download_file "docflow/knowledge/product/user-flows.md" "docflow/knowledge/product/user-flows.md"
 
+# Add install script to .gitignore
+if [ ! -f ".gitignore" ]; then
+  touch .gitignore
+fi
+
+if ! grep -q "^docflow-install\.sh$" .gitignore 2>/dev/null; then
+  echo "docflow-install.sh" >> .gitignore
+  echo ""
+  echo "   [Added docflow-install.sh to .gitignore]"
+fi
+
 echo ""
 echo "✅ Installation complete!"
 echo ""
