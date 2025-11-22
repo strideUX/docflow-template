@@ -41,56 +41,251 @@ Check the project state:
 
 ### Process
 
-#### 1. Greet and Gather (Conversational)
+#### 1. Collaborative Discovery & Concept Refinement
 
 ```
 🎯 Setting up DocFlow for a new project!
 
-Tell me about what you're building. I'll ask a few questions 
-to set up your project properly.
+Let's talk through your idea so I can help you scope it well 
+and set up the right foundation. This is collaborative - I'll 
+ask questions, offer alternatives, and help refine the concept.
 ```
 
-**Ask these questions naturally:**
-- What are you building? (product vision, core purpose)
-- Who is it for? (target users, use cases)
-- What tech stack do you want? (or should I recommend one?)
-- What are the first 3-5 features you want to build?
-- Any specific requirements? (performance, integrations, etc.)
+**Start conversational, not transactional:**
+- "Tell me about what you're building - what's the core idea?"
+- Listen, then probe deeper with follow-ups
 
-**Goal:** Gather enough to fill context files and create initial backlog.
+**Example opening flow:**
+```
+User: "I want to build a task management app"
 
-#### 2. Fill Context Files
+Agent: "Cool! Task management - let me ask a few questions to 
+        help us scope this well.
+        
+        First, who's this for? Personal use, team use, or both?"
 
-Based on conversation, populate:
+User: "Team use, like Asana but simpler"
+
+Agent: "Got it. 'Simpler than Asana' - can you give me an example 
+        of what you'd cut? I want to make sure we're aligned on 
+        what 'simple' means here."
+```
+
+**Vetting Questions (adapt based on their answers):**
+
+**On Product Concept:**
+- What problem does this solve? (validate the "why")
+- Have you seen similar solutions? What would you do differently?
+- What's your definition of "done" for an MVP? (scope check)
+- If scope seems too large: "That's ambitious - could we start with X and add Y later?"
+
+**On Users:**
+- Who are the target users specifically?
+- What's their current workflow/pain point?
+- If unclear: "Let me make sure I understand - you want users to be able to..."
+
+**On Features:**
+- When they list features, ask: "Which of these is absolutely required for launch?"
+- If complex feature mentioned: "That feature is complex - can we break it down?"
+- Suggest prerequisites: "For that to work, you'll need X first - should I add that?"
+- Offer alternatives: "For that use case, [alternative approach] might be simpler - thoughts?"
+
+**On Feasibility:**
+- If they want integrations/APIs: "This will need API access and auth - is that ok?"
+- If they want real-time: "Real-time means WebSockets or polling - preference?"
+- If they want complex data: "That data model will need migrations - comfortable with that?"
+
+**Goal:** Iterate until you have a solid, scoped concept that's achievable. Don't just accept everything - help them refine.
+
+**Red Flags (push back constructively):**
+- Too many features for MVP → Suggest phasing
+- Vague requirements → Ask clarifying questions
+- Unrealistic scope → Explain trade-offs
+- Missing prerequisites → Identify dependencies
+
+**Green Lights (proceed with confidence):**
+- Clear problem statement
+- Defined target users
+- Reasonable MVP scope
+- User understands trade-offs
+
+#### 2. Stack Selection & Research
+
+**If user has strong preference:**
+```
+User: "I want to use React and Node.js"
+
+Agent: "Perfect - React and Node.js are great for this use case. 
+        Let me research current best practices so we set this 
+        up right..."
+```
+→ Skip to research phase
+
+**If user is uncertain or asks for recommendation:**
+
+**Ask about their context:**
+- "What languages/frameworks are you comfortable with?"
+- "Any deployment constraints? (Vercel, AWS, self-hosted)"
+- "Team project or solo?"
+- "Need mobile app eventually, or web-only?"
+
+**Make recommendation based on:**
+- Their experience level
+- Project requirements
+- Best practices for use case
+- Ecosystem maturity
+
+**Example recommendation:**
+```
+Agent: "Based on what you described, I'd recommend:
+        - Next.js (React + API in one, great DX)
+        - Prisma for database (type-safe, great for teams)
+        - Vercel for deployment (zero-config, fast)
+        
+        This stack is well-documented, actively maintained, and 
+        perfect for [their use case]. Sound good, or want to 
+        explore alternatives?"
+```
+
+**Once stack is chosen, RESEARCH IT:**
+
+**Step A: Use Context7 MCP for official docs**
+```
+Agent: "Let me get the official docs for [framework]..."
+```
+
+Actions:
+- `mcp_context7_resolve-library-id` for each framework
+- `mcp_context7_get-library-docs` for setup, best practices, patterns
+- Focus on: current version, recommended setup, project structure
+
+**Step B: Web search for current best practices (2024/2025)**
+
+Search queries:
+- "[framework] best practices 2024"
+- "[framework] project structure"
+- "[framework] recommended dependencies"
+- "[stack] starter template"
+
+**Step C: Synthesize findings**
+- Note current versions
+- Identify must-have dependencies for their use case
+- Capture recommended patterns and conventions
+- Note tooling (linters, formatters, testing)
+
+**Time investment:** 3-5 minutes of research to save hours of rework later.
+
+#### 3. Build Context Files from Research
+
+**Now fill context files with RESEARCHED, SPECIFIC information:**
 
 **`docflow/context/overview.md`:**
-- Project name and purpose
-- Target users and use cases
-- Core features (high level)
-- Success metrics
+Based on discovery conversation:
+- Project name and purpose (their words)
+- Target users and use cases (refined together)
+- Core MVP features (scoped version)
+- Success criteria (what "done" looks like)
 
 **`docflow/context/stack.md`:**
-- Chosen framework/language
-- Key dependencies
-- Development tools
-- Deployment approach
+Based on research:
+- Framework and current version (from Context7/web search)
+- Recommended dependencies for their use case
+- Development tooling (linters, formatters from official docs)
+- Build/deployment approach (from best practices)
+- Project structure recommendations (from research)
+
+**Example (React + Next.js):**
+```markdown
+# Stack
+
+## Framework
+- **Next.js 15** (App Router)
+- **React 18** (Server Components)
+- **TypeScript** (strict mode)
+
+## Dependencies
+- **Prisma** - Type-safe database ORM
+- **NextAuth.js** - Authentication
+- **Tailwind CSS** - Styling
+- **Zod** - Runtime validation
+
+## Development Tools
+- **ESLint** (Next.js config)
+- **Prettier** (opinionated formatting)
+- **TypeScript** (strict mode)
+
+## Deployment
+- **Vercel** (zero-config, edge functions)
+- **Postgres** (via Vercel Postgres or Supabase)
+
+## Project Structure
+[Based on Next.js 15 App Router conventions - from research]
+```
 
 **`docflow/context/standards.md`:**
-- Coding conventions for their stack
-- File organization patterns
-- Testing approach
-- Documentation standards
+Based on official docs + best practices:
+- Coding conventions (from official style guides)
+- File organization (from framework docs)
+- Testing approach (from community standards)
+- Component patterns (from framework recommendations)
 
-#### 3. Create Initial Backlog
+**Example (React/Next.js standards from research):**
+```markdown
+# Standards
 
-For each feature mentioned, create a spec:
-- `docflow/specs/backlog/feature-[name].md`
-- Copy from `docflow/specs/templates/feature.md`
-- Fill in basics from conversation
-- Set priority (work with user on ordering)
-- Mark complexity (S/M/L/XL based on discussion)
+## Code Style
+- **TypeScript strict mode** - No implicit any
+- **Functional components** - Use hooks, not classes
+- **Server Components by default** - Client components only when needed
+- **ESLint + Prettier** - Auto-format on save
 
-#### 4. Generate Project Scaffolding Spec
+## File Organization
+- **Co-locate by feature** - Not by type
+- **Server vs Client** - Explicit 'use client' directives
+- **Route handlers** - App router conventions
+
+## Component Patterns
+- **Composition over inheritance**
+- **Props: interfaces, not types**
+- **Event handlers: handleX naming**
+- **Async Server Components** for data fetching
+
+## Testing
+- **Vitest** for unit tests
+- **Playwright** for E2E
+- **Test user behavior, not implementation**
+```
+
+**Not generic - specific to their chosen stack, from research.**
+
+#### 4. Optional: Capture Initial Backlog
+
+**Don't force this - keep it lightweight.**
+
+```
+Agent: "I've captured the core concept and researched the stack. 
+        
+        Do you want me to create backlog specs for the features 
+        we discussed, or would you rather start with just the 
+        scaffolding and add features as we go?
+        
+        (You can always use /capture later to add items)"
+```
+
+**If user says yes, create backlog:**
+- Create `docflow/specs/backlog/feature-[name].md` for each feature
+- Keep it basic - just copy template and fill title/context
+- Don't over-engineer - they'll refine with /review later
+- Suggest priority order based on dependencies
+
+**If user says no, skip backlog:**
+- That's fine! They can /capture as they go
+- Focus on getting scaffolding done first
+- Backlog can grow organically
+
+**Either way is valid.**
+
+#### 5. Generate Project Scaffolding Spec
 
 **Critical:** Create a custom scaffolding spec for their stack:
 
@@ -169,21 +364,24 @@ After scaffolding:
 
 #### 6. Complete and Hand Off
 
+**If backlog was created:**
 ```
 ✅ New project setup complete!
 
 📋 Created:
-   • Context files (overview, stack, standards)
-   • [N] backlog items:
-     - feature-[name] (Priority: High)
-     - feature-[name] (Priority: Medium)
-     - ...
+   • Context files (researched and specific to your stack)
+   • [N] backlog items ready for refinement
    • Project scaffolding spec (ACTIVE and ready)
 
+📚 Research Applied:
+   • [Framework] - Current version, best practices
+   • Standards based on official style guides
+   • Stack recommendations from community
+
 📁 DocFlow Structure:
-   • /docflow/context/ - Project documentation
+   • /docflow/context/ - Project foundation (researched)
    • /docflow/specs/backlog/ - Feature queue
-   • /docflow/specs/active/ - Current work (scaffolding)
+   • /docflow/specs/active/ - Scaffolding (ready to build)
 
 ⏭️  Next step:
 
@@ -191,8 +389,36 @@ After scaffolding:
    
    Or just say: "let's build the foundation"
    
-   The Implementation Agent will set up your project structure
-   and get everything ready for feature development.
+   The Implementation Agent will set up your project using 
+   current [stack] best practices.
+```
+
+**If backlog was skipped:**
+```
+✅ New project setup complete!
+
+📋 Created:
+   • Context files (researched and specific to [stack])
+   • Project scaffolding spec (ACTIVE and ready)
+
+📚 Research Applied:
+   • [Framework] v[X] - Official docs and patterns
+   • Current best practices (2024/2025)
+   • Standards from [framework] style guide
+
+📁 DocFlow Structure:
+   • /docflow/context/ - Project foundation (solid and researched)
+   • /docflow/specs/active/ - Scaffolding (ready to build)
+   • /docflow/specs/backlog/ - Empty (use /capture as you go)
+
+⏭️  Next step:
+
+   Run: /implement project-scaffolding
+   
+   Or just say: "let's build it"
+   
+   After scaffolding is done, use /capture to add features 
+   as you think of them.
 ```
 
 ---
@@ -583,18 +809,31 @@ User might say:
 
 ## Context Loading
 
-**Load these files:**
-- `/docflow/` folder structure (list to understand state)
-- `docflow/context/*.md` (if they exist, to check if filled)
-- `docflow/ACTIVE.md` (if exists, to see current state)
-- `docflow/INDEX.md` (if exists, to see what's tracked)
-- Sample specs (if they exist, to check format)
-- Project config files (package.json, etc. - to analyze stack)
+**For New Projects:**
+- `/docflow/` folder structure (understand state)
+- `docflow/specs/templates/` (understand template structure)
+- **Use Context7 MCP** for chosen stack documentation
+- **Use web search** for best practices and patterns
 
-**Don't load:**
+**For Retrofits:**
+- `/docflow/` folder structure (understand state)
+- Project config files (package.json, requirements.txt, etc.)
+- Directory structure (scan, don't read all files)
+- Sample code files (to understand patterns)
+- `docflow/context/*.md` (if they exist, to check if filled)
+
+**For Upgrades:**
+- `/docflow/` folder structure (complete inventory)
+- `docflow/context/*.md` (check current state)
+- `docflow/ACTIVE.md` (check active work)
+- `docflow/INDEX.md` (check tracked items)
+- Sample specs from each folder (check format)
+- Legacy files (shared/, reference/, dependencies.md)
+
+**Don't auto-load:**
 - Individual spec content (unless checking format)
 - All completed specs (just count them)
-- Entire codebase (just scan structure)
+- Entire codebase (use targeted scans)
 
 ---
 
@@ -603,8 +842,26 @@ User might say:
 ### For New Projects
 ```
 ✅ Setup complete
-📋 [N] backlog items created
+📚 Context researched ([Framework] v[X] best practices)
+📋 Optional: [N] backlog items or ready to /capture later
 📁 Scaffolding spec ready
+⏭️  Next: /implement project-scaffolding
+```
+
+Example:
+```
+✅ New project setup complete!
+
+📋 Created:
+   • Context files (Next.js 15 best practices)
+   • 3 backlog items ready for refinement
+   • Project scaffolding spec (ACTIVE)
+
+📚 Research Applied:
+   • Next.js 15 (App Router, Server Components)
+   • React 18 official patterns
+   • TypeScript strict mode standards
+
 ⏭️  Next: /implement project-scaffolding
 ```
 
@@ -628,13 +885,43 @@ User might say:
 
 ## Checklist
 
-- [ ] Detected scenario correctly (new/retrofit/upgrade)
-- [ ] Chose appropriate flow
-- [ ] Gathered necessary information
-- [ ] Filled or updated context files appropriately
-- [ ] Created, documented, or updated specs
-- [ ] Initialized or updated tracking files (ACTIVE.md, INDEX.md)
+**For New Projects:**
+- [ ] Detected scenario correctly (new project - empty dir)
+- [ ] Had collaborative discovery conversation (not just Q&A)
+- [ ] Vetted the concept (pushed back where appropriate, offered alternatives)
+- [ ] Helped choose or validated tech stack choice
+- [ ] **Researched stack using Context7 + web search**
+- [ ] Filled context files with **researched, specific** information (not generic)
+- [ ] Created backlog items (or offered /capture alternative)
+- [ ] Generated scaffolding spec with stack-specific tasks
+- [ ] Initialized tracking files (ACTIVE.md, INDEX.md)
+- [ ] Provided clear completion summary with research highlights
+- [ ] Gave specific next step command
+
+**For Retrofits:**
+- [ ] Detected scenario correctly (code exists, DocFlow empty)
+- [ ] Analyzed existing codebase thoroughly
+- [ ] Asked clarifying questions about project
+- [ ] Filled context files from code analysis + user input
+- [ ] Documented existing features in complete/
+- [ ] Captured current work if any
+- [ ] Populated knowledge base with discoveries
+- [ ] Initialized tracking files
 - [ ] Provided clear completion summary
 - [ ] Gave specific next step command
-- [ ] Verified all content preserved (for upgrades)
+
+**For Upgrades:**
+- [ ] Detected scenario correctly (DocFlow exists with content)
+- [ ] Analyzed current DocFlow state (structure + spec formats)
+- [ ] Reported findings clearly (what needs updating)
+- [ ] Got explicit user approval before migration
+- [ ] Archived old structure safely
+- [ ] Updated all specs to 2.1 format
+- [ ] Initialized new structure (knowledge/, assets/)
+- [ ] Migrated relevant content from old structure
+- [ ] Cleaned up legacy files
+- [ ] Verified all content preserved
+- [ ] Created migration log
+- [ ] Provided clear completion summary
+- [ ] Gave specific next step command
 
