@@ -11,7 +11,7 @@ This project uses **DocFlow**, a spec-driven development workflow.
 **Read this file to understand:**
 - Three-agent orchestration model (PM, Implementation, QE)
 - Spec lifecycle and status states
-- Command system (12 commands)
+- Command system (13 commands)
 - Context loading strategy
 - File organization rules
 - Natural language triggers
