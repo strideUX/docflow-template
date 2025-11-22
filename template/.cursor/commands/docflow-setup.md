@@ -335,8 +335,12 @@ Let me analyze your current setup and check what needs updating.
 **Structure checks:**
 - Does old `shared/` folder exist?
 - Does old `reference/` folder exist?
-- Are templates in `.templates/` (old) vs `templates/` (new)?
-- Check for any deprecated file locations
+- Does `dependencies.md` exist in docflow/?
+- Are templates in `.templates/` (old, hidden) vs `templates/` (new, visible)?
+- Are old command files present (`new-project.md`, `scan-project.md`)?
+- Are 2.1 platform adapters missing (AGENTS.md, .claude/, .github/)?
+- Is `knowledge/` folder missing or incomplete?
+- Is `specs/assets/` folder missing?
 
 **Spec format checks:**
 - Read a sample of specs
@@ -362,18 +366,22 @@ Structure:
    ✓ Completed specs: [N]
 
 ⚠️  Needs updating:
-   • Old structure detected: shared/, reference/
+   • Old structure detected: shared/, reference/, dependencies.md
    • [N] specs using old format (time estimates)
    • [N] specs missing complexity field
    • Templates in .templates/ (should be templates/)
+   • Old command files: new-project.md, scan-project.md
+   • Missing 2.1 additions: knowledge/, assets/, platform adapters
 
 🔄 Migration Plan:
    1. Archive old structure → knowledge/archived-migration/
-   2. Update [N] specs to 2.1 format
-   3. Initialize knowledge base with new structure
-   4. Update templates to current versions
+   2. Remove legacy files (.templates/, dependencies.md, old commands)
+   3. Add 2.1 structure (knowledge/, assets/, adapters)
+   4. Update [N] specs to 2.1 format
+   5. Create migration documentation
 
 ✅ All active work will be preserved and updated.
+📦 Old files archived (safe to delete after 30 days).
 ```
 
 #### 3. Ask for Approval
@@ -423,6 +431,67 @@ For each spec file that needs updating:
 - Move useful docs from `shared/` to appropriate `knowledge/` folders
 - Move references to `knowledge/notes/` or `knowledge/features/`
 - Convert and organize based on content type
+
+**E. Clean up legacy files:**
+
+**DocFlow 1.x files to remove:**
+```bash
+# Old hidden templates folder (replaced by visible templates/)
+rm -rf docflow/specs/.templates/
+
+# Old dependency tracking (use search instead)
+rm -f docflow/dependencies.md
+
+# Old command files (replaced with 2.1 versions)
+rm -f .cursor/commands/new-project.md
+rm -f .cursor/commands/scan-project.md
+```
+
+**Files to verify exist (2.1 additions):**
+- `AGENTS.md` in root
+- `.claude/rules.md`
+- `.github/copilot-instructions.md`
+- `docflow/knowledge/` structure
+- `docflow/specs/assets/`
+- `docflow/specs/templates/` (visible, not hidden)
+
+**Log cleanup actions:**
+Create `docflow/knowledge/archived-migration/MIGRATION-[date].md`:
+```markdown
+# DocFlow 1.x → 2.1 Migration
+
+**Date:** [date]
+**Migrated by:** DocFlow Setup Command
+
+## Files Removed
+- `/docflow/specs/.templates/` → Archived
+- `/docflow/shared/` → Archived
+- `/docflow/reference/` → Archived
+- `/docflow/dependencies.md` → Archived
+- `/.cursor/commands/new-project.md` → Removed
+- `/.cursor/commands/scan-project.md` → Removed
+
+## Files Added
+- `/AGENTS.md` - Universal AI instructions
+- `/.claude/rules.md` - Claude Desktop adapter
+- `/.github/copilot-instructions.md` - GitHub Copilot adapter
+- `/docflow/knowledge/` - Knowledge base structure
+- `/docflow/specs/assets/` - Spec-specific resources
+- `/docflow/specs/templates/` - Updated templates (visible)
+
+## Specs Updated
+- [N] specs converted from `Estimated Time` → `Complexity`
+- All metadata updated to 2.1 format
+- All content and history preserved
+
+## Archive Location
+Old structure preserved in:
+- `/docflow/knowledge/archived-migration/shared-[date]/`
+- `/docflow/knowledge/archived-migration/reference-[date]/`
+- `/docflow/knowledge/archived-migration/old-templates-[date]/`
+
+Safe to delete after verifying migration (recommend keeping for 30 days).
+```
 
 #### 5. Verify Migration
 
