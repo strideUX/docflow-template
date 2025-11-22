@@ -3,18 +3,18 @@
 # Version: 2.1
 # 
 # Usage: 
-#   curl -sSL https://raw.githubusercontent.com/YOUR-ORG/docflow-template/main/docflow-install.sh | bash
+#   curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash
 #
 # Or download and run locally:
-#   curl -sSL https://raw.githubusercontent.com/YOUR-ORG/docflow-template/main/docflow-install.sh > docflow-install.sh
+#   curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh > docflow-install.sh
 #   chmod +x docflow-install.sh
 #   ./docflow-install.sh
 
 set -e
 
 DOCFLOW_VERSION="2.1"
-REPO_URL="https://github.com/YOUR-ORG/docflow-template"
-RAW_BASE="https://raw.githubusercontent.com/YOUR-ORG/docflow-template/main/template"
+REPO_URL="https://github.com/strideUX/docflow-template"
+RAW_BASE="https://raw.githubusercontent.com/strideUX/docflow-template/main/template"
 
 echo ""
 echo "╔════════════════════════════════════════════════╗"

@@ -795,13 +795,15 @@ docflow/knowledge/
 **1. Run Install Script**
 ```bash
 # One-line installation
-curl -sSL https://raw.githubusercontent.com/YOUR-ORG/docflow-template/main/docflow-install.sh | bash
+curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash
 
-# Or download and inspect first
-curl -sSL https://raw.githubusercontent.com/YOUR-ORG/docflow-template/main/docflow-install.sh > docflow-install.sh
+# Or download and inspect first (recommended for private repos)
+curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh > docflow-install.sh
 chmod +x docflow-install.sh
 ./docflow-install.sh
 ```
+
+> **Note:** For private repos, authenticate first with `gh auth login` or download the script manually.
 
 **2. Complete Setup**
 ```bash

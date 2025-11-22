@@ -41,15 +41,17 @@ Working with AI assistants without structure leads to:
 
 **One-line installation:**
 ```bash
-curl -sSL https://raw.githubusercontent.com/YOUR-ORG/docflow-template/main/docflow-install.sh | bash
+curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash
 ```
 
 **Or download and inspect first:**
 ```bash
-curl -sSL https://raw.githubusercontent.com/YOUR-ORG/docflow-template/main/docflow-install.sh > docflow-install.sh
+curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh > docflow-install.sh
 chmod +x docflow-install.sh
 ./docflow-install.sh
 ```
+
+> **Note:** For private repos, you'll need GitHub authentication. If the one-line install fails, download the script first (method 2) or authenticate with `gh auth login`.
 
 **What it does:**
 - ✅ Detects your project type (new, existing code, or existing DocFlow)
