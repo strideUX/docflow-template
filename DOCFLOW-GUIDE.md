@@ -90,7 +90,7 @@ DocFlow uses a **three-agent orchestration model** for efficient, focused work:
 
 ## Commands Reference
 
-### PM/Planning Agent Commands (7)
+### PM/Planning Agent Commands (6)
 
 #### `/start-session` - Begin Planning Session
 **Purpose:** Check current state and identify priorities
@@ -239,46 +239,37 @@ DocFlow uses a **three-agent orchestration model** for efficient, focused work:
 
 ---
 
-### System Setup Commands (3)
+### System Setup Command (1)
 
-#### `/docflow-new` - Set Up New Project
-**Purpose:** Initialize DocFlow in empty project
+#### `/docflow-setup` - Universal Setup
+**Purpose:** Intelligently handle all DocFlow setup scenarios
 
-**What it does:**
-- Conversational setup (~10-15 min)
-- Fills context files from your vision
-- Creates initial backlog
-- Generates project-scaffolding spec (custom to your stack)
-- First task: Framework setup + git init
+**Automatically detects and handles:**
+1. **New Project** - Empty directory
+   - Conversational setup (~10-15 min)
+   - Fills context files from your vision
+   - Creates initial backlog
+   - Generates project-scaffolding spec (custom to your stack)
+   - First task: Framework setup + git init
 
-**When to use:** Brand new project, starting from scratch
+2. **Retrofit Existing** - Code exists, no DocFlow
+   - Analyzes existing code (~5-10 min)
+   - Documents current features
+   - Fills context files from detected stack
+   - Sets up DocFlow for ongoing work
 
-#### `/docflow-scan` - Analyze Project
-**Purpose:** Review codebase and suggest documentation gaps (read-only)
+3. **Upgrade DocFlow** - Existing DocFlow found
+   - Migrates to version 2.1 (~15-30 min)
+   - Updates spec formats (removes time, adds complexity)
+   - Preserves all content and active work
+   - Archives old structure (shared/, reference/)
+   - Organizes knowledge base
 
-**What it does:**
-- Analyzes existing code (~5-10 min)
-- Identifies documentation gaps
-- Suggests capture opportunities
-- Provides health score (if DocFlow exists)
-- Detects DocFlow version or other systems
-- **Makes no file changes** - only analyzes and recommends
-
-**When to use:** Anytime for health checks, gap analysis, or before upgrading
-
-#### `/docflow-upgrade` - Install or Upgrade DocFlow
-**Purpose:** Set up, migrate, or repair DocFlow (write operations)
-
-**What it does:**
-- Installs DocFlow 2.1 (if new)
-- Upgrades from DocFlow 1.x → 2.1
-- Migrates from other spec systems
-- Repairs broken DocFlow installations
-- Fills context files from detected stack
-- Documents existing features as completed specs
-- **Always asks before making changes**
-
-**When to use:** First-time setup, version upgrades, migrations, repairs
+**When to use:** 
+- Run once after `docflow-install.sh`
+- Agent automatically chooses the right flow based on detection
+- Always safe - preserves existing content
+- Always asks before making changes (for upgrades)
 
 ---
 
@@ -630,22 +621,17 @@ BACKLOG → ACTIVE → COMPLETE
 
 ---
 
-### System Setup (3 Commands)
+### System Setup (1 Command)
 
-#### /docflow-new
-**Purpose:** Set up brand new project  
-**Use once:** Per new project  
-**Duration:** ~10-15 min conversation  
+#### /docflow-setup
+**Purpose:** Universal setup - handles all scenarios  
+**Use once:** After running `docflow-install.sh`  
+**Auto-detects:**
+- New project (~10-15 min conversation)
+- Existing code (~5-10 min analysis)
+- Upgrade DocFlow (~15-30 min migration)
 
-#### /docflow-scan
-**Purpose:** Analyze project and suggest documentation gaps (read-only)  
-**Use anytime:** Health checks, gap analysis  
-**Duration:** ~5-10 min analysis  
-
-#### /docflow-upgrade
-**Purpose:** Install, upgrade, or migrate DocFlow (write operations)  
-**Use once:** Per project or version upgrade  
-**Duration:** ~15-30 min setup/migration  
+**Natural language:** "set up DocFlow", "initialize", "complete setup"  
 
 ---
 
@@ -804,52 +790,52 @@ docflow/knowledge/
 
 ## Setup Instructions
 
-### For a New Project
+### Installation (All Projects)
 
-**1. Copy Template**
+**1. Run Install Script**
 ```bash
-cp -r /path/to/docflow-template/template/* /path/to/your-project/
+# One-line installation
+curl -sSL https://raw.githubusercontent.com/YOUR-ORG/docflow-template/main/docflow-install.sh | bash
+
+# Or download and inspect first
+curl -sSL https://raw.githubusercontent.com/YOUR-ORG/docflow-template/main/docflow-install.sh > docflow-install.sh
+chmod +x docflow-install.sh
+./docflow-install.sh
 ```
 
-**2. Initialize DocFlow**
+**2. Complete Setup**
 ```bash
 # In your AI tool (Cursor, Claude, etc.)
-/docflow-new
+/docflow-setup
 ```
 
-**3. Follow Agent Conversation**
-- Describe your project vision
-- Choose or confirm tech stack
+**3. Agent Auto-Detects Scenario:**
+
+**New Project:**
+- Conversational setup (~10-15 min)
+- Describe project vision
+- Choose tech stack
 - Create initial backlog
-- Agent generates project-scaffolding spec
+- Generate project-scaffolding spec
 
-**4. Start Building**
+**Existing Code:**
+- Analyze codebase (~5-10 min)
+- Ask clarifying questions
+- Fill context files from detected stack
+- Document existing features
+
+**Existing DocFlow:**
+- Migrate to 2.1 (~15-30 min)
+- Update spec formats
+- Preserve all content
+- Organize knowledge base
+
+**4. Start Working**
 ```bash
+# New projects
 /implement project-scaffolding
-```
 
-### For an Existing Project
-
-**1. Copy Template**
-```bash
-cp -r /path/to/docflow-template/template/* /path/to/your-project/
-```
-
-**2. Analyze & Setup**
-```bash
-# In your AI tool
-/docflow-scan
-```
-
-**3. Follow Agent Analysis**
-- Agent analyzes your code
-- Asks clarifying questions
-- Fills context files from detected stack
-- Documents existing features
-- Migrates old specs if they exist
-
-**4. Start Using**
-```bash
+# Existing projects
 /start-session
 ```
 

@@ -37,54 +37,59 @@ Working with AI assistants without structure leads to:
 
 ## Quick Start
 
-### 1. Copy Template to Your Project
+### 1. Install DocFlow
 
+**One-line installation:**
 ```bash
-# Copy the template folder to your project root
-cp -r /path/to/docflow-template/template/* /path/to/your-project/
-
-# This copies:
-# - .cursor/ (rules and commands)
-# - .claude/ (Claude Desktop adapter)
-# - .github/ (GitHub Copilot adapter)
-# - docflow/ (complete folder structure)
-# - AGENTS.md (universal AI instructions)
+curl -sSL https://raw.githubusercontent.com/YOUR-ORG/docflow-template/main/docflow-install.sh | bash
 ```
 
-### 2. Initialize DocFlow
-
-**For a brand new project:**
+**Or download and inspect first:**
 ```bash
-# In your AI tool (Cursor, Claude Desktop, etc.)
-/docflow-new
+curl -sSL https://raw.githubusercontent.com/YOUR-ORG/docflow-template/main/docflow-install.sh > docflow-install.sh
+chmod +x docflow-install.sh
+./docflow-install.sh
 ```
-**Agent conversation (~10-15 min):**
-- Describe your project vision
-- Choose or confirm tech stack
-- Create initial backlog
-- Generate custom project-scaffolding spec
 
-**For an existing project:**
-```bash
-/docflow-scan
-```
-**Agent analysis (~5-10 min):**
-- Analyzes your existing code
-- Identifies documentation gaps
-- Suggests capture opportunities
-- Provides health score (if DocFlow exists)
-- Recommends next action
+**What it does:**
+- ✅ Detects your project type (new, existing code, or existing DocFlow)
+- ✅ Installs all system files (.cursor, .claude, .github, AGENTS.md)
+- ✅ Creates complete docflow/ structure
+- ✅ Preserves any existing content (safe for upgrades)
 
-**Then install/upgrade:**
+**Installs:**
+- `.cursor/` - Rules and 11 commands
+- `.claude/` - Claude Desktop adapter
+- `.github/` - GitHub Copilot adapter
+- `AGENTS.md` - Universal AI instructions
+- `docflow/` - Complete workflow structure
+
+### 2. Complete Setup
+
+**In your AI tool (Cursor, Claude Desktop, etc.):**
 ```bash
-/docflow-upgrade
+/docflow-setup
 ```
-**Agent setup (~15-30 min):**
-- Installs DocFlow 2.1 (if new)
-- Upgrades from 1.x → 2.1 (if old version)
-- Migrates from other systems
-- Fills context files from detected stack
-- Documents existing features
+
+**Automatically handles all scenarios:**
+
+**New Project** (~10-15 min):
+- Agent asks about your project vision
+- Creates context files from conversation
+- Builds initial backlog
+- Generates custom project-scaffolding spec
+
+**Existing Project** (~5-10 min):
+- Agent analyzes your existing code
+- Documents current features
+- Fills context files from stack
+- Sets up DocFlow for ongoing work
+
+**Upgrade DocFlow** (~15-30 min):
+- Migrates to version 2.1
+- Updates spec formats
+- Preserves all content
+- Organizes knowledge base
 
 ### 3. Start Working
 
@@ -115,7 +120,7 @@ Agent shows current state and helps you pick what to work on.
 
 ---
 
-## Commands (13 Total)
+## Commands (11 Total)
 
 ### Daily Workflow
 
@@ -138,9 +143,7 @@ Agent shows current state and helps you pick what to work on.
 - `/status` - Check current state
 
 ### System Setup (Once Per Project)
-- `/docflow-new` - New project setup
-- `/docflow-scan` - Analyze project & suggest gaps (read-only)
-- `/docflow-upgrade` - Install or upgrade DocFlow
+- `/docflow-setup` - Universal setup (new, retrofit, or upgrade)
 
 **Natural language works too!** Say "let's start", "build this", "test it" - agents understand.
 
@@ -164,7 +167,7 @@ Agent shows current state and helps you pick what to work on.
 ### Core System (`template/` folder)
 ```
 template/
-├── .cursor/              # Cursor rules and 13 commands
+├── .cursor/              # Cursor rules and 11 commands
 ├── .claude/              # Claude Desktop adapter
 ├── .github/              # GitHub Copilot adapter
 ├── AGENTS.md             # Universal AI instructions
@@ -280,7 +283,7 @@ your-project/
 
 **Lightweight:**
 - 4 spec types
-- 13 commands
+- 11 commands
 - ~6,350 lines total system
 
 **Efficient:**
@@ -311,7 +314,7 @@ your-project/
 ### Complete Reference
 - **[DOCFLOW-GUIDE.md](DOCFLOW-GUIDE.md)** - Comprehensive guide
   - Three-agent model details
-  - All 13 commands with examples
+  - All 11 commands with examples
   - All 4 templates explained
   - Workflow states and transitions
   - Knowledge base usage
@@ -319,7 +322,7 @@ your-project/
 
 ### Source Files
 - **`template/.cursor/rules/docflow.mdc`** - Complete workflow rules (648 lines)
-- **`template/.cursor/commands/`** - 12 command implementation files
+- **`template/.cursor/commands/`** - 11 command implementation files
 - **`template/docflow/specs/templates/`** - 4 spec templates with instructions
 
 ### Platform Adapters
@@ -344,8 +347,8 @@ your-project/
 
 ## Next Steps
 
-1. **Copy `template/` to your project**
-2. **Run `/docflow-new` or `/docflow-scan`**
+1. **Run `docflow-install.sh` in your project**
+2. **Complete setup with `/docflow-setup`**
 3. **Start working with `/start-session`**
 4. **Read [DOCFLOW-GUIDE.md](DOCFLOW-GUIDE.md) for deep dive**
 
@@ -363,4 +366,4 @@ your-project/
 
 **Ready to build better software with AI assistance?**
 
-Copy `template/` to your project and let DocFlow guide you through structured, efficient development.
+Install DocFlow with one command and let it guide you through structured, efficient development.
