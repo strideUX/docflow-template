@@ -21,6 +21,9 @@
 **What Changes:**
 - **Agent Framework:** Mastra agents (not custom AI SDK routes)
 - **Orchestration:** Mastra graph-based workflows (not custom state machine)
+- **Task Backend:** Provider abstraction (supports Convex, Jira, Asana, Linear, custom)
+- **Frontend:** Minimal admin UI for agent visibility and control
+- **Notifications:** Webhook-based alerts to Slack, Discord, Teams
 - **Deployment:** Same Vercel infrastructure (no new platform)
 - **Cost:** Same (~$30-100/mo for Vercel + Convex + E2B + LLM calls)
 
@@ -30,13 +33,14 @@
 - ✅ Three-agent model (PM → Implementation → QE)
 - ✅ Local-first philosophy (git-versioned knowledge)
 
-**New Strategic Capability:**
+**New Strategic Capabilities:**
 - 🎯 **Multi-Provider Support** - Works with Convex, Jira, Asana, Linear, or custom task systems
 - 🎯 **TaskProvider abstraction** - Workflows are backend-agnostic
 - 🎯 **Per-project configuration** - Each project chooses its task system
 - 🎯 **Future-proof** - Easy to add new providers without touching workflow code
+- 🔔 **Webhook Notifications** - Essential alerts to Slack, Discord, Teams for async workflows
 
-**Next Step:** Phase 0 validation (1 week) to prove Mastra workflow execution + provider pattern
+**Next Step:** Phase 0 validation (1 week) to prove Mastra workflow execution + provider pattern + notifications
 
 ---
 
@@ -693,6 +697,1409 @@ export const getProviderConfigTool = {
 - Based on customer demand
 - Provider pattern makes this easy
 - Each provider ~200 lines of code
+
+---
+
+## Notifications & Alerts Strategy
+
+### Strategic Decision: Simple Webhooks in MVP
+
+**Goal:** Enable async agent workflows without constant dashboard monitoring, while keeping implementation minimal.
+
+**Why Notifications Are Critical:**
+
+1. **Async Cloud Agents** - You assign a task and walk away; need to know when it's done
+2. **Human-in-the-Loop** - Agents need to notify humans when review/input required
+3. **Error Visibility** - Failed agents must alert immediately, not silently fail
+4. **Developer Experience** - "Your PR is ready for review" beats "check the dashboard every 5 minutes"
+
+### MVP Approach: Webhook-Based Notifications
+
+**Simple, powerful, no new infrastructure:**
+
+```typescript
+// .docflow/config.json (per-project configuration)
+{
+  "version": "2.1",
+  "provider": { ... },
+  "notifications": {
+    "webhook": "${SLACK_WEBHOOK_URL}",  // or Discord, Teams, custom endpoint
+    "enabled": true,
+    "events": [
+      "task.ready_for_review",
+      "task.completed",
+      "task.failed",
+      "workflow.human_input_needed",
+      "task.stuck"
+    ]
+  }
+}
+```
+
+**Supported Platforms:**
+- ✅ Slack (incoming webhooks)
+- ✅ Discord (webhooks)
+- ✅ Microsoft Teams (webhooks)
+- ✅ Custom HTTP endpoints
+- ✅ Any service that accepts webhook JSON
+
+### Implementation
+
+**Notification Tool:**
+
+```typescript
+// mastra/tools/notifications.ts
+
+import { createTool } from '@mastra/core';
+import { z } from 'zod';
+
+export const sendNotificationTool = createTool({
+  id: 'send-notification',
+  description: 'Send notification via webhook (Slack, Discord, Teams, custom)',
+  inputSchema: z.object({
+    message: z.string(),
+    event: z.enum([
+      'task.ready_for_review',
+      'task.completed',
+      'task.failed',
+      'workflow.human_input_needed',
+      'task.stuck'
+    ]),
+    metadata: z.object({
+      taskId: z.string(),
+      taskTitle: z.string(),
+      taskUrl: z.string().optional(),
+      prUrl: z.string().optional(),
+      errorMessage: z.string().optional()
+    })
+  }),
+  
+  execute: async ({ input, context }) => {
+    const config = await getProjectConfig(context.projectId);
+    
+    if (!config.notifications?.enabled || !config.notifications?.webhook) {
+      return { sent: false, reason: 'Notifications not configured' };
+    }
+    
+    // Check if this event type is enabled
+    if (!config.notifications.events.includes(input.event)) {
+      return { sent: false, reason: 'Event type not enabled' };
+    }
+    
+    // Format message for Slack/Discord/Teams
+    const payload = formatWebhookPayload(input);
+    
+    await fetch(config.notifications.webhook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    return { sent: true, timestamp: new Date().toISOString() };
+  }
+});
+
+function formatWebhookPayload(input: any) {
+  // Slack-compatible format (also works with Discord, Teams with minor differences)
+  const emoji = {
+    'task.ready_for_review': '👀',
+    'task.completed': '✅',
+    'task.failed': '❌',
+    'workflow.human_input_needed': '🤚',
+    'task.stuck': '⏱️'
+  }[input.event] || '📋';
+  
+  return {
+    text: `${emoji} ${input.message}`,
+    blocks: [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `${emoji} ${input.message}`
+        }
+      },
+      {
+        type: 'context',
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: [
+              `Task: <${input.metadata.taskUrl}|${input.metadata.taskTitle}>`,
+              input.metadata.prUrl ? `PR: <${input.metadata.prUrl}|View Pull Request>` : null,
+              input.metadata.errorMessage ? `Error: \`${input.metadata.errorMessage}\`` : null
+            ].filter(Boolean).join(' • ')
+          }
+        ]
+      }
+    ]
+  };
+}
+```
+
+**Integration in Workflows:**
+
+```typescript
+// mastra/workflows/docflow.ts
+
+export const docflowWorkflow = new Workflow({
+  name: 'docflow-task-lifecycle',
+  
+  execute: async ({ trigger, step }) => {
+    const { taskId, action, projectId } = trigger;
+    const provider = await getTaskProvider(projectId);
+    const task = await provider.getTask(taskId);
+    
+    if (action === 'implement') {
+      try {
+        // Update status
+        await provider.transitionStatus(taskId, 'IMPLEMENTING');
+        
+        // Run implementation agent
+        const implementation = await step.agent('implementation', {
+          agent: implementationAgent,
+          input: buildAgentPrompt(task)
+        });
+        
+        // Update task with results
+        await provider.updateTask(taskId, {
+          status: 'REVIEW',
+          implementationNotes: implementation.text
+        });
+        
+        // ✅ Notify: Ready for review
+        await step.run('notify-review-ready', async () => {
+          await sendNotificationTool.execute({
+            input: {
+              message: `*Implementation Complete:* ${task.title}`,
+              event: 'task.ready_for_review',
+              metadata: {
+                taskId: task.id,
+                taskTitle: task.title,
+                taskUrl: task.metadata.externalUrl,
+                prUrl: implementation.toolResults?.createPR?.url
+              }
+            },
+            context: { projectId }
+          });
+        });
+        
+        return { success: true, prUrl: implementation.toolResults?.createPR?.url };
+        
+      } catch (error) {
+        // ❌ Notify: Task failed
+        await step.run('notify-failure', async () => {
+          await sendNotificationTool.execute({
+            input: {
+              message: `*Task Failed:* ${task.title}`,
+              event: 'task.failed',
+              metadata: {
+                taskId: task.id,
+                taskTitle: task.title,
+                taskUrl: task.metadata.externalUrl,
+                errorMessage: error.message
+              }
+            },
+            context: { projectId }
+          });
+        });
+        
+        throw error;
+      }
+    }
+    
+    // Human input needed
+    if (action === 'refine' && needsUserInput) {
+      await step.run('notify-input-needed', async () => {
+        await sendNotificationTool.execute({
+          input: {
+            message: `*User Input Needed:* ${task.title}\n${agent.question}`,
+            event: 'workflow.human_input_needed',
+            metadata: {
+              taskId: task.id,
+              taskTitle: task.title,
+              taskUrl: task.metadata.externalUrl
+            }
+          },
+          context: { projectId }
+        });
+      });
+    }
+  }
+});
+```
+
+### Notification Events
+
+**MVP Event Types:**
+
+| Event | When Triggered | Example Message |
+|-------|----------------|-----------------|
+| `task.ready_for_review` | Implementation agent completes | "✅ Implementation Complete: User Dashboard\nPR: [link]" |
+| `task.completed` | QE agent approves, task moves to COMPLETE | "🎉 Task Completed: User Dashboard" |
+| `task.failed` | Agent encounters error | "❌ Task Failed: User Dashboard\nError: timeout exceeded" |
+| `workflow.human_input_needed` | Agent needs clarification | "🤚 User Input Needed: User Dashboard\nQuestion: Should we use REST or GraphQL?" |
+| `task.stuck` | Task in same state > threshold | "⏱️ Task Stuck: User Dashboard\nStuck in IMPLEMENTING for 4 hours" |
+
+### Configuration Examples
+
+**Slack:**
+
+```typescript
+// .docflow/config.json
+{
+  "notifications": {
+    "webhook": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX",
+    "enabled": true,
+    "events": ["task.ready_for_review", "task.failed", "workflow.human_input_needed"]
+  }
+}
+```
+
+**Discord:**
+
+```typescript
+{
+  "notifications": {
+    "webhook": "https://discord.com/api/webhooks/123456789/abcdefghijk",
+    "enabled": true,
+    "events": ["task.ready_for_review", "task.completed", "task.failed"]
+  }
+}
+```
+
+**Custom Endpoint:**
+
+```typescript
+{
+  "notifications": {
+    "webhook": "https://api.mycompany.com/docflow/notifications",
+    "enabled": true,
+    "events": ["task.ready_for_review", "task.failed"]
+  }
+}
+```
+
+### Why Webhooks?
+
+**Advantages:**
+- ✅ No additional infrastructure (just HTTP POST)
+- ✅ Works with all major chat platforms
+- ✅ Easy to configure (just paste webhook URL)
+- ✅ No API keys or OAuth flows needed
+- ✅ Per-project configuration (different teams → different channels)
+- ✅ Can build custom receivers easily
+- ✅ No rate limits for basic usage
+
+**Limitations (acceptable for MVP):**
+- ❌ One-way only (no bidirectional)
+- ❌ No rich formatting control (basic markdown)
+- ❌ No @mentions (can hardcode in message)
+- ❌ Single webhook per project (can't route different alerts differently)
+
+### Future Enhancements (Post-MVP)
+
+**Phase 2 (V1):**
+```typescript
+// Multiple channels, message templates
+{
+  "notifications": {
+    "channels": [
+      {
+        "name": "team-alerts",
+        "webhook": "...",
+        "events": ["task.ready_for_review", "task.completed"]
+      },
+      {
+        "name": "errors",
+        "webhook": "...",
+        "events": ["task.failed", "task.stuck"]
+      }
+    ],
+    "messageTemplates": {
+      "task.ready_for_review": "{{emoji}} {{task.title}} is ready!\nReviewer: {{assignedTo}}\nPR: {{prUrl}}"
+    }
+  }
+}
+```
+
+**Phase 3 (V2):**
+- Native Slack app (bidirectional communication)
+- Slash commands: `/docflow activate task-123`
+- In-thread conversations with agents
+- Approve/reject from Slack
+- @mention routing
+
+**Phase 4 (Future):**
+- Email notifications (SendGrid, AWS SES)
+- SMS/text (Twilio)
+- Mobile push (via custom app)
+- Phone calls for critical failures
+
+### Benefits vs. Complexity Trade-off
+
+| Aspect | Complexity | Value |
+|--------|-----------|-------|
+| **Implementation** | ~100 lines | ✅ Minimal |
+| **Configuration** | Environment variable | ✅ Simple |
+| **Infrastructure** | None (just webhooks) | ✅ Zero overhead |
+| **Developer Experience** | Immediate, actionable alerts | ✅✅✅ High value |
+| **Async Workflows** | Makes cloud agents usable | ✅✅✅ Critical |
+| **Error Visibility** | Instant failure detection | ✅✅✅ Essential |
+
+**Decision: ✅ INCLUDE IN MVP**
+
+Webhooks are too simple NOT to include, and they're essential for good async agent UX.
+
+---
+
+## Frontend Strategy: Minimal Admin UI
+
+### Strategic Decision: Lightweight Control Panel for MVP
+
+**Goal:** Provide essential visibility and control over cloud agents without building a full task management system.
+
+**Why a UI is Critical:**
+
+1. **Agent Visibility** - Cloud agents run asynchronously; need to see what they're doing
+2. **Debugging** - Must view agent execution logs and workflow traces
+3. **Manual Control** - Trigger workflows manually during testing/development
+4. **Configuration** - Set up projects without editing JSON files
+5. **Developer Experience** - Dashboard beats jumping between Slack, Jira, logs, etc.
+
+### What NOT to Build (Defer to Post-MVP)
+
+**Skip full task management features:**
+- ❌ Create/edit tasks in UI (use existing task system - Jira, Convex, etc.)
+- ❌ Kanban boards or advanced views
+- ❌ Comments and discussions
+- ❌ Rich text editors
+- ❌ File attachments
+- ❌ User management/permissions
+- ❌ Advanced filtering/search
+
+**Rationale:**
+- These features already exist in Jira, Asana, Linear, etc.
+- Not core to proving agent workflows work
+- Would add ~2,000+ lines of code
+- Can build later if there's demand
+
+### MVP UI: Four Essential Screens
+
+```
+app/(dashboard)/
+├── page.tsx                          # 1. Projects Dashboard
+├── projects/[id]/page.tsx            # 2. Task List (per project)
+├── tasks/[taskId]/page.tsx           # 3. Task Detail & Agent Logs
+└── settings/[projectId]/page.tsx     # 4. Project Configuration
+```
+
+### Screen 1: Projects Dashboard
+
+**Purpose:** High-level overview of all projects using DocFlow Cloud
+
+**Features:**
+```typescript
+// app/(dashboard)/page.tsx
+
+interface ProjectDashboardProps {
+  projects: {
+    id: string;
+    name: string;
+    provider: 'convex' | 'jira' | 'asana';
+    stats: {
+      activeCount: number;        // Tasks in IMPLEMENTING, REVIEW
+      queuedCount: number;         // Tasks assigned to cloud agents
+      completedToday: number;
+      failedToday: number;
+    };
+    lastActivity: Date;
+  }[];
+}
+
+// UI Elements:
+- Project cards with stats
+- "Add Project" button
+- Quick filters (show only active, show only with errors)
+- Recent agent activity feed (last 10 actions across all projects)
+```
+
+**Visual Design:**
+```
+┌─────────────────────────────────────────────────────┐
+│ DocFlow Cloud                              [+ Add]  │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  ┌──────────────────┐  ┌──────────────────┐       │
+│  │ Project Alpha    │  │ Project Beta     │       │
+│  │ Provider: Convex │  │ Provider: Jira   │       │
+│  │                  │  │                  │       │
+│  │ 🔄 Active: 3     │  │ 🔄 Active: 1     │       │
+│  │ ⏳ Queued: 2     │  │ ⏳ Queued: 0     │       │
+│  │ ✅ Today: 5      │  │ ✅ Today: 2      │       │
+│  │ ❌ Failed: 0     │  │ ❌ Failed: 1     │       │
+│  └──────────────────┘  └──────────────────┘       │
+│                                                     │
+│  Recent Activity                                   │
+│  ─────────────────────────────────────────────    │
+│  👀 Task "User Dashboard" ready for review        │
+│     Project Alpha • 2 min ago                      │
+│                                                     │
+│  ✅ Task "Login Form" completed                    │
+│     Project Beta • 15 min ago                      │
+└─────────────────────────────────────────────────────┘
+```
+
+### Screen 2: Task List (Per Project)
+
+**Purpose:** View all tasks for a specific project, see agent assignments
+
+**Features:**
+```typescript
+// app/(dashboard)/projects/[id]/page.tsx
+
+interface TaskListProps {
+  project: Project;
+  tasks: {
+    id: string;
+    title: string;
+    status: TaskStatus;
+    type: 'feature' | 'bug' | 'chore' | 'idea';
+    assignedTo: string;          // 'cloud-agent', '@username', 'Unassigned'
+    owner: 'PM' | 'Implementation' | 'QE';
+    updatedAt: Date;
+    externalUrl?: string;        // Link to Jira/Asana/etc.
+    agentStatus?: {
+      state: 'queued' | 'running' | 'completed' | 'failed';
+      startedAt?: Date;
+      progress?: string;
+    };
+  }[];
+}
+
+// UI Elements:
+- Filter by status (BACKLOG, READY, IMPLEMENTING, REVIEW, QE_TESTING, COMPLETE)
+- Filter by assignment (Cloud Agent, Local Dev, Unassigned)
+- Sort by updated date, priority, status
+- Quick action: "Assign to Cloud Agent" button
+- External link icon (view in source system)
+- Agent status indicator (running, queued, etc.)
+```
+
+**Visual Design:**
+```
+┌─────────────────────────────────────────────────────┐
+│ ← Back   Project Alpha (Convex)                    │
+├─────────────────────────────────────────────────────┤
+│ Filter: [All] [Cloud Agent] [Local]  Sort: Updated │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│ ┌─ IMPLEMENTING ──────────────────────────────┐   │
+│ │                                              │   │
+│ │ 🔄 User Dashboard                   [Jira ↗]│   │
+│ │    Assigned: Cloud Agent • PM Agent          │   │
+│ │    Running for 15 min...                     │   │
+│ │    Status: Writing implementation code       │   │
+│ │                                              │   │
+│ └──────────────────────────────────────────────┘   │
+│                                                     │
+│ ┌─ REVIEW ─────────────────────────────────────┐   │
+│ │                                              │   │
+│ │ 👀 Login Form                       [Jira ↗]│   │
+│ │    Assigned: @matt • Implementation Agent    │   │
+│ │    PR: github.com/...                        │   │
+│ │    [View Details]                            │   │
+│ │                                              │   │
+│ └──────────────────────────────────────────────┘   │
+│                                                     │
+│ ┌─ BACKLOG ────────────────────────────────────┐   │
+│ │                                              │   │
+│ │ 📋 Password Reset                   [Jira ↗]│   │
+│ │    Assigned: Unassigned • PM Agent           │   │
+│ │    [Assign to Cloud Agent]                   │   │
+│ │                                              │   │
+│ └──────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────┘
+```
+
+### Screen 3: Task Detail & Agent Logs
+
+**Purpose:** Deep dive into single task, see full agent execution trace
+
+**Features:**
+```typescript
+// app/(dashboard)/tasks/[taskId]/page.tsx
+
+interface TaskDetailProps {
+  task: DocFlowTask;
+  agentExecution?: {
+    workflowId: string;
+    status: 'running' | 'completed' | 'failed';
+    startedAt: Date;
+    completedAt?: Date;
+    steps: {
+      name: string;
+      status: 'pending' | 'running' | 'completed' | 'failed';
+      startedAt?: Date;
+      completedAt?: Date;
+      agent?: 'PM' | 'Implementation' | 'QE';
+      logs?: string[];           // Agent's thought process
+      toolCalls?: {
+        tool: string;
+        input: any;
+        output: any;
+        duration: number;
+      }[];
+      error?: string;
+    }[];
+  };
+}
+
+// UI Elements:
+- Task metadata (title, type, status, acceptance criteria)
+- Link to external system (Jira, Asana, etc.)
+- Link to PR (if created)
+- Agent execution timeline (visual step-by-step)
+- Agent logs (expandable per step)
+- Tool calls made by agent (what tools used, with what params)
+- Manual controls: "Retry Workflow", "Cancel", "Mark Failed"
+- Real-time updates (via Convex subscriptions or polling)
+```
+
+**Visual Design:**
+```
+┌─────────────────────────────────────────────────────┐
+│ ← Back to Project Alpha                            │
+├─────────────────────────────────────────────────────┤
+│ User Dashboard                                      │
+│ Type: Feature • Status: IMPLEMENTING • [View Jira ↗]│
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│ Acceptance Criteria:                               │
+│ ☐ Users can view personal dashboard                │
+│ ☐ Dashboard shows recent activity                  │
+│ ☐ Dashboard is responsive                          │
+│                                                     │
+├─────────────────────────────────────────────────────┤
+│ Agent Execution (Running for 18 min)               │
+│                                                     │
+│ ✅ Step 1: Fetch Task (completed in 2s)            │
+│    └─ Tool: getTask(taskId: "xyz")                 │
+│                                                     │
+│ ✅ Step 2: Update Status to IMPLEMENTING (1s)      │
+│    └─ Tool: transitionStatus("xyz", "IMPLEMENTING")│
+│                                                     │
+│ 🔄 Step 3: Run Implementation Agent (running...)   │
+│    Agent: Implementation                           │
+│    ├─ [+] Agent Logs (15 lines)                    │
+│    │   I'll start by getting project context...    │
+│    │   Retrieved stack.md: Next.js, TypeScript...  │
+│    │   Planning to create dashboard route...       │
+│    │   ...                                          │
+│    │                                                │
+│    └─ Tool Calls:                                  │
+│        • getContext(["stack", "standards"]) - 3s   │
+│        • executeCode("...") - 12s                   │
+│        • createPR({...}) - in progress...          │
+│                                                     │
+│ ⏳ Step 4: Update Status to REVIEW (pending)        │
+│                                                     │
+│ [Cancel Workflow] [View Full Logs]                 │
+└─────────────────────────────────────────────────────┘
+```
+
+### Screen 4: Project Configuration
+
+**Purpose:** Set up provider, webhooks, and credentials for a project
+
+**Features:**
+```typescript
+// app/(dashboard)/settings/[projectId]/page.tsx
+
+interface ProjectSettingsProps {
+  project: Project;
+  config: {
+    provider: {
+      type: 'convex' | 'jira' | 'asana' | 'linear';
+      config: Record<string, string>;
+    };
+    notifications: {
+      enabled: boolean;
+      webhook: string;
+      events: string[];
+    };
+  };
+}
+
+// UI Elements:
+- Provider selection dropdown (Convex, Jira, Asana, etc.)
+- Provider-specific configuration form (dynamic based on provider)
+- Webhook URL input for notifications
+- Event checkboxes (which events to receive)
+- Test webhook button (send test notification)
+- Save/cancel buttons
+- API key management (show/hide sensitive values)
+```
+
+**Visual Design:**
+```
+┌─────────────────────────────────────────────────────┐
+│ ← Back   Project Alpha Settings                    │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│ Task Provider                                       │
+│ ┌─────────────────────────────────────────────┐   │
+│ │ Provider Type: [Convex ▼]                    │   │
+│ │                                              │   │
+│ │ Convex URL:                                  │   │
+│ │ [https://api.convex.dev/xyz              ]   │   │
+│ │                                              │   │
+│ │ API Key:                                     │   │
+│ │ [••••••••••••••••••••]  [Show]              │   │
+│ │                                              │   │
+│ │ [Test Connection]                            │   │
+│ └──────────────────────────────────────────────┘   │
+│                                                     │
+│ Notifications                                       │
+│ ┌─────────────────────────────────────────────┐   │
+│ │ ☑ Enable Notifications                       │   │
+│ │                                              │   │
+│ │ Webhook URL (Slack, Discord, etc.):          │   │
+│ │ [https://hooks.slack.com/services/...    ]   │   │
+│ │                                              │   │
+│ │ Events to Notify:                            │   │
+│ │ ☑ Task ready for review                      │   │
+│ │ ☑ Task completed                             │   │
+│ │ ☑ Task failed                                │   │
+│ │ ☑ Human input needed                         │   │
+│ │ ☐ Task stuck                                 │   │
+│ │                                              │   │
+│ │ [Send Test Notification]                     │   │
+│ └──────────────────────────────────────────────┘   │
+│                                                     │
+│ [Cancel] [Save Changes]                            │
+└─────────────────────────────────────────────────────┘
+```
+
+### Implementation Details
+
+**Tech Stack:**
+- **Framework:** Next.js 15 (already using)
+- **UI Library:** shadcn/ui (or Tailwind + headless UI)
+- **State Management:** React Server Components + Server Actions
+- **Real-time Updates:** Convex subscriptions (if using Convex) or polling
+- **Styling:** Tailwind CSS
+
+**Code Structure:**
+```
+app/
+├── (dashboard)/
+│   ├── layout.tsx                    # Shared layout (nav, sidebar)
+│   ├── page.tsx                      # Projects dashboard
+│   ├── projects/
+│   │   └── [id]/
+│   │       └── page.tsx              # Task list
+│   ├── tasks/
+│   │   └── [taskId]/
+│   │       └── page.tsx              # Task detail & logs
+│   └── settings/
+│       └── [projectId]/
+│           └── page.tsx              # Project configuration
+│
+├── api/
+│   └── mastra/
+│       └── route.ts                  # Mastra agent endpoint
+│
+└── components/
+    ├── project-card.tsx              # Reusable project card
+    ├── task-card.tsx                 # Reusable task card
+    ├── agent-log.tsx                 # Agent execution display
+    ├── status-badge.tsx              # Status indicator
+    └── provider-form.tsx             # Dynamic provider config form
+```
+
+**Data Fetching:**
+```typescript
+// app/(dashboard)/projects/[id]/page.tsx
+
+export default async function ProjectPage({ params }: { params: { id: string } }) {
+  // Fetch from task provider (Convex, Jira, etc.)
+  const provider = await getTaskProvider(params.id);
+  const tasks = await provider.getTasksByProject(params.id);
+  
+  return <TaskList tasks={tasks} />;
+}
+```
+
+**Real-time Updates (Optional for MVP):**
+```typescript
+// For Convex-backed projects, use real-time subscriptions
+'use client';
+
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+
+export function TaskList({ projectId }: { projectId: string }) {
+  const tasks = useQuery(api.tasks.getByProject, { projectId });
+  
+  // Tasks automatically update when agents make changes
+  return <div>{/* render tasks */}</div>;
+}
+```
+
+### Why This Approach?
+
+**Advantages:**
+
+1. **Minimal but Sufficient** (~350 lines vs ~2,000+ for full task management)
+2. **Provider-Agnostic** - UI adapts to whatever task backend is configured
+3. **Essential Features Only** - Focus on agent visibility and control
+4. **Quick to Build** - Simple React components, no complex state management
+5. **Easy to Enhance** - Can add features later based on usage
+
+**What You Get:**
+- ✅ See all projects and their agent activity
+- ✅ View tasks and their current status
+- ✅ See real-time agent execution logs
+- ✅ Manually trigger workflows during development
+- ✅ Configure projects without editing JSON
+- ✅ Debug agent failures with full traces
+
+**What You Don't Build:**
+- ❌ Task creation/editing (use Jira/Convex/etc.)
+- ❌ Advanced task management features
+- ❌ Collaboration tools (comments, @mentions)
+- ❌ Custom views/reports
+- ❌ User management
+
+### Code Estimate
+
+```typescript
+🔨 **Frontend UI** (~350 lines)
+
+Components:
+- app/(dashboard)/layout.tsx              (~40 lines)  # Shared layout
+- app/(dashboard)/page.tsx                (~60 lines)  # Projects dashboard
+- app/(dashboard)/projects/[id]/page.tsx  (~80 lines)  # Task list
+- app/(dashboard)/tasks/[taskId]/page.tsx (~100 lines) # Task detail & logs
+- app/(dashboard)/settings/[projectId]/page.tsx (~50 lines) # Configuration
+- components/project-card.tsx             (~20 lines)  # Reusable UI
+- components/task-card.tsx                (~30 lines)
+- components/agent-log.tsx                (~40 lines)  # Agent execution display
+- components/status-badge.tsx             (~10 lines)
+- components/provider-form.tsx            (~50 lines)  # Dynamic config form
+
+Total: ~480 lines (rounded to ~350-400 for conservative estimate)
+```
+
+### Future Enhancements (Post-MVP)
+
+**Phase 2 (V1):**
+- Kanban board view
+- Advanced filtering and search
+- Agent performance metrics/charts
+- Cost tracking dashboard
+- Bulk operations (assign multiple tasks to cloud agent)
+
+**Phase 3 (V2):**
+- Task creation/editing in UI (in addition to external systems)
+- Comments and discussions
+- File attachments
+- Team collaboration features
+- Custom workflows/templates
+
+**Phase 4 (Future):**
+- Full task management system (compete with Jira/Asana)
+- Mobile app
+- Advanced reporting and analytics
+- Workflow builder (visual editor)
+
+### Integration with Provider Abstraction
+
+**The UI is provider-aware:**
+
+```typescript
+// Dynamic rendering based on configured provider
+function TaskCard({ task }: { task: DocFlowTask }) {
+  const providerInfo = task.metadata.provider;
+  
+  return (
+    <div>
+      <h3>{task.title}</h3>
+      {/* Show external link if available */}
+      {task.metadata.externalUrl && (
+        <a href={task.metadata.externalUrl} target="_blank">
+          View in {providerInfo.displayName} ↗
+        </a>
+      )}
+      {/* Provider-specific badges */}
+      {providerInfo.name === 'jira' && <JiraBadge issueKey={task.id} />}
+    </div>
+  );
+}
+```
+
+**Benefits:**
+- Same UI works with Convex, Jira, Asana, etc.
+- Shows links back to source system
+- Provider-specific features can be added incrementally
+
+---
+
+## Project Identity & Connection Model
+
+### Critical Question: How Does Everything Connect?
+
+**The Anchors:**
+1. **Project Identity:** Git repository + generated project ID
+2. **Local → Cloud:** MCP Server (running on developer machine)
+3. **Browser → Cloud:** Admin UI (web application)
+
+### Project Identity: Git as Foundation
+
+**Git repository is the primary anchor, enhanced with a generated ID:**
+
+```typescript
+// .docflow/config.json (committed to git)
+{
+  "projectId": "proj_abc123",                      // Unique ID (generated on init)
+  "gitRepo": "github.com/mycompany/myproject",     // Git repository URL
+  "name": "My Project",
+  "cloudUrl": "https://docflow.yourapp.com",
+  "apiKey": "${DOCFLOW_API_KEY}",                  // Reference to env var
+  "provider": {
+    "type": "convex",
+    "config": {
+      "url": "${CONVEX_URL}",
+      "apiKey": "${CONVEX_API_KEY}"
+    }
+  },
+  "notifications": {
+    "webhook": "${SLACK_WEBHOOK_URL}",
+    "events": ["task.ready_for_review", "task.failed"]
+  }
+}
+```
+
+**Why this approach:**
+- ✅ **Git repo URL** - Human-readable, meaningful, shared across team
+- ✅ **Project ID** - Unique identifier, survives repo renames, supports monorepos
+- ✅ **Config in git** - Team shares same configuration
+- ✅ **Secrets in env** - API keys not committed, each dev has their own
+
+### Connection Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│          Local Developer Machine                        │
+│                                                          │
+│  ┌────────────────┐                                     │
+│  │ Cursor / AI    │                                     │
+│  └────────┬───────┘                                     │
+│           ↓ MCP Protocol (localhost)                    │
+│  ┌────────────────────────────────┐                     │
+│  │ MCP Server (Node.js daemon)    │                     │
+│  │ - Reads .docflow/config.json   │                     │
+│  │ - Uses API key from .env.local │                     │
+│  │ - Port: 3000                   │                     │
+│  └────────┬───────────────────────┘                     │
+│           │                                              │
+│  ┌────────────────────────────────┐                     │
+│  │ Git Repository                 │                     │
+│  │ .docflow/config.json           │ (committed)         │
+│  │ .docflow/.sync/                │ (git-ignored cache) │
+│  └────────────────────────────────┘                     │
+└───────────┬──────────────────────────────────────────────┘
+            │
+            │ HTTPS + API Key
+            │ (Internet)
+            ↓
+┌─────────────────────────────────────────────────────────┐
+│          DocFlow Cloud (Vercel)                         │
+│                                                          │
+│  ┌────────────────────────────────┐                     │
+│  │ Next.js App                    │                     │
+│  │ - Admin UI (browser access)    │                     │
+│  │ - API routes                   │                     │
+│  │ - Mastra agents                │                     │
+│  └────────┬───────────────────────┘                     │
+│           ↓                                              │
+│  ┌────────────────────────────────┐                     │
+│  │ Convex Database                │                     │
+│  │ - projects table               │                     │
+│  │ - agent execution queue        │                     │
+│  └────────┬───────────────────────┘                     │
+│           ↓                                              │
+│  ┌────────────────────────────────┐                     │
+│  │ Task Provider                  │                     │
+│  │ (Convex / Jira / Asana / etc.) │                     │
+│  └────────────────────────────────┘                     │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Initial Setup Flow
+
+**Step 1: Developer Initializes Project**
+
+```bash
+# In local git repository
+cd /path/to/myproject
+
+# Initialize DocFlow
+npx @docflow/cli init
+
+# Interactive prompts:
+? DocFlow Cloud URL: https://docflow.yourapp.com
+? Email: matt@example.com
+? Password: ••••••••
+
+✓ Connected to DocFlow Cloud
+✓ Detected git repo: github.com/mycompany/myproject
+✓ Created project: proj_abc123
+✓ Generated API key
+
+? Task provider: [Convex / Jira / Asana / Linear]
+? Provider URL: https://api.convex.dev/xyz
+? Notification webhook: https://hooks.slack.com/...
+
+✓ Configuration saved to .docflow/config.json
+✓ API key saved to .env.local
+✓ Added .docflow/.sync/ to .gitignore
+
+Next steps:
+  1. Commit .docflow/config.json to git
+  2. Share .env.local template with team (without actual keys)
+  3. Start MCP server: npx @docflow/mcp-server start
+```
+
+**What gets created:**
+
+```typescript
+// Local files:
+myproject/
+├── .docflow/
+│   ├── config.json          // ✅ Committed
+│   └── .sync/               // ❌ Git-ignored (local cache)
+│       └── tasks.db
+├── .env.local               // ❌ Git-ignored (secrets)
+│   ├── DOCFLOW_API_KEY=docflow_key_abc123
+│   ├── CONVEX_API_KEY=...
+│   └── SLACK_WEBHOOK_URL=...
+├── .env.example             // ✅ Committed (template)
+│   ├── DOCFLOW_API_KEY=
+│   ├── CONVEX_API_KEY=
+│   └── SLACK_WEBHOOK_URL=
+└── .gitignore
+    ├── .docflow/.sync/
+    └── .env.local
+
+// Cloud database (Convex):
+projects: {
+  _id: "proj_abc123",
+  gitRepo: "github.com/mycompany/myproject",
+  name: "My Project",
+  ownerId: "user_matt",
+  teamMemberIds: ["user_matt"],
+  apiKeys: [
+    {
+      name: "Default",
+      keyHash: hash("docflow_key_abc123"),  // Hashed, never stored plaintext
+      createdAt: 1700000000,
+      lastUsed: null
+    }
+  ],
+  provider: {
+    type: "convex",
+    config: { /* encrypted */ }
+  },
+  notifications: { /* ... */ },
+  createdAt: 1700000000
+}
+```
+
+### How MCP Server Connects
+
+**Startup sequence:**
+
+```typescript
+// @docflow/mcp-server/src/server.ts
+
+async function start() {
+  console.log('🚀 Starting DocFlow MCP Server...');
+  
+  // 1. Find project root (search up directory tree for .docflow/)
+  const projectRoot = await findProjectRoot(process.cwd());
+  console.log(`📁 Project root: ${projectRoot}`);
+  
+  // 2. Load configuration
+  const configPath = path.join(projectRoot, '.docflow/config.json');
+  const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+  console.log(`🔧 Loaded config for project: ${config.projectId}`);
+  
+  // 3. Load API key from environment
+  require('dotenv').config({ path: path.join(projectRoot, '.env.local') });
+  const apiKey = process.env.DOCFLOW_API_KEY;
+  
+  if (!apiKey) {
+    throw new Error('DOCFLOW_API_KEY not found in .env.local');
+  }
+  
+  // 4. Initialize cloud client
+  const cloudClient = new DocFlowCloudClient({
+    url: config.cloudUrl,
+    apiKey: apiKey,
+    projectId: config.projectId
+  });
+  
+  // 5. Test connection
+  const projectInfo = await cloudClient.getProject();
+  console.log(`✓ Connected to cloud: ${projectInfo.name}`);
+  
+  // 6. Initialize task provider
+  const provider = await cloudClient.getTaskProvider();
+  console.log(`✓ Task provider: ${provider.getProviderInfo().displayName}`);
+  
+  // 7. Start MCP server
+  const server = new MCPServer({
+    port: 3000,
+    tools: createTools(cloudClient, provider, projectRoot)
+  });
+  
+  await server.listen();
+  console.log('✓ MCP server running on http://localhost:3000');
+  console.log('✓ Ready for Cursor/AI tool connections');
+}
+```
+
+**Example request from MCP server to cloud:**
+
+```typescript
+// MCP tool: docflow_create_task
+
+async function createTask(params: { title: string; type: string }) {
+  // MCP server makes authenticated request to cloud
+  const response = await fetch(`${cloudUrl}/api/tasks/create`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'X-Project-ID': projectId,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(params)
+  });
+  
+  return await response.json();
+}
+```
+
+**Cloud validates and routes:**
+
+```typescript
+// app/api/tasks/create/route.ts
+
+export async function POST(req: Request) {
+  // 1. Extract credentials
+  const authHeader = req.headers.get('Authorization');
+  const apiKey = authHeader?.replace('Bearer ', '');
+  const projectId = req.headers.get('X-Project-ID');
+  
+  if (!apiKey || !projectId) {
+    return Response.json({ error: 'Missing credentials' }, { status: 401 });
+  }
+  
+  // 2. Validate API key belongs to this project
+  const project = await convex.query(api.projects.getByApiKey, { 
+    keyHash: hash(apiKey) 
+  });
+  
+  if (!project || project._id !== projectId) {
+    return Response.json({ error: 'Invalid credentials' }, { status: 401 });
+  }
+  
+  // 3. Get project's configured provider
+  const provider = TaskProviderFactory.create(project.provider);
+  
+  // 4. Create task in provider (Convex, Jira, etc.)
+  const task = await provider.createTask({
+    ...await req.json(),
+    metadata: {
+      projectId,
+      ...
+    }
+  });
+  
+  return Response.json(task);
+}
+```
+
+### Team Collaboration Model
+
+**Developer A (original developer):**
+```bash
+# Already set up
+git push origin main  # .docflow/config.json is committed
+```
+
+**Developer B (joins team):**
+```bash
+# 1. Clone repository
+git clone github.com/mycompany/myproject
+cd myproject
+
+# 2. Config already present (from git)
+cat .docflow/config.json
+# { "projectId": "proj_abc123", ... }
+
+# 3. Get API key (from team or regenerate)
+# Option A: Use shared team key
+echo "DOCFLOW_API_KEY=docflow_key_abc123" > .env.local
+
+# Option B: Generate new key via CLI
+npx @docflow/cli login
+npx @docflow/cli key:create --project proj_abc123
+# → Generates new API key for same project
+# → Adds to cloud's apiKeys array
+
+# 4. Start MCP server
+npx @docflow/mcp-server start
+# ✓ Connected to cloud: My Project
+# ✓ Ready!
+```
+
+**Result:** 
+- Both devs connected to **same cloud project** (same `projectId`)
+- Both see **same tasks** (same task provider)
+- Both can trigger **same agents**
+- Different API keys (or shared), both valid for project
+
+### What Gets Committed vs. Not Committed
+
+**✅ Committed to Git (team shares):**
+
+```
+.docflow/config.json
+  - projectId: "proj_abc123"
+  - gitRepo: "github.com/..."
+  - cloudUrl: "https://..."
+  - apiKey: "${DOCFLOW_API_KEY}"     # Reference, not actual key
+  - provider.config.url: "https://..."
+  - provider.config.apiKey: "${CONVEX_API_KEY}"  # Reference
+  - notifications.webhook: "${SLACK_WEBHOOK_URL}"  # Reference
+
+.env.example
+  DOCFLOW_API_KEY=
+  CONVEX_API_KEY=
+  SLACK_WEBHOOK_URL=
+  
+README.md (setup instructions)
+  "Run: npm install && npx @docflow/mcp-server start"
+```
+
+**❌ NOT Committed (developer-specific):**
+
+```
+.env.local
+  DOCFLOW_API_KEY=docflow_key_abc123xyz  # Actual secret
+  CONVEX_API_KEY=...                     # Actual secret
+  SLACK_WEBHOOK_URL=...                  # Actual URL
+  
+.docflow/.sync/
+  tasks.db           # Local SQLite cache
+  recent_activity/   # Temporary data
+```
+
+**How this is enforced:**
+
+```
+# .gitignore (auto-added by docflow init)
+.env.local
+.docflow/.sync/
+```
+
+### Authentication & Security Model
+
+**Three levels of authentication:**
+
+```typescript
+// 1. User Authentication (for web UI)
+interface UserToken {
+  userId: string;
+  email: string;
+  scope: 'user';
+  expiresAt: Date;
+}
+
+// Used for:
+- Logging into admin UI
+- Managing projects (create, delete, configure)
+- Inviting team members
+- Viewing all projects you're member of
+
+// 2. Project API Key (for MCP server)
+interface ProjectApiKey {
+  projectId: string;
+  keyHash: string;        // bcrypt hash of actual key
+  name: string;           // "Default", "CI/CD", etc.
+  scope: 'project';
+  createdAt: Date;
+  lastUsed?: Date;
+}
+
+// Used for:
+- MCP server → Cloud API calls
+- CI/CD pipelines
+- Local development
+- Only accesses specific project
+
+// 3. Provider Credentials (for task backends)
+interface ProviderCredentials {
+  type: 'convex' | 'jira' | 'asana';
+  credentials: {
+    // Encrypted at rest in cloud database
+    apiKey?: string;
+    email?: string;
+    token?: string;
+  };
+}
+
+// Used for:
+- Cloud agents accessing tasks in Jira/Asana/etc.
+- Stored encrypted in cloud
+- Never sent to MCP server
+```
+
+### Project Lifecycle
+
+**Initial Creation:**
+```
+Developer runs: npx @docflow/cli init
+  ↓
+CLI creates project in cloud
+  ↓
+Cloud assigns projectId: "proj_abc123"
+  ↓
+Cloud generates first API key
+  ↓
+CLI saves config locally
+  ↓
+Developer commits config to git
+```
+
+**Team Member Joins:**
+```
+Developer clones repo
+  ↓
+Config already present (projectId: "proj_abc123")
+  ↓
+Developer gets API key (from team or generates new)
+  ↓
+Developer starts MCP server
+  ↓
+MCP server connects using projectId + API key
+  ↓
+Same project, same tasks, same agents
+```
+
+**Project Removal:**
+```
+Owner runs: npx @docflow/cli project:delete
+  ↓
+Cloud marks project as deleted
+  ↓
+All API keys revoked
+  ↓
+MCP server can no longer connect
+  ↓
+Local config remains but is orphaned
+  ↓
+Developer can re-init to create new project
+```
+
+### Key Insight: Hybrid Identity Model
+
+**Project identity is hybrid:**
+```
+Git Repository
+  ↓ (provides context, team sharing, config versioning)
+Generated Project ID
+  ↓ (provides stable identifier, uniqueness, cloud reference)
+Cloud Database
+  ↓ (stores configuration, manages access, routes requests)
+Task Provider
+  ↓ (actual task storage - Convex, Jira, Asana, etc.)
+```
+
+**Not purely Git-based because:**
+- Git repo might be renamed
+- Multiple projects could exist in monorepo
+- Need stable ID for cloud database foreign keys
+- API keys need to map to specific project
+
+**Not purely cloud-based because:**
+- Config travels with code (git)
+- Team shares same configuration
+- Works offline (local MCP cache)
+- No cloud vendor lock-in for config
+
+**Benefits of hybrid:**
+- ✅ Git versioning for configuration
+- ✅ Stable project identity (survives renames)
+- ✅ Team collaboration (share config via git)
+- ✅ Security (secrets not in git)
+- ✅ Flexibility (change providers without cloud migration)
+
+### Connection Flow Example
+
+**Complete flow: Local dev creates task → Cloud agent implements it**
+
+```
+1. Developer in Cursor: "capture feature: user dashboard"
+
+2. Cursor → MCP Server (localhost:3000)
+   Tool: docflow_create_task
+   
+3. MCP Server reads .docflow/config.json
+   projectId: "proj_abc123"
+   cloudUrl: "https://docflow.yourapp.com"
+   
+4. MCP Server → Cloud API
+   POST https://docflow.yourapp.com/api/tasks/create
+   Headers:
+     Authorization: Bearer docflow_key_abc123
+     X-Project-ID: proj_abc123
+   Body:
+     { title: "User dashboard", type: "feature" }
+   
+5. Cloud validates:
+   - API key valid? ✓
+   - Belongs to proj_abc123? ✓
+   - User has access? ✓
+   
+6. Cloud fetches project config:
+   project.provider = { type: 'jira', config: {...} }
+   
+7. Cloud creates JiraTaskProvider
+   
+8. JiraTaskProvider.createTask(...)
+   → Creates issue in Jira
+   
+9. Cloud returns task to MCP server
+   
+10. MCP server returns to Cursor
+    
+11. Cursor shows: "✅ Created task: PROJ-123"
+
+12. Later: Cloud agent picks up task
+    → Workflow triggered
+    → Uses same JiraTaskProvider
+    → Updates same Jira issue
+    → Sends notification to Slack
+```
+
+**All connected via:**
+- Project ID: `proj_abc123`
+- API Key: `docflow_key_abc123`
+- Git Config: `.docflow/config.json`
 
 ---
 
@@ -1373,7 +2780,7 @@ Implement this feature following the project's standards and patterns.
       });
       
       return { 
-        success: true, 
+      success: true,
         prUrl: implementation.toolResults?.createPR?.url,
         taskUrl: task.metadata.externalUrl  // Link back to source system
       };
@@ -1586,22 +2993,35 @@ convex/crons.ts                      (~50 lines)
 Total: ~1,450 lines + ongoing maintenance
 ```
 
-### New Plan (Mastra Self-Hosted)
+### New Plan (Mastra Self-Hosted + Provider Abstraction + Notifications + Admin UI)
 
 ```typescript
 // You will build:
+lib/task-providers/types.ts         (~50 lines)
+lib/task-providers/factory.ts       (~50 lines)
+lib/task-providers/convex-provider.ts (~200 lines)
 mastra/agents/pm.ts                  (~40 lines)
 mastra/agents/implementation.ts      (~50 lines)
 mastra/agents/qe.ts                  (~40 lines)
 mastra/workflows/docflow.ts          (~120 lines)
 mastra/tools/index.ts                (~150 lines)
+mastra/tools/notifications.ts        (~80 lines)
+lib/notifications/formatters.ts      (~20 lines)
+app/(dashboard)/page.tsx             (~60 lines)
+app/(dashboard)/projects/[id]/page.tsx (~80 lines)
+app/(dashboard)/tasks/[taskId]/page.tsx (~100 lines)
+app/(dashboard)/settings/[projectId]/page.tsx (~50 lines)
+components/                          (~110 lines)
 mastra/index.ts                      (~20 lines)
 app/api/mastra/route.ts              (~10 lines)
+app/api/projects/init/route.ts       (~50 lines)  # Project creation API
 convex/agents.ts                     (~100 lines)
 convex/crons.ts                      (~50 lines)
-@docflow/mcp-server/                 (~300 lines)
+convex/projects.ts                   (~50 lines)  # Project identity/auth
+@docflow/cli/                        (~200 lines)  # CLI tool
+@docflow/mcp-server/                 (~400 lines)  # MCP server + cloud client
 ─────────────────────────────────────────────────
-Total: ~880 lines (40% reduction)
+Total: ~1,550-1,700 lines
 
 What you DON'T need to build:
 ❌ Custom state machine (Mastra workflows)
@@ -1609,6 +3029,15 @@ What you DON'T need to build:
 ❌ Custom observability (Mastra built-in)
 ❌ Multi-step reasoning logic (Mastra native)
 ❌ Tool calling infrastructure (Mastra tools)
+❌ Custom notification infrastructure (webhooks)
+❌ Full task management system (use Jira/Asana/etc.)
+
+What you GET:
+✅ Works with any task backend (Convex, Jira, Asana, etc.)
+✅ Webhook notifications to Slack/Discord/Teams
+✅ Minimal admin UI for agent visibility & control
+✅ Future-proof architecture
+✅ Everything needed to operate cloud agents
 ```
 
 ### What You Gain
@@ -1777,7 +3206,43 @@ lib/task-providers/
 
 Skip Convex schema changes, implement appropriate provider instead.
 
-### 3. MCP Server (Local Bridge)
+### 3. CLI Tool (Project Initialization & Management)
+
+**New Package:** `@docflow/cli`
+
+**Responsibilities:**
+- Initialize new projects (create config, register with cloud)
+- Manage API keys (create, revoke, list)
+- Project configuration (provider setup, webhooks)
+- Team management (invite members, manage access)
+
+**Key Commands:**
+```bash
+npx @docflow/cli init          # Initialize project
+npx @docflow/cli login         # Authenticate with cloud
+npx @docflow/cli key:create    # Generate new API key
+npx @docflow/cli key:revoke    # Revoke API key
+npx @docflow/cli config:show   # Display current config
+npx @docflow/cli project:delete # Delete project
+```
+
+**Key Files:**
+```
+@docflow/cli/
+├── src/
+│   ├── commands/
+│   │   ├── init.ts         # Project initialization
+│   │   ├── login.ts        # User authentication
+│   │   ├── key.ts          # API key management
+│   │   └── config.ts       # Configuration management
+│   ├── cloud-client.ts     # HTTP client for cloud API
+│   └── index.ts           # CLI entry point
+└── package.json
+```
+
+**Estimated Code:** ~200 lines
+
+### 4. MCP Server (Local Bridge)
 
 **New Package:** `@docflow/mcp-server`
 
@@ -1788,29 +3253,29 @@ Skip Convex schema changes, implement appropriate provider instead.
 - Provide project context to Mastra agents
 - Create GitHub PRs
 - Handle offline mode (queue operations when cloud unreachable)
+- Read `.docflow/config.json` and connect to cloud
 
 **Key Files:**
 ```
 @docflow/mcp-server/
 ├── src/
 │   ├── server.ts           # MCP protocol implementation
+│   ├── startup.ts          # Config loading, cloud connection
 │   ├── tools/
 │   │   ├── sync.ts         # docflow_sync_tasks (provider-agnostic)
 │   │   ├── context.ts      # docflow_get_context
-│   │   ├── config.ts       # docflow_get_provider_config (NEW)
+│   │   ├── config.ts       # docflow_get_provider_config
 │   │   ├── tasks.ts        # docflow_create_task, update_task
 │   │   └── git.ts          # docflow_create_pr
 │   ├── cache/
 │   │   └── sqlite.ts       # Local cache (SQLite)
-│   ├── providers/
-│   │   └── client.ts       # Uses TaskProvider interface
+│   ├── cloud-client.ts     # HTTP client for cloud API
 │   └── config/
 │       └── reader.ts       # Reads .docflow/config.json
-├── cli.ts                  # CLI: docflow init, sync, upgrade
 └── package.json
 ```
 
-**Estimated Code:** ~350 lines (includes provider config discovery)
+**Estimated Code:** ~400 lines (includes config discovery + cloud client)
 
 ### 4. Mastra Framework Integration
 
@@ -1824,13 +3289,14 @@ mastra/
 │   ├── implementation.ts  # Implementation Agent
 │   └── qe.ts              # QE Agent
 ├── workflows/
-│   └── docflow.ts         # Task lifecycle workflow (provider-agnostic)
+│   └── docflow.ts         # Task lifecycle workflow (provider-agnostic + notifications)
 ├── tools/
 │   ├── index.ts           # Tool exports
 │   ├── mcp.ts             # MCP bridge tools
 │   ├── e2b.ts             # Code execution
 │   ├── github.ts          # PR creation
-│   └── task-provider.ts   # TaskProvider abstraction tools
+│   ├── task-provider.ts   # TaskProvider abstraction tools
+│   └── notifications.ts   # Webhook notifications (NEW)
 ├── providers/
 │   └── index.ts           # getTaskProvider() helper
 └── index.ts               # Mastra app initialization
@@ -1861,6 +3327,86 @@ QE Agent:
 ```
 
 **Estimated Code:** ~250 lines (much less than custom AI SDK implementation)
+
+### 5. Notification System
+
+**New Component:** `mastra/tools/notifications.ts` + `lib/notifications/`
+
+**Responsibilities:**
+- Send webhook notifications to Slack, Discord, Teams, custom endpoints
+- Format messages for different platforms
+- Handle event filtering (only send enabled events)
+- Integrate with Mastra workflows at key points
+
+**Key Files:**
+```
+mastra/tools/
+└── notifications.ts       # Webhook notification tool
+
+lib/notifications/
+├── types.ts              # NotificationEvent types
+└── formatters.ts         # Platform-specific message formatting
+```
+
+**Notification Points in Workflows:**
+```
+✅ task.ready_for_review   → After implementation completes
+✅ task.completed          → After QE approves
+❌ task.failed             → When agent encounters error
+🤚 workflow.human_input_needed → When agent needs clarification
+⏱️ task.stuck              → When task timeout exceeded
+```
+
+**Configuration:**
+- Per-project webhook URL (in `.docflow/config.json`)
+- Event filtering (choose which events to receive)
+- Environment variable support for webhook secrets
+
+**Estimated Code:** ~100 lines
+
+### 6. Admin UI (Next.js Frontend)
+
+**New Component:** `app/(dashboard)/` + reusable components
+
+**Responsibilities:**
+- Provide visibility into agent execution across all projects
+- Allow manual triggering of workflows
+- Display agent logs and execution traces
+- Enable project configuration (provider, webhooks)
+- Monitor task status and assignments
+
+**Key Screens:**
+```
+app/(dashboard)/
+├── page.tsx                          # Projects dashboard
+├── projects/[id]/page.tsx            # Task list per project
+├── tasks/[taskId]/page.tsx           # Task detail & agent logs
+├── settings/[projectId]/page.tsx     # Project configuration
+└── layout.tsx                        # Shared layout
+
+components/
+├── project-card.tsx                  # Reusable project card
+├── task-card.tsx                     # Reusable task card
+├── agent-log.tsx                     # Agent execution display
+├── status-badge.tsx                  # Status indicators
+└── provider-form.tsx                 # Dynamic provider config
+```
+
+**Features:**
+- View all projects and their stats
+- Filter/sort tasks by status, assignment
+- Real-time agent execution logs
+- Manual controls (assign to cloud agent, retry, cancel)
+- Provider configuration UI
+- Webhook testing
+
+**Not Included (use external systems):**
+- Task creation/editing
+- Kanban boards
+- Comments/discussions
+- User management
+
+**Estimated Code:** ~350-400 lines
 
 ### 4. Template Management (In Convex)
 
@@ -2105,7 +3651,7 @@ export const templates = defineTable({
 - `mastra/agents/pm.ts`
 - `mastra/agents/implementation.ts`
 - `mastra/agents/qe.ts`
-- `mastra/workflows/docflow.ts` (provider-agnostic)
+- `mastra/workflows/docflow.ts` (provider-agnostic + notifications)
 - Much simpler than custom AI SDK routes
 
 🔨 **Mastra Tools** (~150 lines)
@@ -2114,23 +3660,58 @@ export const templates = defineTable({
 - GitHub PR creation
 - TaskProvider integration
 
-🔨 **MCP Server** (~350 lines)
+🔨 **Notification System** (~100 lines)
+- `mastra/tools/notifications.ts` (webhook sender)
+- `lib/notifications/formatters.ts` (message formatting)
+- Workflow integration (trigger at key points)
+- Per-project webhook configuration
+
+🔨 **Admin UI (Next.js Frontend)** (~350-400 lines)
+- `app/(dashboard)/page.tsx` (projects dashboard)
+- `app/(dashboard)/projects/[id]/page.tsx` (task list)
+- `app/(dashboard)/tasks/[taskId]/page.tsx` (task detail & logs)
+- `app/(dashboard)/settings/[projectId]/page.tsx` (configuration)
+- Reusable components (cards, badges, forms)
+- Essential visibility and control over agents
+
+🔨 **CLI Tool** (~200 lines)
+- `@docflow/cli` package
+- Project initialization (npx @docflow/cli init)
+- API key management
+- Cloud authentication
+- Configuration management
+
+🔨 **MCP Server** (~400 lines)
 - Bridge between Mastra agents and local projects
 - Provider configuration discovery
 - Context provision to cloud agents
 - Git operations
+- Cloud client for API communication
 
 🔨 **Convex Schema (if using Convex)** (~100 lines)
 - Add `docflow` field to task schema
 - State machine validation (simplified with Mastra workflows)
 - Cron to poll queue
+- Projects table for identity/auth
 
-**Total: ~900-1,000 lines of code for MVP (includes provider abstraction)**
+**Total: ~1,550-1,700 lines of code for MVP**
 
-**Note:** Provider abstraction adds ~200 lines upfront but pays dividends:
-- Adding Jira provider: +200 lines (vs rewriting entire system)
-- Adding Asana provider: +200 lines (vs building from scratch)
-- Each new provider is isolated, clean, testable
+**Breakdown:**
+- Core workflow logic: ~650 lines
+- Provider abstraction: ~300 lines (future-proof investment)
+- Notifications: ~100 lines (essential for async UX)
+- Admin UI: ~350-400 lines (essential for visibility & debugging)
+- CLI + MCP Server: ~600 lines (project setup & local bridge)
+
+**Note:** 
+- Provider abstraction adds ~200 lines upfront but pays dividends:
+  - Adding Jira provider: +200 lines (vs rewriting entire system)
+  - Adding Asana provider: +200 lines (vs building from scratch)
+  - Each new provider is isolated, clean, testable
+- Admin UI is minimal but critical:
+  - Can't debug cloud agents without visibility
+  - Essential for manual testing during development
+  - Defers full task management features to post-MVP
 
 ### Recommended Tech Choices
 
@@ -2139,11 +3720,13 @@ export const templates = defineTable({
 | **Agent Framework** | Mastra (Self-Hosted) | TypeScript-native, workflow orchestration built-in |
 | **Task Backend** | Provider Abstraction | Support Convex, Jira, Asana, Linear, custom |
 | **Initial Provider** | Convex | Fast to build, real-time, works with existing stack |
+| **Frontend** | Next.js 15 + shadcn/ui | Minimal admin UI for visibility & control |
+| **Notifications** | Webhooks | Slack, Discord, Teams, custom endpoints |
 | **Code Execution** | E2B | Secure sandboxes, integrates with Mastra tools |
 | **Local Bridge** | Custom MCP Server | Universal, works with all AI tools, provider discovery |
 | **Orchestration** | Mastra Workflows | Graph-based, provider-agnostic, eliminates custom state machine |
 | **Deployment** | Vercel | Your existing platform, deploy with Next.js app |
-| **Observability** | Mastra Built-in | Production-ready monitoring included |
+| **Observability** | Mastra Built-in + Custom UI | Production-ready monitoring + agent execution logs |
 | **Optional** | Mastra Cloud | Evaluate later for enhanced features |
 
 ### Cursor CLI Role
@@ -2192,13 +3775,21 @@ Before writing 600-700 lines of code:
 **Phase 0: Validation (Week 1)**
 - Install Mastra in Next.js project
 - Create one simple agent with tool
-- Build minimal MCP server (2 tools)
+- **Build minimal CLI tool** (init command, basic cloud connection)
+- Build minimal MCP server (2 tools + config reader)
 - Test Mastra workflow execution
 - **Build TaskProvider interface** (validate abstraction pattern)
+- **Build simple notification tool** (test webhook to Slack)
+- **Test project identity flow** (init → config → MCP → cloud)
 - Verify E2B integration
 - **Go/No-Go decision**
 
 **MVP (Week 2-5):**
+- **Build project identity infrastructure**
+  - Extend Convex schema with projects table
+  - Implement project creation API
+  - Build full CLI tool (init, login, key management)
+  - API key authentication system
 - **Build TaskProvider abstraction layer**
   - Define interface and types
   - Implement provider factory
@@ -2206,10 +3797,29 @@ Before writing 600-700 lines of code:
 - Extend Convex schema with DocFlow fields (if using Convex)
 - Build three Mastra agents (PM, Implementation, QE)
 - **Create provider-agnostic DocFlow workflow**
-- Build full MCP tool suite (including provider config discovery)
-- Implement provider discovery in MCP server
+- **Implement notification system**
+  - Webhook tool for Slack/Discord/Teams
+  - Integrate notifications at key workflow points
+  - Per-project configuration support
+- **Build minimal admin UI**
+  - Projects dashboard
+  - Task list view
+  - Task detail & agent logs
+  - Configuration screen
+- **Build full MCP server**
+  - All tools (sync, context, tasks, git, config)
+  - Cloud client for authenticated requests
+  - Config discovery from .docflow/config.json
+  - Local SQLite cache
 - Deploy to Vercel
-- Test end-to-end with real task
+- **Test complete flow:**
+  - `npx @docflow/cli init` (create project)
+  - `npx @docflow/mcp-server start` (connect local to cloud)
+  - Create task via Cursor
+  - Assign to cloud agent
+  - Agent executes workflow
+  - Notification sent
+  - View in admin UI
 
 **V1 (Week 6-9):**
 - Refine agent prompts based on testing
@@ -2241,6 +3851,8 @@ Before writing 600-700 lines of code:
 - ✅ Works with **any task system** (Convex, Jira, Asana, Linear, custom)
 - ✅ Provider abstraction forces clean architecture
 - ✅ Built-in workflow orchestration (eliminates custom state machine)
+- ✅ **Webhook notifications** for async workflows (Slack, Discord, Teams)
+- ✅ **Minimal admin UI** for agent visibility and debugging
 - ✅ Production observability included
 - ✅ No platform fees (self-hosted)
 - ✅ No vendor lock-in (to Mastra OR to task backend)
@@ -2249,17 +3861,47 @@ Before writing 600-700 lines of code:
 - ✅ Easy to add new providers (~200 lines each)
 - ✅ Multi-tenant ready (different customers, different backends)
 
-**Architectural Decision: Provider Abstraction Upfront**
+**Architectural Decisions:**
+
+**1. Provider Abstraction Upfront**
 
 Even though we're starting with Convex, we're building the provider abstraction layer from day one because:
 
-1. **Forces better architecture** - Workflows can't be coupled to Convex-specific details
-2. **Easy to add providers** - Jira/Asana providers are just ~200 lines each
-3. **Testing** - Mock provider makes testing trivial
-4. **Product flexibility** - "Works with your existing tools" is a differentiator
-5. **Small overhead** - Only adds ~200 lines to MVP, saves 1000s later
-6. **Future-proof** - Migration between systems is config change, not rewrite
+- **Forces better architecture** - Workflows can't be coupled to Convex-specific details
+- **Easy to add providers** - Jira/Asana providers are just ~200 lines each
+- **Testing** - Mock provider makes testing trivial
+- **Product flexibility** - "Works with your existing tools" is a differentiator
+- **Small overhead** - Only adds ~200 lines to MVP, saves 1000s later
+- **Future-proof** - Migration between systems is config change, not rewrite
 
-**Next Action:** Validate Mastra framework + TaskProvider pattern with Phase 0 prototypes
+**2. Webhook Notifications in MVP**
+
+Including simple webhook notifications from day one because:
+
+- **Essential for async** - Can't operate cloud agents without alerts
+- **Minimal overhead** - Only ~100 lines of code
+- **No infrastructure** - Just HTTP POST to webhook URLs
+- **Great UX** - Devs get notified when action needed, not constantly checking dashboard
+- **Flexible** - Works with Slack, Discord, Teams, custom endpoints
+- **Foundation** - Easy to enhance with bidirectional later
+
+**3. Minimal Admin UI (Not Full Task Management)**
+
+Building a lightweight control panel (~350-400 lines) instead of full task management because:
+
+- **Essential for debugging** - Can't debug cloud agents blind
+- **Visibility is critical** - Need to see agent execution logs in real-time
+- **Manual control needed** - Must trigger workflows during development
+- **Minimal overhead** - ~350 lines vs ~2,000+ for full task management
+- **Defers complexity** - Let users use Jira/Asana/etc. for task management
+- **Focus on core value** - Agent workflows, not task CRUD
+
+**What we're NOT building in MVP:**
+- Task creation/editing (use external systems)
+- Kanban boards, advanced views
+- Comments, discussions, collaboration
+- User management, permissions
+
+**Next Action:** Validate Mastra framework + TaskProvider pattern + notifications + minimal UI with Phase 0 prototypes
 
 
