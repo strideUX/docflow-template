@@ -149,15 +149,18 @@ Agent: "Based on what you described, I'd recommend:
 
 **Once stack is chosen, RESEARCH IT:**
 
-**Step A: Use Context7 MCP for official docs**
+**Step A: Use Ref.tools MCP for official docs**
 ```
 Agent: "Let me get the official docs for [framework]..."
 ```
 
 Actions:
-- `mcp_context7_resolve-library-id` for each framework
-- `mcp_context7_get-library-docs` for setup, best practices, patterns
-- Focus on: current version, recommended setup, project structure
+- `mcp_Ref_ref_search_documentation` to search for framework documentation
+  - Include framework name, version, and topic (e.g., "React 18 best practices setup")
+  - Search for official docs, GitHub repos, and framework-specific guides
+- `mcp_Ref_ref_read_url` to read the documentation pages returned
+  - Use exact URLs from search results (including #hash fragments)
+  - Focus on: current version, recommended setup, project structure, best practices
 
 **Step B: Web search for current best practices (2024/2025)**
 
@@ -188,7 +191,7 @@ Based on discovery conversation:
 
 **`docflow/context/stack.md`:**
 Based on research:
-- Framework and current version (from Context7/web search)
+- Framework and current version (from Ref.tools/web search)
 - Recommended dependencies for their use case
 - Development tooling (linters, formatters from official docs)
 - Build/deployment approach (from best practices)
@@ -812,7 +815,7 @@ User might say:
 **For New Projects:**
 - `/docflow/` folder structure (understand state)
 - `docflow/specs/templates/` (understand template structure)
-- **Use Context7 MCP** for chosen stack documentation
+- **Use Ref.tools MCP** for chosen stack documentation
 - **Use web search** for best practices and patterns
 
 **For Retrofits:**
@@ -890,7 +893,7 @@ Example:
 - [ ] Had collaborative discovery conversation (not just Q&A)
 - [ ] Vetted the concept (pushed back where appropriate, offered alternatives)
 - [ ] Helped choose or validated tech stack choice
-- [ ] **Researched stack using Context7 + web search**
+- [ ] **Researched stack using Ref.tools + web search**
 - [ ] Filled context files with **researched, specific** information (not generic)
 - [ ] Created backlog items (or offered /capture alternative)
 - [ ] Generated scaffolding spec with stack-specific tasks
