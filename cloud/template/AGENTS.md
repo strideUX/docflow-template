@@ -1,0 +1,227 @@
+# AI Agent Instructions
+
+This project uses **DocFlow Cloud**, a spec-driven development workflow with Linear integration for task management.
+
+---
+
+## 📖 Primary Documentation
+
+### You MUST Read These Files First:
+
+1. **`.cursor/rules/docflow.mdc`** - Complete workflow rules (SOURCE OF TRUTH)
+   - Three-agent orchestration model
+   - Command system and natural language triggers
+   - Context loading strategy
+   - Linear integration patterns
+
+2. **`docflow/context/`** - Project understanding
+   - `overview.md` - Project vision and goals
+   - `stack.md` - Tech stack and architecture
+   - `standards.md` - Code conventions
+
+3. **Linear** - Current work state
+   - Check "In Progress" view for active work
+   - Check "Backlog" for prioritized work
+   - Issues contain full spec details
+
+---
+
+## 🎯 Quick Start for Agents
+
+### Understand Your Role
+
+**PM/Planning Agent:**
+- Plan and refine work in Linear
+- Activate specs for implementation
+- Review and close completed work
+- Commands: /start-session, /capture, /review, /activate, /close, /wrap-session
+
+**Implementation Agent:**
+- Build features and fix bugs
+- Read specs from Linear, update progress in comments
+- Commands: /implement, /block
+
+**QE/Validation Agent:**
+- Code review and user testing
+- Iterate with user until approved
+- Commands: /validate
+
+### Check Current State
+```
+1. Query Linear for "In Progress" issues (know what's active)
+2. Read docflow/context/ (understand project)
+3. Load specific spec from Linear when implementing
+```
+
+### Load Context Situationally
+**Don't auto-load everything!** See `.cursor/rules/docflow.mdc` for when to load:
+- Planning: overview.md, Linear backlog
+- Implementing: Linear spec, stack.md, standards.md
+- Searching: Use codebase_search, then load what you find
+
+**Knowledge base:** Scan `docflow/knowledge/INDEX.md` first, then load selectively.
+
+---
+
+## 📁 Directory Structure
+
+```
+project/
+├── .cursor/
+│   ├── rules/docflow.mdc    # Workflow rules (synced from source)
+│   ├── commands/            # Slash commands (synced from source)
+│   └── mcp.json             # MCP server configuration
+│
+├── docflow/
+│   ├── context/             # Project understanding (LOCAL)
+│   │   ├── overview.md      # Vision and goals
+│   │   ├── stack.md         # Tech stack and patterns
+│   │   └── standards.md     # Code conventions
+│   │
+│   ├── knowledge/           # Project knowledge (LOCAL)
+│   │   ├── INDEX.md         # Knowledge inventory
+│   │   ├── decisions/       # Architecture decisions (ADRs)
+│   │   ├── features/        # Complex feature docs
+│   │   ├── notes/           # Technical discoveries
+│   │   └── product/         # Personas, user flows
+│   │
+│   └── README.md            # DocFlow usage guide
+│
+├── .docflow.json            # Config (version + Linear IDs)
+└── AGENTS.md                # This file
+```
+
+### What's NOT Local (Lives in Linear)
+
+- **Specs** → Linear issues
+- **INDEX.md** → Linear issue list with filters
+- **ACTIVE.md** → Linear "In Progress" view
+- **Spec assets** → Linear attachments
+- **Decision log** → Linear issue comments
+- **Implementation notes** → Linear issue comments
+
+---
+
+## 🔧 Available Commands
+
+Type `/` to see commands, or use natural language triggers.
+
+**PM/Planning (6):**
+- `/start-session` - Begin session, check Linear status
+- `/wrap-session` - End session, update Linear
+- `/capture` - Create new Linear issue
+- `/review [issue]` - Refine backlog item
+- `/activate [issue]` - Ready for implementation
+- `/close [issue]` - Move to Done
+
+**Implementation (2):**
+- `/implement [issue]` - Pick up and build
+- `/block` - Document blocker in Linear
+
+**QE/Validation (1):**
+- `/validate [issue]` - Test and review
+
+**All Agents (1):**
+- `/status` - Check Linear state
+
+**DocFlow System (2):**
+- `/docflow-update` - Sync rules from source repo
+- `/docflow-setup` - Configure Linear integration
+
+---
+
+## 🗣️ Natural Language Support
+
+You don't need explicit commands. Recognize these phrases:
+
+**Start session:** "let's start" / "what's next" / "where are we"
+**Capture:** "capture that" / "add to backlog" / "found a bug"
+**Implement:** "let's build [spec]" / "implement [spec]"
+**Validate:** "test this" / "review implementation"
+**Approve (during QE):** "looks good" / "approve" / "ship it"
+
+---
+
+## 🔄 Workflow States (in Linear)
+
+**Features & Bugs:**
+```
+Backlog → Todo → In Progress → In Review → QA → Done
+```
+
+**Chores & Ideas:**
+```
+Backlog → In Progress → Done
+```
+
+---
+
+## 📎 Assets & Design
+
+### Figma Integration
+When a Linear issue has a Figma attachment:
+1. Read issue → see Figma URL
+2. Call Figma MCP: `get_design_context(fileKey, nodeId)`
+3. Receive: colors, spacing, component structure, even code
+4. Implement with actual design specs
+
+### Screenshots & References
+- Embedded in Linear issue description
+- Attached to Linear issue
+- Agent can read image URLs directly
+
+---
+
+## ⚠️ Critical Rules
+
+### Never Create Local Spec Files
+- ❌ NO specs in docflow/specs/ (doesn't exist anymore)
+- ❌ NO INDEX.md or ACTIVE.md files
+- ✅ ALL specs live in Linear
+
+### Context Stays Local
+- ✅ docflow/context/ stays in git
+- ✅ docflow/knowledge/ stays in git
+- These are version-controlled with code
+
+### Update Linear, Not Files
+- Status changes → Update Linear issue state
+- Progress notes → Add Linear comment
+- Decisions → Add dated Linear comment
+- Blockers → Update Linear issue
+
+### Document Decisions
+- Spec-specific: In Linear issue comments (dated)
+- Architectural: In docflow/knowledge/decisions/
+
+---
+
+## 🛠️ MCP Tools Available
+
+### Linear MCP
+- Create/read/update issues
+- Query by status, assignee, labels
+- Add comments and attachments
+
+### Figma MCP
+- `get_design_context` - Get UI code and specs
+- `get_screenshot` - Get visual reference
+- `get_variable_defs` - Get design tokens
+
+### DocFlow Update MCP
+- `docflow_check_update` - Check for updates
+- `docflow_update` - Sync latest rules
+- `docflow_version` - Show current version
+
+---
+
+## 📚 Additional Resources
+
+- **docflow/README.md** - DocFlow usage in this project
+- **docflow/knowledge/README.md** - Knowledge base guide
+- **.cursor/rules/docflow.mdc** - Complete workflow rules
+
+---
+
+**The workflow is tool-agnostic. Linear is the first provider; others can be added.**
+

@@ -1,371 +1,176 @@
-# DocFlow Template
+# DocFlow
 
-**A complete spec-driven development workflow system for AI-assisted development.**
+> Spec-driven development workflow for AI-assisted coding
 
-**Version:** 2.1 | **Released:** Nov 21, 2024 | **[Release Notes](releases/2.1.md)**
-
----
-
-## What is DocFlow?
-
-DocFlow is a **lightweight, structured workflow system** that transforms your AI coding assistant into a complete development partner with three specialized roles:
-
-- **🎯 PM/Planning Agent** - Plans, refines, and orchestrates work
-- **💻 Implementation Agent** - Builds features with focused context
-- **✅ QE/Validation Agent** - Tests and validates iteratively with you
-
-### The Problem It Solves
-
-Working with AI assistants without structure leads to:
-- ❌ Lost context across conversations
-- ❌ Incomplete implementations
-- ❌ Scattered documentation
-- ❌ Duplicated effort
-- ❌ No systematic testing
-
-### What DocFlow Provides
-
-- ✅ **Structured specs** with clear acceptance criteria
-- ✅ **Three specialized agents** for different workflow phases
-- ✅ **Progressive documentation** that stays current
-- ✅ **Knowledge base** that grows with your project
-- ✅ **Efficient context** loading (2K-7K tokens typical)
-- ✅ **Natural language** interface (no command memorization)
-- ✅ **Cross-platform** compatible (Cursor, Claude, Copilot, etc.)
+DocFlow is a structured workflow system that helps AI agents and developers collaborate effectively through detailed specifications and a three-agent orchestration model.
 
 ---
 
-## Quick Start
+## Versions
 
-### 1. Install DocFlow
+### 📁 [Local](./local/) - v2.x (Current Stable)
 
-**One-line installation:**
-```bash
-curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash
-```
+The original, fully local DocFlow system. All specs, indexes, and workflow state stored in markdown files within the project.
 
-**Or download and inspect first:**
-```bash
-curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh > docflow-install.sh
-chmod +x docflow-install.sh
-./docflow-install.sh
-```
-
-> **Note:** For private repos, you'll need GitHub authentication. If the one-line install fails, download the script first (method 2) or authenticate with `gh auth login`.
-
-**What it does:**
-- ✅ Detects your project type (new, existing code, or existing DocFlow)
-- ✅ Installs all system files (.cursor, .claude, .github, AGENTS.md)
-- ✅ Creates complete docflow/ structure
-- ✅ Preserves any existing content (safe for upgrades)
-
-**Installs:**
-- `.cursor/` - Rules and 11 commands
-- `.claude/` - Claude Desktop adapter
-- `.github/` - GitHub Copilot adapter
-- `AGENTS.md` - Universal AI instructions
-- `docflow/` - Complete workflow structure
-
-### 2. Complete Setup
-
-**In your AI tool (Cursor, Claude Desktop, etc.):**
-```bash
-/docflow-setup
-```
-
-**Automatically handles all scenarios:**
-
-**New Project** (~10-15 min):
-- Agent asks about your project vision
-- Creates context files from conversation
-- Builds initial backlog
-- Generates custom project-scaffolding spec
-
-**Existing Project** (~5-10 min):
-- Agent analyzes your existing code
-- Documents current features
-- Fills context files from stack
-- Sets up DocFlow for ongoing work
-
-**Upgrade DocFlow** (~15-30 min):
-- Migrates to version 2.1
-- Updates spec formats
-- Preserves all content
-- Organizes knowledge base
-
-### 3. Start Working
+**Best for:**
+- Solo developers
+- Projects that don't need team collaboration
+- Offline-first workflows
+- Getting started with DocFlow
 
 ```bash
-/start-session
+# Install local version
+cd local
+./docflow-install.sh /path/to/your/project
 ```
 
-Agent shows current state and helps you pick what to work on.
-
-**That's it!** DocFlow is ready to use.
+[📖 Local Documentation](./local/DOCFLOW-GUIDE.md)
 
 ---
 
-## Three-Agent Workflow
+### ☁️ [Cloud](./cloud/) - v3.x (Linear Integration)
 
+The hybrid DocFlow system with Linear integration. Specs live in Linear, understanding stays local.
+
+**Best for:**
+- Teams needing collaboration
+- Projects requiring stakeholder visibility
+- Cursor Background Agent workflows
+- Design-integrated development (Figma)
+
+```bash
+# Install cloud version
+cp -r cloud/template/* /path/to/your/project/
+# Then configure .docflow.json with your Linear IDs
 ```
-🎯 PM Agent        💻 Implementation      ✅ QE Agent         🎯 PM Agent
-   Plans              Builds                Validates           Closes
-     ↓                  ↓                       ↓                  ↓
-  /activate        /implement             /validate           /close
-     ↓                  ↓                       ↓                  ↓
-  READY          IMPLEMENTING          QE_TESTING          COMPLETE
-```
 
-**Key insight:** Different agents, different threads, different contexts = focused and efficient work.
-
-**See [DOCFLOW-GUIDE.md](DOCFLOW-GUIDE.md) for detailed examples and workflows.**
+[📖 Cloud Documentation](./cloud/README.md)  
+[📋 Full Specification](./cloud/DOCFLOW-CLOUD-SPEC.md)
 
 ---
 
-## Commands (11 Total)
+## Comparison
 
-### Daily Workflow
-
-**PM/Planning Agent:**
-- `/start-session` - Begin session
-- `/capture` - Quick capture work
-- `/review` - Refine backlog item
-- `/activate` - Ready for implementation
-- `/close` - Archive completed work
-- `/wrap-session` - End session
-
-**Implementation Agent:**
-- `/implement` - Pick up and build
-- `/block` - Document blocker
-
-**QE/Validation Agent:**
-- `/validate` - Test and validate
-
-**Any Agent:**
-- `/status` - Check current state
-
-### System Setup (Once Per Project)
-- `/docflow-setup` - Universal setup (new, retrofit, or upgrade)
-
-**Natural language works too!** Say "let's start", "build this", "test it" - agents understand.
+| Feature | Local (v2) | Cloud (v3) |
+|---------|------------|------------|
+| Spec Storage | Markdown files | Linear issues |
+| Team Visibility | Git only | Linear UI |
+| Offline Work | ✅ Full | ✅ Context only |
+| Collaboration | Via git | Real-time |
+| AI Agent Integration | Good | Excellent |
+| Figma Integration | Manual | Automatic |
+| Update Distribution | Manual copy | MCP sync |
+| Setup Complexity | Low | Medium |
 
 ---
 
-## Spec Templates (4 Types)
+## Core Concepts
 
-| Template | Use Case | Workflow | Complexity |
-|----------|----------|----------|------------|
-| **feature.md** | New functionality | Full (6 states) | S/M/L/XL |
-| **bug.md** | Fix defects | Full (6 states) | S/M/L/XL |
-| **chore.md** | Maintenance/cleanup | Simple (3 states) | Ongoing |
-| **idea.md** | Quick exploration | Simple (3 states) | Rough |
+Both versions share the same core workflow:
 
-**All templates include inline agent instructions for consistency.**
+### Three-Agent Model
 
----
-
-## What's Included
-
-### Core System (`template/` folder)
 ```
-template/
-├── .cursor/              # Cursor rules and 11 commands
-├── .claude/              # Claude Desktop adapter
-├── .github/              # GitHub Copilot adapter
-├── AGENTS.md             # Universal AI instructions
+PM/Planning Agent     Implementation Agent     QE/Validation Agent
+       │                      │                       │
+       │  Plan & Activate     │  Build & Complete     │  Test & Approve
+       │──────────────────────▶──────────────────────▶│
+       │                      │                       │
+       │◀─────────────────────│◀──────────────────────│
+       │   Review & Close     │   Return if issues    │
+```
+
+### Workflow States
+
+```
+BACKLOG → READY → IMPLEMENTING → REVIEW → TESTING → COMPLETE
+```
+
+### Separation of Concerns
+
+| Layer | What It Contains | Where It Lives |
+|-------|------------------|----------------|
+| **Understanding** | Context, knowledge | Always local (git) |
+| **Workflow** | Specs, status | Local (v2) or Cloud (v3) |
+| **Rules** | Commands, agent instructions | Local (synced in v3) |
+
+---
+
+## Getting Started
+
+### Option 1: Start with Local
+
+If you're new to DocFlow or working solo:
+
+```bash
+cd local
+./docflow-install.sh /path/to/your/project
+```
+
+Then read [DOCFLOW-GUIDE.md](./local/DOCFLOW-GUIDE.md).
+
+### Option 2: Start with Cloud
+
+If you need team features or Linear integration:
+
+```bash
+cp -r cloud/template/* /path/to/your/project/
+```
+
+Then:
+1. Edit `.docflow.json` with your Linear team ID
+2. Set `LINEAR_API_KEY` environment variable
+3. Read [Cloud README](./cloud/README.md)
+
+---
+
+## Migration
+
+### Local → Cloud
+
+See [DOCFLOW-CLOUD-SPEC.md](./cloud/DOCFLOW-CLOUD-SPEC.md) Section 8 for migration guide.
+
+### Cloud → Local
+
+Copy context/knowledge from cloud project, then install local template.
+
+---
+
+## Repository Structure
+
+```
+docflow-template/
+├── README.md              # This file
+├── local/                 # Local version (v2.x)
+│   ├── DOCFLOW-GUIDE.md   # Complete local documentation
+│   ├── docflow-install.sh # Installation script
+│   ├── template/          # Local template files
+│   └── releases/          # Version history
 │
-└── docflow/              # Complete workflow structure
-    ├── ACTIVE.md         # Current work
-    ├── INDEX.md          # Master inventory
-    ├── context/          # Project fundamentals
-    ├── specs/            # Spec lifecycle + templates
-    └── knowledge/        # Project knowledge base
-```
-
-### Documentation (This Repository)
-- `README.md` - This file (quick start)
-- `DOCFLOW-GUIDE.md` - Complete reference guide
-- `releases/` - Version history and release notes
-
----
-
-## Key Features
-
-### Efficient Context Management
-- Situational loading based on task
-- Knowledge base index-first
-- Search before auto-load
-- Typical usage: 2K-7K tokens (96%+ headroom)
-
-### Three-Agent Orchestration
-- PM agent orchestrates (long-running thread)
-- Implementation builds (fresh, focused thread)
-- QE validates iteratively (fresh thread with user)
-- Clear handoff points between agents
-
-### Progressive Documentation
-- Specs evolve through workflow
-- Decision logs track rationale
-- Implementation notes capture process
-- Knowledge base grows organically
-
-### Cross-Platform Compatible
-- Optimized for Cursor
-- Works with Claude Desktop
-- Works with GitHub Copilot
-- Universal adapter for any AI tool
-
-### Natural Language Interface
-- No command memorization needed
-- Conversational triggers
-- Agents understand context
-- "looks good" approves work
-
----
-
-## Directory Structure (After Installation)
-
-```
-your-project/
-├── .cursor/              ← Cursor rules and commands
-├── .claude/              ← Claude Desktop adapter
-├── .github/              ← GitHub Copilot adapter
-├── AGENTS.md             ← Universal AI instructions
-│
-└── docflow/              ← DocFlow workspace
-    ├── ACTIVE.md         ← Current state (check first!)
-    ├── INDEX.md          ← Master inventory
-    ├── README.md         ← Quick daily reference
-    │
-    ├── context/          ← Project fundamentals
-    │   ├── overview.md
-    │   ├── stack.md
-    │   └── standards.md
-    │
-    ├── specs/            ← Spec lifecycle
-    │   ├── templates/    ← 4 spec types
-    │   ├── active/       ← Currently implementing
-    │   ├── backlog/      ← Planned work
-    │   ├── complete/     ← Archived by quarter
-    │   └── assets/       ← Spec-specific resources
-    │
-    └── knowledge/        ← Project knowledge
-        ├── INDEX.md      ← Scan first!
-        ├── decisions/
-        ├── features/
-        ├── notes/
-        └── product/
+└── cloud/                 # Cloud version (v3.x)
+    ├── README.md          # Cloud quick start
+    ├── DOCFLOW-CLOUD-SPEC.md  # Full specification
+    └── template/          # Cloud template files
 ```
 
 ---
 
-## Example: Feature Implementation
+## Contributing
 
-```
-1. PM: "let's start"              → Shows status
-2. PM: "review dashboard spec"    → Refines spec
-3. PM: "ready to build"           → Activates for impl
+Contributions welcome! Please:
 
-4. Impl: "implement dashboard"    → Builds feature
-   [Auto-completes when done]     → Marks REVIEW
-
-5. QE: "validate dashboard"       → Reviews & tests
-   User tests...
-   User: "looks great!"           → Approves
-
-6. PM: /start-session             → Sees approved work
-7. PM: "close it"                 → Archives, queues next
-```
-
-**Simple, clean, systematic.**
+1. Decide which version you're improving (local or cloud)
+2. Follow existing patterns and conventions
+3. Update documentation with changes
+4. Test with actual AI agents
 
 ---
 
-## System Characteristics
+## License
 
-**Lightweight:**
-- 4 spec types
-- 11 commands
-- ~6,350 lines total system
-
-**Efficient:**
-- 2K-7K tokens typical usage
-- 96%+ context headroom
-- Search-first approach
-
-**Complete:**
-- All workflow phases covered
-- All agent roles defined
-- All handoffs explicit
-- All scenarios handled
-
-**Portable:**
-- Works across AI tools
-- Single source of truth
-- Lightweight adapters
-- Tool-agnostic design
+[Your License Here]
 
 ---
 
-## Documentation
+*DocFlow - Making AI-assisted development structured and effective*
 
-### Quick Start
-- **[README.md](README.md)** - This file (overview and setup)
-- **`template/docflow/README.md`** - Quick daily reference (after copying)
-
-### Complete Reference
-- **[DOCFLOW-GUIDE.md](DOCFLOW-GUIDE.md)** - Comprehensive guide
-  - Three-agent model details
-  - All 11 commands with examples
-  - All 4 templates explained
-  - Workflow states and transitions
-  - Knowledge base usage
-  - Best practices and troubleshooting
-
-### Source Files
-- **`template/.cursor/rules/docflow.mdc`** - Complete workflow rules (648 lines)
-- **`template/.cursor/commands/`** - 11 command implementation files
-- **`template/docflow/specs/templates/`** - 4 spec templates with instructions
-
-### Platform Adapters
-- **`template/AGENTS.md`** - Universal AI instructions
-- **`template/.claude/rules.md`** - Claude Desktop
-- **`template/.github/copilot-instructions.md`** - GitHub Copilot
-
----
-
-## Version History
-
-**Current:** 2.1 (Nov 21, 2024)
-- Complete system refactoring
-- Three-agent model formalized
-- Knowledge base added
-- Context optimization
-- Cross-platform support
-
-**See [releases/](releases/) for detailed release notes.**
-
----
-
-## Next Steps
-
-1. **Run `docflow-install.sh` in your project**
-2. **Complete setup with `/docflow-setup`**
-3. **Start working with `/start-session`**
-4. **Read [DOCFLOW-GUIDE.md](DOCFLOW-GUIDE.md) for deep dive**
-
----
-
-## Questions?
-
-- **Complete guide:** [DOCFLOW-GUIDE.md](DOCFLOW-GUIDE.md)
-- **Release notes:** [releases/2.1.md](releases/2.1.md)
-- **Daily reference:** `template/docflow/README.md`
-- **Templates guide:** `template/docflow/specs/templates/README.md`
-- **Knowledge guide:** `template/docflow/knowledge/README.md`
-
----
-
-**Ready to build better software with AI assistance?**
-
-Install DocFlow with one command and let it guide you through structured, efficient development.
