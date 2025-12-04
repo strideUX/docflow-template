@@ -6,23 +6,43 @@ DocFlow is a structured workflow system that helps AI agents and developers coll
 
 ---
 
+## Quick Start
+
+### One-Line Install
+
+```bash
+curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash
+```
+
+The installer will ask you to choose:
+- **Local** - All specs stored as markdown files (solo/offline)
+- **Cloud** - Specs in Linear, context local (teams/collaboration)
+
+### Then Complete Setup
+
+```bash
+# Open your AI tool (Cursor, Claude) and run:
+/docflow-setup
+```
+
+The setup command will:
+- Fill out project context from a PRD or description
+- Configure Linear (if cloud mode)
+- Create initial work items
+- Get your project ready to go
+
+---
+
 ## Versions
 
-### 📁 [Local](./local/) - v2.x (Current Stable)
+### 📁 [Local](./local/) - v2.x
 
-The original, fully local DocFlow system. All specs, indexes, and workflow state stored in markdown files within the project.
+The fully local DocFlow system. All specs, indexes, and workflow state stored in markdown files.
 
 **Best for:**
 - Solo developers
-- Projects that don't need team collaboration
 - Offline-first workflows
 - Getting started with DocFlow
-
-```bash
-# Install local version
-cd local
-./docflow-install.sh /path/to/your/project
-```
 
 [📖 Local Documentation](./local/DOCFLOW-GUIDE.md)
 
@@ -34,15 +54,9 @@ The hybrid DocFlow system with Linear integration. Specs live in Linear, underst
 
 **Best for:**
 - Teams needing collaboration
-- Projects requiring stakeholder visibility
+- Stakeholder visibility
 - Cursor Background Agent workflows
 - Design-integrated development (Figma)
-
-```bash
-# Install cloud version
-cp -r cloud/template/* /path/to/your/project/
-# Then configure .docflow.json with your Linear IDs
-```
 
 [📖 Cloud Documentation](./cloud/README.md)  
 [📋 Full Specification](./cloud/DOCFLOW-CLOUD-SPEC.md)
