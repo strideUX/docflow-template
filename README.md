@@ -8,28 +8,33 @@ DocFlow is a structured workflow system that helps AI agents and developers coll
 
 ## Quick Start
 
-### One-Line Install
+### Create a New Project
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash
 ```
 
-The installer will ask you to choose:
-- **Local** - All specs stored as markdown files (solo/offline)
-- **Cloud** - Specs in Linear, context local (teams/collaboration)
+The installer will prompt you for:
+- **Project name** → Creates folder automatically
+- **Location** → Where to save (default: `~/Projects`)
+- **Local or Cloud** → Choose your workflow type
+- **Linear config** → API key and team ID (Cloud only, can skip)
 
-### Then Complete Setup
+### Then Open and Setup
 
 ```bash
-# Open your AI tool (Cursor, Claude) and run:
+# Open the created project in Cursor
+cursor ~/Projects/your-project-name
+
+# Run the setup command
 /docflow-setup
 ```
 
 The setup command will:
+- Complete Linear configuration (if Cloud mode)
 - Fill out project context from a PRD or description
-- Configure Linear (if cloud mode)
-- Create initial work items
-- Get your project ready to go
+- Create initial work items in Linear or local specs
+- Get your project ready for development
 
 ---
 
@@ -275,27 +280,32 @@ docflow-template/
 curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash
 ```
 
-Choose your version when prompted, then run `/docflow-setup` in your AI tool.
+The installer will guide you through:
 
-### Option 2: Install Local Version Directly
+1. **Project name** - Enter your project name (auto-converts to folder name)
+2. **Location** - Where to create the project (default: `~/Projects`)
+3. **Type** - Choose Local or Cloud (Linear)
+4. **Linear config** - If Cloud, optionally configure Linear API key and team ID
 
-```bash
-cd /path/to/your/project
-curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/local/docflow-install.sh | bash
+Then it creates your project folder, downloads all files, and initializes git.
+
+**After installation, open in Cursor and run:**
+```
+/docflow-setup
 ```
 
-### Option 3: Install Cloud Version Directly
+The agent will help you complete configuration and create initial work items.
+
+### Option 2: Add to Existing Project
+
+If you already have a project and want to add DocFlow:
 
 ```bash
 cd /path/to/your/project
-# Copy template files
 curl -sSL https://github.com/strideUX/docflow-template/archive/main.tar.gz | tar -xz --strip-components=3 docflow-template-main/cloud/template
-
-# Configure
-# 1. Edit .docflow.json with your Linear team ID
-# 2. Set LINEAR_API_KEY environment variable
-# 3. Run /docflow-setup in your AI tool
 ```
+
+Then configure `.docflow.json` with your Linear team ID and run `/docflow-setup`.
 
 ---
 
@@ -377,11 +387,12 @@ Contributions welcome! Please:
 git clone https://github.com/strideUX/docflow-template.git
 cd docflow-template
 
-# Test local version
-cd local && ./docflow-install.sh ../test-project-local
+# Test the installer
+./docflow-install.sh
+# Follow prompts to create a test project
 
-# Test cloud version
-cp -r cloud/template/* ../test-project-cloud/
+# Or test by copying templates directly
+cp -r cloud/template/* /path/to/test-project/
 ```
 
 ---
