@@ -119,6 +119,7 @@ Use search_replace to update the version and lastUpdated fields.
 ### 6. **Recreate Claude Command Symlinks**
 
 ```bash
+mkdir -p .claude/commands
 cd .claude/commands
 for cmd in start-session wrap-session capture review activate implement validate close block status docflow-setup docflow-update; do
   ln -sf "../../.cursor/commands/${cmd}.md" "${cmd}.md" 2>/dev/null || true

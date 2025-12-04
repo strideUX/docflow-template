@@ -289,7 +289,7 @@ curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/local
 ```bash
 cd /path/to/your/project
 # Copy template files
-curl -sSL https://github.com/strideUX/docflow-template/archive/main.tar.gz | tar -xz --strip-components=2 docflow-template-main/cloud/template
+curl -sSL https://github.com/strideUX/docflow-template/archive/main.tar.gz | tar -xz --strip-components=3 docflow-template-main/cloud/template
 
 # Configure
 # 1. Edit .docflow.json with your Linear team ID
