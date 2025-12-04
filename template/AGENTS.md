@@ -236,10 +236,16 @@ PM → Next:           /close queues next priority
 ## Tool-Specific Files
 
 ### Using Cursor?
-You're already set! Rules auto-load.
+You're already set! Rules auto-load from `.cursor/rules/docflow.mdc`.
+
+### Using Claude Code (CLI)?
+See `.claude/rules.md` - Full slash command support via `.claude/commands/`.
 
 ### Using Claude Desktop?
 See `.claude/rules.md`
+
+### Using Warp?
+See `.warp/rules.md` and `WARP.md` for terminal-specific workflow guidance.
 
 ### Using VS Code with Copilot?
 See `.github/copilot-instructions.md`

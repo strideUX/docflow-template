@@ -1,0 +1,1 @@
+../../.cursor/commands/status.md

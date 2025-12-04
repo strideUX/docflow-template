@@ -678,11 +678,24 @@ rm -f .cursor/commands/scan-project.md
 
 **Files to verify exist (2.1 additions):**
 - `AGENTS.md` in root
+- `WARP.md` in root (Warp workflow guide)
 - `.claude/rules.md`
+- `.claude/commands/` (symlinks to .cursor/commands/)
+- `.warp/rules.md` (Warp adapter)
 - `.github/copilot-instructions.md`
 - `docflow/knowledge/` structure
 - `docflow/specs/assets/`
 - `docflow/specs/templates/` (visible, not hidden)
+
+**Create Claude command symlinks (if missing):**
+```bash
+mkdir -p .claude/commands
+cd .claude/commands
+# Create symlinks to all cursor commands
+for cmd in ../../.cursor/commands/*.md; do
+  ln -sf "$cmd" "$(basename $cmd)"
+done
+```
 
 **Log cleanup actions:**
 Create `docflow/knowledge/archived-migration/MIGRATION-[date].md`:
@@ -702,7 +715,10 @@ Create `docflow/knowledge/archived-migration/MIGRATION-[date].md`:
 
 ## Files Added
 - `/AGENTS.md` - Universal AI instructions
+- `/WARP.md` - Warp workflow guide
 - `/.claude/rules.md` - Claude Desktop adapter
+- `/.claude/commands/` - Symlinks to Cursor commands (Claude Code CLI support)
+- `/.warp/rules.md` - Warp adapter
 - `/.github/copilot-instructions.md` - GitHub Copilot adapter
 - `/docflow/knowledge/` - Knowledge base structure
 - `/docflow/specs/assets/` - Spec-specific resources
@@ -923,6 +939,8 @@ Example:
 - [ ] Initialized new structure (knowledge/, assets/)
 - [ ] Migrated relevant content from old structure
 - [ ] Cleaned up legacy files
+- [ ] Created Claude command symlinks (.claude/commands/)
+- [ ] Created Warp adapter files (.warp/rules.md, WARP.md)
 - [ ] Verified all content preserved
 - [ ] Created migration log
 - [ ] Provided clear completion summary

@@ -910,13 +910,25 @@ DocFlow works across AI tools:
 
 ### Cursor (Primary)
 - All rules auto-load from `.cursor/rules/docflow.mdc`
-- Commands available natively
+- Commands available natively in `.cursor/commands/`
 - Optimized experience
+
+### Claude Code (CLI)
+- Reads `.claude/rules.md`
+- Full slash command support via `.claude/commands/` (symlinked to Cursor commands)
+- Great for terminal-based workflows
+- Same `/command` syntax as Cursor
 
 ### Claude Desktop
 - Reads `.claude/rules.md`
 - Points to Cursor rules
 - Great for PM and QE agents
+
+### Warp
+- Reads `.warp/rules.md` and `WARP.md`
+- Terminal-first workflow guidance
+- Shell aliases for common operations
+- Excellent for Implementation Agent work
 
 ### GitHub Copilot
 - Reads `.github/copilot-instructions.md`

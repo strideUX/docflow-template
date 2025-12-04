@@ -107,10 +107,20 @@ download_file ".cursor/commands/docflow-setup.md" ".cursor/commands/docflow-setu
 
 # Platform adapters
 echo "   [2/5] Installing platform adapters..."
-mkdir -p .claude .github
+mkdir -p .claude/commands .warp .github
 download_file ".claude/rules.md" ".claude/rules.md"
+download_file ".warp/rules.md" ".warp/rules.md"
 download_file ".github/copilot-instructions.md" ".github/copilot-instructions.md"
 download_file "AGENTS.md" "AGENTS.md"
+download_file "WARP.md" "WARP.md"
+
+# Create Claude command symlinks (for Claude Code CLI)
+echo "   Creating Claude command symlinks..."
+cd .claude/commands
+for cmd in start-session wrap-session capture review activate implement validate close block status docflow-setup; do
+  ln -sf "../../.cursor/commands/${cmd}.md" "${cmd}.md" 2>/dev/null || true
+done
+cd ../..  # Return to project root
 
 # DocFlow structure
 echo "   [3/5] Creating DocFlow directory structure..."
@@ -165,7 +175,11 @@ echo "📦 Installed DocFlow ${DOCFLOW_VERSION}"
 echo ""
 echo "📁 System Files:"
 echo "   ✓ Rules and commands (.cursor/)"
-echo "   ✓ Platform adapters (.claude/, .github/, AGENTS.md)"
+echo "   ✓ Platform adapters:"
+echo "      - Claude Desktop/Code (.claude/, .claude/commands/)"
+echo "      - Warp (.warp/, WARP.md)"
+echo "      - GitHub Copilot (.github/)"
+echo "      - Universal (AGENTS.md)"
 echo "   ✓ Spec templates (4 types)"
 echo "   ✓ Knowledge base structure"
 echo ""

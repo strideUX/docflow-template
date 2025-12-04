@@ -1,4 +1,4 @@
-# DocFlow Rules for Claude Desktop
+# DocFlow Rules for Warp
 
 This project uses **DocFlow**, a spec-driven development workflow optimized for AI-assisted development.
 
@@ -17,7 +17,7 @@ This file contains the complete DocFlow system. **You MUST read it** to understa
 - Knowledge base usage
 
 **Also read:**
-- `WORKFLOW.md` - Visual workflow guide
+- `WARP.md` - Warp-specific workflow guide
 - `docflow/ACTIVE.md` - Current work state (always check this)
 - `AGENTS.md` - Universal agent instructions
 
@@ -31,7 +31,7 @@ DocFlow uses a **three-agent model**:
 - **Implementation Agent** - Builds features, fixes bugs
 - **QE/Validation Agent** - Tests and validates with user
 
-See `WORKFLOW.md` for the visual model.
+See `AGENTS.md` for the visual model.
 
 ### 2. Check Current State
 On every interaction:
@@ -56,62 +56,44 @@ Both work the same way.
 
 ---
 
-## Claude Desktop Specific Notes
+## Warp-Specific Notes
 
-### Chat Interface
-- Commands work with `/` prefix
-- Natural language triggers work the same as Cursor
-- Multi-turn conversations supported (perfect for QE validation)
+### Terminal-First Workflow
+Warp is excellent for:
+- **Implementation Agent work** - Direct terminal access for builds, tests, git
+- **File operations** - Efficient mv commands for spec management
+- **Running validation** - Tests, type-checking, linting
+- **Quick status checks** - Fast file browsing and viewing
 
-### Project Context
-Claude Desktop can access:
-- All docflow/ files
-- Command files in .cursor/commands/
-- Templates and knowledge base
-
-**Load situationally** - don't request all files at once.
+### Using Warp AI
+When working with Warp's AI:
+1. Reference this file: "Read .warp/rules.md for project workflow"
+2. Point to specs: "Check docflow/ACTIVE.md for current state"
+3. Follow DocFlow patterns described in AGENTS.md
+4. Reference command specs in `.cursor/commands/` for detailed behavior
 
 ### Long Conversations
-Claude Desktop is excellent for:
-- **PM Agent** - Long-running planning sessions
-- **QE Agent** - Iterative testing with user
+Warp works well for:
+- **Implementation Agent** - Focused terminal-based building
+- **Quick status checks** - Fast context switching
 
-Use fresh chats for:
-- **Implementation Agent** - Focused building
+For extended planning or QE sessions, consider Cursor or Claude Desktop.
 
 ### File Operations
-- Claude can create/update specs
-- Claude can move files between folders
-- Use terminal mv command for efficiency (single operation)
+- Warp can create/update specs via AI
+- Use terminal `mv` command for efficiency (single operation)
+- Direct file editing with your preferred editor
 
 ---
 
 ## Commands Available
 
-**Claude Code has full slash command support!** Commands are available in `.claude/commands/` (symlinked to `.cursor/commands/` for single-source maintenance).
+See `.cursor/commands/` for detailed command files.
 
-Type `/` to see available commands:
-
-**PM Agent:**
-- `/start-session` - Begin session, check status
-- `/wrap-session` - End session, save state
-- `/capture` - Quick capture new work
-- `/review` - Refine backlog item
-- `/activate` - Ready for implementation
-- `/close` - Archive completed work
-
-**Implementation Agent:**
-- `/implement` - Pick up and build
-- `/block` - Document blocker
-
-**QE Agent:**
-- `/validate` - Test and validate
-
-**All Agents:**
-- `/status` - Check current state
-
-**Setup:**
-- `/docflow-setup` - Initialize or upgrade DocFlow
+**PM Agent:** start-session, wrap-session, capture, review, activate, close  
+**Implementation Agent:** implement, block  
+**QE Agent:** validate  
+**All Agents:** status  
 
 ---
 
@@ -146,10 +128,11 @@ Read `.cursor/rules/docflow.mdc` for complete rules. Key ones:
 ## For Complete System Documentation
 
 1. **`.cursor/rules/docflow.mdc`** - Complete rules ⭐ READ THIS
-2. **`WORKFLOW.md`** - Workflow guide
+2. **`WARP.md`** - Warp workflow guide
 3. **`AGENTS.md`** - Universal instructions
 4. **`.cursor/commands/`** - Command details
 
 ---
 
-**Claude Desktop works great with DocFlow!** Use it for planning and QE validation especially.
+**Warp works great with DocFlow!** Use it for focused implementation and terminal-based workflows.
+
