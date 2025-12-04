@@ -111,48 +111,7 @@ else
 fi
 
 # =====================================================
-# STEP 4: Cloud Configuration (if cloud mode)
-# =====================================================
-LINEAR_TEAM_ID=""
-LINEAR_API_KEY=""
-
-if [ "$MODE" == "cloud" ]; then
-  echo ""
-  echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-  echo -e "${BLUE}║${NC}              ${CYAN}Linear Configuration${NC}                          ${BLUE}║${NC}"
-  echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
-  echo ""
-  echo "DocFlow Cloud stores specs in Linear for team collaboration."
-  echo ""
-  echo -e "${YELLOW}You'll need:${NC}"
-  echo "  1. Linear API Key (from Linear → Settings → API)"
-  echo "  2. Team ID (from team URL or settings)"
-  echo ""
-  echo -e "${CYAN}Don't have these yet?${NC}"
-  echo "  - Skip now, then run /docflow-setup in Cursor to configure"
-  echo ""
-  
-  read -p "Configure Linear now? (y/n): " CONFIGURE_LINEAR
-  
-  if [[ $CONFIGURE_LINEAR =~ ^[Yy]$ ]]; then
-    echo ""
-    read -p "Linear API Key (lin_api_...): " LINEAR_API_KEY
-    echo ""
-    read -p "Linear Team ID: " LINEAR_TEAM_ID
-    
-    if [ -n "$LINEAR_API_KEY" ]; then
-      echo ""
-      echo -e "${GREEN}✓ Linear configuration captured${NC}"
-    fi
-  else
-    echo ""
-    echo -e "${YELLOW}⚠️  Skipping Linear configuration${NC}"
-    echo "   Run /docflow-setup in Cursor to complete setup"
-  fi
-fi
-
-# =====================================================
-# STEP 5: Confirm and Create
+# STEP 4: Confirm and Create
 # =====================================================
 echo ""
 echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
@@ -162,9 +121,6 @@ echo ""
 echo "   Project:  $PROJECT_NAME"
 echo "   Location: $FULL_PATH"
 echo "   Type:     $MODE"
-if [ "$MODE" == "cloud" ] && [ -n "$LINEAR_TEAM_ID" ]; then
-  echo "   Linear:   Team ID configured ✓"
-fi
 echo ""
 
 read -p "Create project? (y/n): " CONFIRM
@@ -180,7 +136,7 @@ mkdir -p "$FULL_PATH"
 cd "$FULL_PATH"
 
 # =====================================================
-# STEP 6: Download Function
+# STEP 5: Download Function
 # =====================================================
 download_file() {
   local source="$1"
@@ -207,7 +163,7 @@ echo -e "${YELLOW}⬇️  Downloading DocFlow ${MODE} files...${NC}"
 echo ""
 
 # =====================================================
-# STEP 7: Install System Files
+# STEP 6: Install System Files
 # =====================================================
 echo "   [1/5] Installing rules and commands..."
 mkdir -p .cursor/rules .cursor/commands
@@ -284,43 +240,26 @@ if [ "$MODE" == "local" ]; then
   done
 fi
 
-# Cloud-specific: Create .docflow.json
+# Cloud-specific: Create configuration files
 if [ "$MODE" == "cloud" ]; then
   echo ""
-  echo "   Creating .docflow.json configuration..."
+  echo "   Creating configuration files..."
   
-  TEAM_ID_VALUE="${LINEAR_TEAM_ID:-YOUR_TEAM_ID}"
-  
+  # Create .docflow.json (config - no secrets, OK to commit)
   cat > .docflow.json << EOF
 {
   "docflow": {
     "version": "${DOCFLOW_VERSION}",
-    "sourceRepo": "github.com/strideUX/docflow-template",
-    "lastUpdated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    "sourceRepo": "github.com/strideUX/docflow-template"
   },
-
   "project": {
     "name": "${PROJECT_NAME}",
     "created": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
   },
-
   "provider": {
     "type": "linear",
-
-    "linear": {
-      "teamId": "${TEAM_ID_VALUE}",
-      "initiativeId": null,
-      "defaultProjectId": null,
-
-      "labels": {
-        "feature": null,
-        "bug": null,
-        "chore": null,
-        "idea": null
-      }
-    }
+    "projectId": null
   },
-
   "statusMapping": {
     "BACKLOG": "Backlog",
     "READY": "Todo",
@@ -331,6 +270,41 @@ if [ "$MODE" == "cloud" ]; then
   }
 }
 EOF
+
+  # Create .env.example
+  cat > .env.example << 'EOF'
+# DocFlow Cloud - Environment Configuration
+# 
+# Copy this file to .env and fill in your values
+# IMPORTANT: Never commit .env to git!
+
+# ===========================================
+# REQUIRED: Linear API Key
+# ===========================================
+# Get from: Linear → Settings → API → Personal API Keys
+# Format: lin_api_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+LINEAR_API_KEY=
+
+# ===========================================
+# REQUIRED: Linear Team ID  
+# ===========================================
+# Get from: Linear → Settings → Teams → [Your Team]
+# Or from URL: linear.app/team/[TEAM_ID]/...
+LINEAR_TEAM_ID=
+
+# ===========================================
+# OPTIONAL: Figma Access Token
+# ===========================================
+# Get from: Figma → Settings → Personal Access Tokens
+# Only needed if using Figma MCP for design integration
+FIGMA_ACCESS_TOKEN=
+
+# NOTE: Project ID is stored in .docflow.json (not a secret)
+# Run /docflow-setup to select your project
+EOF
+
+  # Create .env (copy of example for user to fill in)
+  cp .env.example .env
 fi
 
 # Create .gitignore
@@ -346,7 +320,7 @@ build/
 .next/
 out/
 
-# Environment
+# Environment (NEVER commit!)
 .env
 .env.local
 .env.*.local
@@ -371,7 +345,7 @@ echo "   Initializing git repository..."
 git init -q
 
 # =====================================================
-# STEP 8: Installation Summary
+# STEP 7: Installation Summary
 # =====================================================
 echo ""
 echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
@@ -385,43 +359,47 @@ echo -e "${YELLOW}📦 DocFlow ${DOCFLOW_VERSION} (${MODE}) installed${NC}"
 echo ""
 
 if [ "$MODE" == "cloud" ]; then
-  if [ -n "$LINEAR_API_KEY" ]; then
-    echo -e "${YELLOW}🔑 Don't forget to set your API key:${NC}"
-    echo ""
-    echo "   export LINEAR_API_KEY=\"${LINEAR_API_KEY}\""
-    echo ""
-    echo "   Add this to your ~/.zshrc for persistence"
-    echo ""
-  else
-    echo -e "${YELLOW}🔑 You'll need to:${NC}"
-    echo "   1. Get API key from Linear → Settings → API"
-    echo "   2. Set: export LINEAR_API_KEY=\"lin_api_...\""
-    echo ""
-  fi
-fi
-
-echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║${NC}                    ${YELLOW}NEXT STEPS${NC}                              ${CYAN}║${NC}"
-echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
-echo ""
-echo "   1. Open in Cursor:"
-echo ""
-echo -e "      ${GREEN}cursor ${FULL_PATH}${NC}"
-echo ""
-echo "   2. Run the setup command:"
-echo ""
-echo -e "      ${GREEN}/docflow-setup${NC}"
-echo ""
-echo "   The agent will help you:"
-if [ "$MODE" == "cloud" ]; then
-  echo "   • Complete Linear configuration (if not done)"
-  echo "   • Fill out project context (overview, stack, standards)"
+  echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
+  echo -e "${CYAN}║${NC}                    ${YELLOW}NEXT STEPS${NC}                              ${CYAN}║${NC}"
+  echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
+  echo ""
+  echo -e "   ${GREEN}1.${NC} Open ${CYAN}.env${NC} and add your Linear credentials:"
+  echo ""
+  echo "      LINEAR_API_KEY=lin_api_your_key_here"
+  echo "      LINEAR_TEAM_ID=your_team_id"
+  echo ""
+  echo -e "   ${GREEN}2.${NC} Open in Cursor:"
+  echo ""
+  echo -e "      ${GREEN}cursor ${FULL_PATH}${NC}"
+  echo ""
+  echo -e "   ${GREEN}3.${NC} Run the setup command:"
+  echo ""
+  echo -e "      ${GREEN}/docflow-setup${NC}"
+  echo ""
+  echo "   The agent will:"
+  echo "   • Validate your .env configuration"
+  echo "   • Test the Linear connection"
+  echo "   • Help fill out project context"
   echo "   • Create initial issues in Linear"
 else
+  echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
+  echo -e "${CYAN}║${NC}                    ${YELLOW}NEXT STEPS${NC}                              ${CYAN}║${NC}"
+  echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
+  echo ""
+  echo -e "   ${GREEN}1.${NC} Open in Cursor:"
+  echo ""
+  echo -e "      ${GREEN}cursor ${FULL_PATH}${NC}"
+  echo ""
+  echo -e "   ${GREEN}2.${NC} Run the setup command:"
+  echo ""
+  echo -e "      ${GREEN}/docflow-setup${NC}"
+  echo ""
+  echo "   The agent will:"
   echo "   • Fill out project context (overview, stack, standards)"
   echo "   • Capture initial work items as specs"
+  echo "   • Get your project ready for development"
 fi
-echo "   • Get your project ready for development"
+
 echo ""
 echo -e "📖 Documentation: https://github.com/strideUX/docflow-template"
 echo ""

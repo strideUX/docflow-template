@@ -1,7 +1,7 @@
 # DocFlow Setup (System)
 
 ## Overview
-Complete DocFlow Cloud setup: configure Linear, fill project context, and create initial work items.
+Complete DocFlow Cloud setup: validate environment, configure Linear, fill project context, and create initial work items.
 
 **Agent Role:** PM/Planning Agent  
 **Frequency:** Once per project (during initial setup)
@@ -10,118 +10,192 @@ Complete DocFlow Cloud setup: configure Linear, fill project context, and create
 
 ## Steps
 
-### 1. **Check Current State**
+### 1. **Check Environment File**
 
-Read `.docflow.json` and verify:
-- Does the file exist?
-- Is `teamId` configured (not "YOUR_TEAM_ID")?
-- Is `LINEAR_API_KEY` environment variable set?
+First, verify the `.env` file exists and has required values:
 
 ```bash
-# Check env var
-echo $LINEAR_API_KEY
+# Check if .env exists
+[ -f ".env" ] && echo "EXISTS" || echo "MISSING"
 ```
 
-**If not configured:**
+**If `.env` is MISSING:**
 ```markdown
 ## 🔧 DocFlow Cloud Setup
 
-I see DocFlow Cloud is installed but Linear isn't fully configured yet.
+Welcome! I see this is a fresh DocFlow Cloud installation.
 
-**Current Status:**
-- [ ] Linear API Key: ${set/not set}
-- [ ] Team ID: ${configured/not configured}
-- [ ] MCP Connection: ${working/not tested}
+**Step 1: Configure your environment**
 
-Let's complete the setup. Do you have:
-1. A Linear account with API access?
-2. Your Linear Team ID?
+You have a `.env.example` file in your project root. To complete setup:
 
-If not, I can help you get these.
+1. Copy it to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Open `.env` and add your Linear credentials:
+   - **LINEAR_API_KEY** - Get from Linear → Settings → API → Personal API Keys
+   - **LINEAR_TEAM_ID** - Get from your team URL: linear.app/team/[TEAM_ID]/...
+   - **LINEAR_PROJECT_ID** (optional) - Get from project URL
+
+Once you've filled in the values, run `/docflow-setup` again!
 ```
 
-### 2. **Complete Linear Configuration**
+**Stop here if .env is missing.**
 
-**If Team ID needed:**
-```markdown
-To find your Linear Team ID:
+---
 
-1. Go to Linear → Team Settings → General
-2. Look at the URL: linear.app/team/**TEAM_KEY**/settings
-3. Or use the API to query teams
+### 2. **Validate Environment Values**
 
-What's your team key or ID?
-```
+Read and check the `.env` file:
 
-**If API Key needed:**
-```markdown
-To get your Linear API Key:
-
-1. Go to Linear → Settings → API → Personal API Keys
-2. Create a new key with appropriate permissions
-3. Copy the key (starts with `lin_api_`)
-
-Set it as an environment variable:
 ```bash
-export LINEAR_API_KEY="lin_api_your_key_here"
+# Source the env file and check values
+source .env
+echo "API_KEY: ${LINEAR_API_KEY:0:10}..."
+echo "TEAM_ID: $LINEAR_TEAM_ID"
+echo "PROJECT_ID: $LINEAR_PROJECT_ID"
 ```
 
-Add to your ~/.zshrc or ~/.bashrc for persistence.
+**Check each required value:**
+
+| Variable | Required | Status Check |
+|----------|----------|--------------|
+| LINEAR_API_KEY | ✓ Yes | Must start with `lin_api_` |
+| LINEAR_TEAM_ID | ✓ Yes | Must not be empty |
+| LINEAR_PROJECT_ID | Optional | Can be empty (will select later) |
+
+**If values are empty or invalid:**
+```markdown
+## ⚠️ Missing Configuration
+
+Your `.env` file exists but is missing some required values:
+
+| Variable | Status |
+|----------|--------|
+| LINEAR_API_KEY | ${empty/set} |
+| LINEAR_TEAM_ID | ${empty/set} |
+| LINEAR_PROJECT_ID | ${empty/set} (optional) |
+
+**To get these values:**
+
+1. **LINEAR_API_KEY:**
+   - Go to Linear → Settings → API → Personal API Keys
+   - Create a new key (starts with `lin_api_`)
+
+2. **LINEAR_TEAM_ID:**
+   - Go to your team in Linear
+   - Copy from URL: linear.app/team/**[TEAM_ID]**/...
+   - Or: Settings → Teams → [Team] → Copy ID
+
+3. **LINEAR_PROJECT_ID (optional):**
+   - Open your project in Linear
+   - Copy from URL: linear.app/[team]/project/**[PROJECT_ID]**
+   - Or leave empty to select during setup
+
+Update your `.env` file and run `/docflow-setup` again!
 ```
 
-**Update .docflow.json with provided values:**
-```typescript
-// Update the config file
-{
-  "linear": {
-    "teamId": "provided-team-id"
-  }
-}
-```
+**Stop here if required values are missing.**
+
+---
 
 ### 3. **Test Linear Connection**
 
-Use Linear MCP to verify connection:
-```typescript
-// Test query
-const teams = await linearClient.teams();
-console.log("Connected to Linear!");
-console.log("Teams:", teams.nodes.map(t => t.name));
+Once `.env` is valid, test the MCP connection:
+
+```markdown
+✅ Environment configured!
+
+Testing Linear connection...
 ```
+
+Use Linear MCP to verify connection:
+- Query teams to confirm API key works
+- Verify the configured team ID exists
 
 **If successful:**
 ```markdown
 ✅ Linear connection verified!
 
-**Team:** [Team Name]
-**Workflow States:** [list states]
-**Labels:** [list labels]
-
-I'll map these to DocFlow workflow states.
+**Connected to:** [Team Name]
+**Workflow States:** [list]
+**Available Labels:** [list]
 ```
 
 **If failed:**
-- Check API key is correct
-- Verify permissions
-- Ensure MCP is configured in `.cursor/mcp.json`
+```markdown
+❌ Could not connect to Linear
 
-### 4. **Map Workflow States**
+**Possible issues:**
+- API key may be incorrect or expired
+- Team ID may not exist
+- Check your internet connection
 
-Query Linear for team's workflow states and map to DocFlow:
+**To fix:**
+1. Verify your API key is correct in `.env`
+2. Regenerate a new key if needed
+3. Double-check your team ID
+```
 
-```typescript
-const team = await linearClient.team(teamId);
-const states = await team.states();
+---
 
-// Auto-map based on common names
-const mapping = {
-  BACKLOG: findState(states, ['Backlog', 'To Do', 'Open']),
-  READY: findState(states, ['Todo', 'Ready', 'Ready for Dev']),
-  IMPLEMENTING: findState(states, ['In Progress', 'In Development']),
-  REVIEW: findState(states, ['In Review', 'Code Review']),
-  TESTING: findState(states, ['QA', 'Testing', 'In QA']),
-  COMPLETE: findState(states, ['Done', 'Closed', 'Complete'])
-};
+### 4. **Select/Confirm Project**
+
+Check `.docflow.json` for existing project ID:
+
+```bash
+cat .docflow.json | grep projectId
+```
+
+**If projectId is null:**
+
+Query Linear for projects in the team and present options:
+
+```markdown
+## 📁 Select a Project
+
+I found these projects in your team:
+
+| # | Project | Status |
+|---|---------|--------|
+| 1 | DocFlow | In Progress |
+| 2 | Website Redesign | Planned |
+| 3 | *(Create new)* | - |
+
+Which project should DocFlow use for this codebase?
+```
+
+**When user selects:**
+- If existing project: Get the project ID
+- If new project: Create it via Linear MCP
+
+**Save to .docflow.json:**
+```json
+{
+  "provider": {
+    "type": "linear",
+    "projectId": "selected-project-id"
+  }
+}
+```
+
+```markdown
+✅ Project configured: **[Project Name]**
+
+I've saved the project ID to `.docflow.json` - this file can be committed.
+```
+
+---
+
+### 5. **Map Workflow States**
+
+Query Linear for team's workflow states and verify mapping:
+
+```bash
+# Read current mapping from .docflow.json
+cat .docflow.json | grep -A 10 "statusMapping"
 ```
 
 **Present mapping to user:**
@@ -130,38 +204,52 @@ const mapping = {
 
 I'll map your Linear states to DocFlow workflow:
 
-| DocFlow | Linear State | ID |
-|---------|--------------|-----|
-| BACKLOG | Backlog | abc123 |
-| READY | Todo | def456 |
-| IMPLEMENTING | In Progress | ghi789 |
-| REVIEW | In Review | jkl012 |
-| TESTING | QA | mno345 |
-| COMPLETE | Done | pqr678 |
+| DocFlow | → | Linear State |
+|---------|---|--------------|
+| BACKLOG | → | Backlog |
+| READY | → | Todo |
+| IMPLEMENTING | → | In Progress |
+| REVIEW | → | In Review |
+| TESTING | → | QA |
+| COMPLETE | → | Done |
 
-Does this look right? I'll save these to .docflow.json.
+Does this match your Linear workflow?
 ```
 
-Update `.docflow.json` with state IDs.
+**If user needs to adjust:**
+- Update `statusMapping` in `.docflow.json` to match their actual state names
 
-### 5. **Create or Map Labels**
+---
 
-Check if type labels exist, create if needed:
+### 6. **Verify Labels**
 
-```typescript
-const labels = await team.labels();
+Check if type labels exist in Linear:
 
-const typeLabels = {
-  feature: findOrCreate('feature', '#3B82F6'),  // blue
-  bug: findOrCreate('bug', '#EF4444'),          // red
-  chore: findOrCreate('chore', '#6B7280'),      // gray
-  idea: findOrCreate('idea', '#8B5CF6')         // purple
-};
+```markdown
+## Labels Check
+
+Looking for DocFlow type labels in Linear...
+
+| Label | Status |
+|-------|--------|
+| feature | ✓ Found / ⚠️ Missing |
+| bug | ✓ Found / ⚠️ Missing |
+| chore | ✓ Found / ⚠️ Missing |
+| idea | ✓ Found / ⚠️ Missing |
 ```
 
-Update `.docflow.json` with label IDs.
+**If labels missing:**
+```markdown
+Some labels are missing. I can:
+1. **Create them** - Add the missing labels to Linear
+2. **Skip** - You'll add labels manually later
 
-### 6. **Gather Project Information**
+What would you like to do?
+```
+
+---
+
+### 7. **Gather Project Information**
 
 ```markdown
 ## 📋 Project Setup
@@ -189,7 +277,9 @@ Which would you like to do?
 - Infer stack and patterns
 - Ask user to confirm
 
-### 7. **Fill Context Files**
+---
+
+### 8. **Fill Context Files**
 
 Based on gathered information, update:
 
@@ -236,7 +326,9 @@ Based on gathered information, update:
 - Keep template defaults
 - Customize based on detected patterns
 
-### 8. **Create Initial Linear Issues**
+---
+
+### 9. **Create Initial Linear Issues**
 
 From PRD or description, identify initial work items:
 
@@ -257,30 +349,28 @@ Based on your project description, I've identified these initial items:
 Should I create these as Linear issues?
 ```
 
-**If approved, create issues:**
-```typescript
-for (const item of items) {
-  await linearClient.createIssue({
-    teamId: config.linear.teamId,
-    title: item.title,
-    description: buildDescription(item),
-    priority: item.priority,
-    labelIds: [config.linear.labels[item.type]],
-    stateId: config.linear.states.BACKLOG
-  });
-}
-```
+**If approved:**
+- Create issues via Linear MCP
+- Add appropriate labels (feature/bug/chore/idea)
+- Set to Backlog state
+- Assign to selected project
 
-### 9. **Setup Complete**
+---
+
+### 10. **Setup Complete**
 
 ```markdown
 ## ✅ DocFlow Cloud Setup Complete!
 
+**Environment:**
+- ✓ .env configured
+- ✓ Linear connection verified
+- ✓ Project: [Project Name]
+
 **Configuration:**
-- ✓ Linear connected (Team: [name])
 - ✓ Workflow states mapped
-- ✓ Labels configured
-- ✓ .docflow.json updated
+- ✓ Labels verified
+- ✓ .docflow.json ready
 
 **Project Context:**
 - ✓ overview.md filled
@@ -289,6 +379,8 @@ for (const item of items) {
 
 **Initial Work:**
 - ✓ Created [X] issues in Linear backlog
+
+---
 
 **You're ready to start!**
 
@@ -323,7 +415,8 @@ If context files already have content:
 ---
 
 ## Context to Load
-- `.docflow.json` (configuration)
+- `.env` (environment configuration)
+- `.docflow.json` (workflow configuration)
 - `docflow/context/*` (current content, if any)
 - Linear MCP (for API calls)
 - Project files (package.json, etc.)
@@ -342,7 +435,8 @@ User might say:
 ---
 
 ## Outputs
-- `.docflow.json` fully configured
+- `.env` validated
+- `.docflow.json` status mapping verified
 - `docflow/context/*` files populated
 - Initial Linear issues created
 - Project ready for development
@@ -350,14 +444,13 @@ User might say:
 ---
 
 ## Checklist
-- [ ] Checked Linear configuration status
-- [ ] API key verified (env var)
-- [ ] Team ID configured
-- [ ] Linear connection tested
-- [ ] Workflow states mapped and saved
-- [ ] Labels created/mapped and saved
-- [ ] Project information gathered
-- [ ] Context files populated
-- [ ] Initial issues created in Linear
-- [ ] Setup confirmation provided
-
+- [ ] Checked .env file exists
+- [ ] Validated required environment variables
+- [ ] Tested Linear API connection
+- [ ] Selected/confirmed Linear project
+- [ ] Verified workflow state mapping
+- [ ] Verified/created labels
+- [ ] Gathered project information
+- [ ] Filled context files
+- [ ] Created initial issues in Linear
+- [ ] Provided setup confirmation

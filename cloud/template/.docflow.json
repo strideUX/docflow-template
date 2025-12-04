@@ -1,36 +1,12 @@
 {
   "docflow": {
     "version": "3.0.0",
-    "sourceRepo": "github.com/YOUR_ORG/docflow",
-    "lastUpdated": null
+    "sourceRepo": "github.com/strideUX/docflow-template"
   },
-
   "provider": {
     "type": "linear",
-
-    "linear": {
-      "teamId": "YOUR_TEAM_ID",
-      "initiativeId": null,
-      "defaultProjectId": null,
-
-      "labels": {
-        "feature": null,
-        "bug": null,
-        "chore": null,
-        "idea": null
-      },
-
-      "states": {
-        "BACKLOG": null,
-        "READY": null,
-        "IMPLEMENTING": null,
-        "REVIEW": null,
-        "TESTING": null,
-        "COMPLETE": null
-      }
-    }
+    "projectId": null
   },
-
   "statusMapping": {
     "BACKLOG": "Backlog",
     "READY": "Todo",
@@ -40,4 +16,3 @@
     "COMPLETE": "Done"
   }
 }
-

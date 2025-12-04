@@ -14,44 +14,63 @@ DocFlow Cloud is a hybrid spec-driven development workflow where work items live
 - Cursor IDE with MCP support
 - (Optional) Figma account for design integration
 
-### 2. Install Template
+### 2. Install with Unified Installer
 
 ```bash
-# Copy template to your project
-cp -r template/* /path/to/your/project/
-
-# Or use the install script (coming soon)
-# npx @docflow/cli init
+curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash
 ```
 
-### 3. Configure Linear
+Select "Cloud" when prompted. This creates your project with all files including `.env.example`.
 
-Edit `.docflow.json`:
+### 3. Configure Environment
 
-```json
-{
-  "provider": {
-    "type": "linear",
-    "linear": {
-      "teamId": "YOUR_TEAM_ID"
-    }
-  }
-}
-```
-
-### 4. Set Environment Variables
+Open the `.env` file created in your project and add your credentials:
 
 ```bash
-export LINEAR_API_KEY="lin_api_xxxxx"
-export FIGMA_ACCESS_TOKEN="xxxxx"  # Optional
+# .env (secrets only - never commit!)
+LINEAR_API_KEY=lin_api_your_key_here    # Required
+LINEAR_TEAM_ID=your_team_id              # Required
+FIGMA_ACCESS_TOKEN=figd_xxx              # Optional
 ```
 
-### 5. Configure MCP
+Note: Project ID is stored in `.docflow.json` (not a secret). The setup command will help you select a project.
 
-The template includes `.cursor/mcp.json` with:
-- Linear MCP for issue management
-- Figma MCP for design context
-- DocFlow Update MCP for syncing rules
+### 4. Load Environment Variables
+
+Choose one approach:
+
+**Option A: direnv (Recommended)**
+```bash
+brew install direnv
+echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
+source ~/.zshrc
+echo "dotenv" > .envrc
+direnv allow
+```
+
+**Option B: Shell Profile**
+```bash
+echo 'export LINEAR_API_KEY="lin_api_xxx"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+**Option C: Manual**
+```bash
+source .env && cursor .
+```
+
+### 5. Run Setup
+
+```bash
+cursor /path/to/your/project
+# Then run: /docflow-setup
+```
+
+The setup command will:
+- Validate your `.env` configuration
+- Test the Linear connection
+- Help you fill project context
+- Create initial Linear issues
 
 ---
 
@@ -79,7 +98,10 @@ template/
 │   │
 │   └── README.md
 │
-├── .docflow.json            # Configuration
+├── .env.example             # Environment template (copy to .env)
+├── .env                     # Your credentials (never commit!)
+├── .docflow.json            # Workflow configuration
+├── .gitignore               # Ignores .env
 └── AGENTS.md                # AI agent instructions
 ```
 

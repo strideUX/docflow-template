@@ -18,20 +18,37 @@ The installer will prompt you for:
 - **Project name** → Creates folder automatically
 - **Location** → Where to save (default: `~/Projects`)
 - **Local or Cloud** → Choose your workflow type
-- **Linear config** → API key and team ID (Cloud only, can skip)
 
-### Then Open and Setup
+### Then Configure and Setup
+
+**For Cloud (Linear) installations:**
+
+1. Open the created `.env` file and add your credentials:
+   ```bash
+   LINEAR_API_KEY=lin_api_your_key_here
+   LINEAR_TEAM_ID=your_team_id
+   ```
+
+2. Load environment variables (choose one):
+   - **direnv (recommended):** `echo "dotenv" > .envrc && direnv allow`
+   - **Manual:** Add exports to `~/.zshrc`
+   - **Per-session:** `source .env && cursor .`
+
+3. Open in Cursor and run setup:
+   ```bash
+   cursor ~/Projects/your-project-name
+   # Then run: /docflow-setup
+   ```
+
+**For Local installations:**
 
 ```bash
-# Open the created project in Cursor
 cursor ~/Projects/your-project-name
-
-# Run the setup command
-/docflow-setup
+# Then run: /docflow-setup
 ```
 
 The setup command will:
-- Complete Linear configuration (if Cloud mode)
+- Validate your configuration (Cloud: checks .env values)
 - Fill out project context from a PRD or description
 - Create initial work items in Linear or local specs
 - Get your project ready for development
@@ -334,26 +351,56 @@ See [DOCFLOW-CLOUD-SPEC.md](./cloud/DOCFLOW-CLOUD-SPEC.md) Section 8 for detaile
 
 ### Cloud Version
 
-```bash
-# Required for Linear integration
-export LINEAR_API_KEY="lin_api_xxx"
+The cloud version uses a `.env` file for secrets and `.docflow.json` for config:
 
-# Optional for Figma integration
-export FIGMA_ACCESS_TOKEN="figd_xxx"
+**`.env`** (never commit - secrets only):
+```bash
+LINEAR_API_KEY=lin_api_xxx         # Required
+LINEAR_TEAM_ID=your_team_id        # Required  
+FIGMA_ACCESS_TOKEN=figd_xxx        # Optional
 ```
 
-### Setting API Keys
+**`.docflow.json`** (OK to commit - config only):
+```json
+{
+  "provider": {
+    "type": "linear",
+    "projectId": "your-project-id"  // Set by /docflow-setup
+  }
+}
+```
 
-**macOS/Linux (zsh/bash):**
+### Loading Environment Variables
+
+The MCP servers need these variables in your shell environment. Choose one approach:
+
+**Option A: direnv (Recommended)**
 ```bash
+# Install direnv
+brew install direnv
+
+# Add to ~/.zshrc
+echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
+source ~/.zshrc
+
+# In your project
+echo "dotenv" > .envrc
+direnv allow
+# → Variables auto-load when you cd into the project!
+```
+
+**Option B: Shell Profile**
+```bash
+# Add to ~/.zshrc or ~/.bashrc
 echo 'export LINEAR_API_KEY="lin_api_xxx"' >> ~/.zshrc
+echo 'export LINEAR_TEAM_ID="your_team_id"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-**Per-project (.env file, if your setup supports it):**
-```
-LINEAR_API_KEY=lin_api_xxx
-FIGMA_ACCESS_TOKEN=figd_xxx
+**Option C: Manual (per session)**
+```bash
+# Before opening Cursor
+source .env && cursor .
 ```
 
 ---
