@@ -1,12 +1,5 @@
 {
   "mcpServers": {
-    "docflow-update": {
-      "command": "npx",
-      "args": ["@docflow/update-mcp"],
-      "env": {
-        "DOCFLOW_CONFIG": ".docflow.json"
-      }
-    },
     "linear": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://mcp.linear.app/mcp"],
