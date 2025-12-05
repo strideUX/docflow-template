@@ -5,6 +5,7 @@ AGENT INSTRUCTIONS:
 - Fill this out during project setup (/docflow-setup)
 - Keep it concise but complete
 - Update when project direction changes significantly
+- After updating, run /sync-project to update Linear project description
 -->
 
 ## Project Name

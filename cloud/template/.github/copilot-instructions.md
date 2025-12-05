@@ -215,6 +215,7 @@ Quick reference:
 - `/validate [issue]` - Test it (QE agent)
 - `/close [issue]` - Move to Done (PM agent)
 - `/project-update` - Post project status update (PM agent)
+- `/sync-project` - Sync context files to Linear project (PM agent)
 - `/status` - Query Linear (any agent)
 - `/docflow-update` - Sync rules from source
 
@@ -222,6 +223,7 @@ Quick reference:
 - "let's start" / "what's next"
 - "build LIN-XXX" / "implement this"
 - "test this" / "review implementation"
+- "sync project" / "update project description"
 
 ---
 

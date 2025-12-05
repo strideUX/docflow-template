@@ -35,7 +35,7 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 - Activate specs (set priority, estimate, assignee, move to In Progress)
 - Review and close completed work
 - Post project updates (health status + summary)
-- Commands: /start-session, /capture, /review, /activate, /close, /wrap-session, /project-update
+- Commands: /start-session, /capture, /review, /activate, /close, /wrap-session, /project-update, /sync-project
 
 **Implementation Agent:**
 - Build features and fix bugs
@@ -108,7 +108,7 @@ project/
 
 Type `/` to see commands, or use natural language triggers.
 
-**PM/Planning (7):**
+**PM/Planning (8):**
 - `/start-session` - Begin session, check Linear status
 - `/wrap-session` - End session, update Linear, offer project update
 - `/capture` - Create new Linear issue
@@ -116,6 +116,7 @@ Type `/` to see commands, or use natural language triggers.
 - `/activate [issue]` - Ready for implementation
 - `/close [issue]` - Move to Done
 - `/project-update [project]` - Post project health + summary update
+- `/sync-project` - Sync context files to Linear project description
 
 **Implementation (3):**
 - `/implement [issue]` - Pick up and build
@@ -145,6 +146,7 @@ You don't need explicit commands. Recognize these phrases:
 **Validate:** "test this" / "review implementation"
 **Approve (during QE):** "looks good" / "approve" / "ship it"
 **Project update:** "post project update" / "update project status"
+**Sync project:** "sync project" / "update project description"
 
 ---
 

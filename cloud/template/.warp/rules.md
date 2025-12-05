@@ -100,7 +100,7 @@ For extended planning or QE sessions with Linear, consider Cursor or Claude.
 
 See `.cursor/commands/` for detailed command files.
 
-**PM Agent:** start-session, wrap-session, capture, review, activate, close, project-update  
+**PM Agent:** start-session, wrap-session, capture, review, activate, close, project-update, sync-project  
 **Implementation Agent:** implement, block, attach  
 **QE Agent:** validate  
 **All Agents:** status  

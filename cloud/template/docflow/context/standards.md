@@ -5,6 +5,7 @@ AGENT INSTRUCTIONS:
 - Reference this when implementing ANY feature
 - Follow these standards strictly
 - If you need to deviate, document in Decision Log
+- After updating, run /sync-project to update Linear project description
 -->
 
 ## TypeScript Standards

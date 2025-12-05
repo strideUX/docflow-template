@@ -13,7 +13,7 @@ This project uses DocFlow Cloud with Linear integration. Read these rules carefu
 ### Your Roles
 
 **PM/Planning Agent:**
-- Commands: /start-session, /capture, /review, /activate, /close, /wrap-session, /project-update
+- Commands: /start-session, /capture, /review, /activate, /close, /wrap-session, /project-update, /sync-project
 - Manages work in Linear, posts project updates
 
 **Implementation Agent:**
@@ -62,6 +62,7 @@ Backlog → In Progress → In Review → QA → Done
 - "looks good" → QE approval
 - "wrap up" → /wrap-session
 - "post project update" → /project-update
+- "sync project" → /sync-project
 
 ## Commands
 

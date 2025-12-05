@@ -268,6 +268,12 @@ Load with: source .env
 3. Post via Linear GraphQL API (requires LINEAR_API_KEY)
 4. Confirm with link
 
+**`/sync-project`**
+1. Read docflow/context/ files (overview, stack, standards)
+2. Generate short summary (255 char) + full content
+3. Update Linear project (description + content fields)
+4. Confirm sync complete
+
 **`/capture`**
 1. Ask for type: feature, bug, chore, idea
 2. Gather title, description, context
@@ -353,6 +359,9 @@ Load with: source .env
 
 ### Project Update
 "post project update" / "update project status" → `/project-update`
+
+### Sync Project
+"sync project" / "update project description" → `/sync-project`
 
 ### Status
 "what's the status" / "where are we" → `/status`

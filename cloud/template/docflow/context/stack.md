@@ -5,6 +5,7 @@ AGENT INSTRUCTIONS:
 - Reference this when implementing ANY feature
 - Keep updated as stack evolves
 - Include version numbers where relevant
+- After updating, run /sync-project to update Linear project description
 -->
 
 ## Core Technologies

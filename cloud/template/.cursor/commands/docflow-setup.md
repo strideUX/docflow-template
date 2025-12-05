@@ -426,7 +426,35 @@ Based on gathered information, update:
 
 ---
 
-### 10. **Create Initial Linear Issues**
+### 10. **Sync Project Description**
+
+After context files are filled, sync to Linear project:
+
+```markdown
+✅ Context files ready!
+
+Syncing project description to Linear...
+```
+
+**Run `/sync-project` (or inline):**
+- Read context files
+- Generate summary
+- Update Linear project `content` field
+
+```markdown
+✅ Project synced!
+
+Linear project description now includes:
+- Vision and goals from overview.md
+- Tech stack from stack.md
+- Key standards from standards.md
+
+**Note:** If you update context files later, run `/sync-project` to keep Linear in sync.
+```
+
+---
+
+### 11. **Create Initial Linear Issues**
 
 From PRD or description, identify initial work items:
 
@@ -455,7 +483,7 @@ Should I create these as Linear issues?
 
 ---
 
-### 11. **Setup Complete**
+### 12. **Setup Complete**
 
 ```markdown
 ## ✅ DocFlow Cloud Setup Complete!
@@ -474,6 +502,7 @@ Should I create these as Linear issues?
 - ✓ overview.md filled
 - ✓ stack.md configured
 - ✓ standards.md ready
+- ✓ Project synced to Linear
 
 **Initial Work:**
 - ✓ Created [X] issues in Linear backlog
@@ -486,6 +515,8 @@ Next commands:
 - `/start-session` - See your Linear backlog and start working
 - `/capture` - Add more work items
 - `/implement [issue]` - Pick up and build
+
+**Remember:** If you update `docflow/context/` files, run `/sync-project` to keep Linear in sync.
 
 Happy building! 🚀
 ```
@@ -551,5 +582,6 @@ User might say:
 - [ ] Verified/created labels
 - [ ] Gathered project information
 - [ ] Filled context files
+- [ ] Synced project description to Linear
 - [ ] Created initial issues in Linear
 - [ ] Provided setup confirmation
