@@ -45,6 +45,28 @@ Needed to unblock:
 @[person] for help.
 ```
 
+### 3b. **Notify Relevant People (Optional)**
+
+If someone specific needs to help, add them as a subscriber so they get notified:
+
+```bash
+# Via GraphQL API (LINEAR_API_KEY required)
+source .env && curl -s -X POST https://api.linear.app/graphql \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation { issueUpdate(id: \"ISSUE_ID\", input: { subscriberIds: [\"USER_ID\"] }) { success } }"
+  }'
+```
+
+**This ensures they get notifications for all updates on the issue.**
+
+To find user IDs:
+```typescript
+// Via MCP
+list_users({ query: "cory" })  // Returns user ID
+```
+
 ### 4. **Update Issue State (Optional)**
 
 Depending on blocker type:

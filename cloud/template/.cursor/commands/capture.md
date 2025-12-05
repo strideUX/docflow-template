@@ -163,7 +163,8 @@ createIssue({
   priority: [1-4 based on user input],
   estimate: [1-5 if known],
   labelIds: [config.linear.labels[type]],
-  stateId: config.linear.states.BACKLOG
+  stateId: config.linear.states.BACKLOG,
+  assignee: [optional - if user specifies]  // "me", name, or email
 })
 
 // Add creation comment
@@ -171,6 +172,17 @@ addComment(issueId, {
   body: '**Created** — [Brief context about why this was captured].'
 })
 ```
+
+**Optional Assignment:**
+If user says "capture this for cory" or "assign to matt":
+```typescript
+createIssue({
+  ...
+  assignee: "cory"  // name, email, or "me"
+})
+```
+
+By default, leave unassigned (goes to backlog for later activation).
 
 ### 6. **Add Figma/Assets If Available**
 If user mentions design references:

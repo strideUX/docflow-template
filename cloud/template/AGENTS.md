@@ -206,6 +206,19 @@ Examples:
 - `**Ready for Review** — All criteria complete. Files: 4.`
 - `**Complete** — Verified and closed.`
 
+### Team Collaboration
+**Assignment:** Assign issues by name, email, or "me":
+```typescript
+updateIssue(issueId, { assignee: "cory" })
+```
+
+**Subscribers:** Add users to get notified of all issue updates (via GraphQL API):
+```bash
+issueUpdate(id: "...", input: { subscriberIds: ["user-id"] })
+```
+
+**Finding users:** `list_users({ query: "name" })`
+
 ---
 
 ## 📎 Assets & Design

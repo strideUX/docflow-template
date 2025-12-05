@@ -74,14 +74,28 @@ Before activating, let's set:
 
 ### 4. **Get Assignee**
 
-**Get current developer:**
+**Default: Assign to current developer:**
 ```bash
 git config github.user || git config user.name || "Developer"
 ```
 
+**If user specifies someone else:**
+- "assign to cory" → assign to that team member
+- Query `list_users` to find user ID by name/email
+
 **Check if already assigned:**
 - If assigned to someone else, warn before changing
-- If unassigned, assign to current user
+- If unassigned, assign to specified user (or current user)
+
+**Assignment options:**
+```typescript
+// Assign to self (default)
+updateIssue(issueId, { assignee: "me" })
+
+// Assign to specific person
+updateIssue(issueId, { assignee: "cory" })  // by name
+updateIssue(issueId, { assignee: "cory@example.com" })  // by email
+```
 
 ### 5. **Update Linear Issue**
 

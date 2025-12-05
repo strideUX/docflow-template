@@ -215,6 +215,34 @@ Examples:
 - `**Blocked** — Waiting on API access from backend team.`
 - `**Complete** — All acceptance criteria met.`
 
+### Team Collaboration
+
+**Assignment:**
+Assign issues to team members by name, email, or "me":
+```typescript
+// Via MCP
+updateIssue(issueId, { assignee: "cory" })      // by name
+updateIssue(issueId, { assignee: "me" })        // self
+updateIssue(issueId, { assignee: "cory@..." })  // by email
+```
+
+**Subscribers (Notifications):**
+Add subscribers to notify team members of all issue updates:
+```bash
+# Via GraphQL API (requires LINEAR_API_KEY)
+issueUpdate(id: "...", input: { subscriberIds: ["user-id-1", "user-id-2"] })
+```
+
+**Finding Users:**
+```typescript
+// Via MCP
+list_users({ query: "cory" })  // Find user by name/email
+```
+
+**When to use each:**
+- **Assignment** → Ownership (who's responsible)
+- **Subscribers** → Notifications (who should know about updates)
+
 ### Figma Integration
 ```
 When issue has Figma attachment:

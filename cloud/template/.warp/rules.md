@@ -129,6 +129,12 @@ Backlog → In Progress → Done
 - **Checkboxes:** Update in description as criteria completed (`- [ ]` → `- [x]`)
 - **Comments:** Use `**Status** — Brief note.` format
 
+## Team Collaboration
+
+- **Assign:** `updateIssue(id, { assignee: "name" })` — by name, email, or "me"
+- **Subscribers:** Add via GraphQL `subscriberIds` for notifications
+- **Find users:** `list_users({ query: "name" })`
+
 ---
 
 ## Critical Rules

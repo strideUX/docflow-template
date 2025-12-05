@@ -53,6 +53,11 @@ Backlog → In Progress → In Review → QA → Done
 - **Checkboxes:** Update in description as criteria completed
 - **Comments:** Use `**Status** — Brief note.` format
 
+### Team Collaboration
+- **Assign:** `updateIssue(id, { assignee: "name" })` — by name, email, or "me"
+- **Subscribers:** Add via GraphQL `subscriberIds` for notifications
+- **Find users:** `list_users({ query: "name" })`
+
 ### Natural Language Triggers
 
 - "let's start" → /start-session

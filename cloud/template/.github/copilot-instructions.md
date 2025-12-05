@@ -202,6 +202,11 @@ Backlog → In Progress → Done
 ```
 Examples: `**Activated** — ...`, `**Progress** — ...`, `**Complete** — ...`
 
+### Team Collaboration
+- **Assign:** `updateIssue(id, { assignee: "name" })` — by name, email, or "me"
+- **Subscribers:** Add via GraphQL `subscriberIds` for notifications
+- **Find users:** `list_users({ query: "name" })`
+
 ---
 
 ## Commands Reference
