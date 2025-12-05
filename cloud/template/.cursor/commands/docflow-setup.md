@@ -8,6 +8,35 @@ Complete DocFlow Cloud setup: validate environment, configure Linear, fill proje
 
 ---
 
+## Linear API Access
+
+### MCP-First, Curl Fallback
+
+For all Linear operations in this command:
+
+1. **Try MCP first** - If Linear MCP is available, use it for cleaner interactions
+2. **Fall back to curl** - If MCP unavailable, use direct GraphQL API calls
+
+**MCP Example:**
+```typescript
+// Cleaner - use when MCP available
+linear_getTeams()
+linear_createIssue({ teamId, title, description, ... })
+```
+
+**Curl Fallback Example:**
+```bash
+# Works without MCP - use as fallback
+source .env && curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "{ teams { nodes { id name key } } }"}' | jq .
+```
+
+**Always source `.env` before curl commands to load the API key.**
+
+---
+
 ## Steps
 
 ### 1. **Check Environment File**
@@ -80,7 +109,7 @@ Update your `.env` file and run `/docflow-setup` again!
 
 ### 3. **Test Linear Connection**
 
-Once API key is valid, test the MCP connection:
+Once API key is valid, test the connection:
 
 ```markdown
 ✅ API key found!
@@ -88,7 +117,26 @@ Once API key is valid, test the MCP connection:
 Testing Linear connection...
 ```
 
-Use Linear MCP to query teams - this verifies the API key works.
+**Try MCP first:**
+```typescript
+// If Linear MCP is available
+linear_getTeams()
+```
+
+**If MCP unavailable, use curl:**
+```bash
+source .env && curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "{ teams { nodes { id name key } } }"}' | jq .
+```
+
+**If successful:**
+```markdown
+✅ Linear connection verified!
+
+Found teams: [Team A, Team B, ...]
+```
 
 **If failed:**
 ```markdown
@@ -117,18 +165,31 @@ cat .docflow.json | grep teamId
 
 **If teamId is null:**
 
-Query Linear for all teams the API key has access to:
+Query Linear for all teams:
 
+**MCP:**
+```typescript
+linear_getTeams()
+```
+
+**Curl fallback:**
+```bash
+source .env && curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "{ teams { nodes { id name key } } }"}' | jq '.data.teams.nodes'
+```
+
+**Present options:**
 ```markdown
 ## 👥 Select a Team
 
 I found these teams in your Linear workspace:
 
-| # | Team | Key |
-|---|------|-----|
-| 1 | strideUX | stride |
-| 2 | Client A | client-a |
-| 3 | Client B | client-b |
+| # | Team | Key | ID |
+|---|------|-----|-----|
+| 1 | strideUX | stride | abc123... |
+| 2 | Client A | client-a | def456... |
 
 Which team should this project use?
 ```
@@ -167,23 +228,45 @@ cat .docflow.json | grep projectId
 
 Query Linear for projects in the selected team:
 
+**MCP:**
+```typescript
+linear_getProjects({ teamId: "selected-team-id" })
+```
+
+**Curl fallback:**
+```bash
+source .env && curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "{ projects(filter: { team: { id: { eq: \"TEAM_ID\" } } }) { nodes { id name state } } }"}' | jq '.data.projects.nodes'
+```
+
+**Present options:**
 ```markdown
 ## 📁 Select a Project
 
 I found these projects in **[Team Name]**:
 
-| # | Project | Status |
-|---|---------|--------|
-| 1 | DocFlow | In Progress |
-| 2 | Website Redesign | Planned |
-| 3 | *(Create new)* | - |
+| # | Project | Status | ID |
+|---|---------|--------|-----|
+| 1 | DocFlow | In Progress | proj123... |
+| 2 | Website Redesign | Planned | proj456... |
+| 3 | *(Create new)* | - | - |
 
 Which project should DocFlow use for this codebase?
 ```
 
 **When user selects:**
 - If existing project: Get the project ID
-- If new project: Create it via Linear MCP, get the new ID
+- If create new: Create via MCP or curl mutation
+
+**Create new project (if needed):**
+```bash
+source .env && curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "mutation { projectCreate(input: { name: \"Project Name\", teamIds: [\"TEAM_ID\"] }) { success project { id name } } }"}' | jq .
+```
 
 **Save to .docflow.json:**
 ```json

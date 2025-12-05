@@ -136,8 +136,7 @@ BACKLOG → READY → IMPLEMENTING → REVIEW → TESTING → COMPLETE
 │  Your Project Repository                                        │
 │  ├── .cursor/                                                   │
 │  │   ├── rules/docflow.mdc    ← Core workflow rules             │
-│  │   ├── commands/*.md        ← 12 slash commands               │
-│  │   └── mcp.json             ← Linear + Figma MCPs             │
+│  │   └── commands/*.md        ← 12 slash commands               │
 │  ├── .claude/commands/        ← Symlinks to .cursor/commands    │
 │  ├── .warp/rules.md           ← Warp adapter                    │
 │  ├── .github/copilot-*.md     ← GitHub Copilot adapter          │
@@ -148,11 +147,11 @@ BACKLOG → READY → IMPLEMENTING → REVIEW → TESTING → COMPLETE
 │  ├── AGENTS.md                ← Agent instructions              │
 │  └── WARP.md                  ← Warp workflow guide             │
 │              │                                                  │
-│              │ Commands call MCPs                               │
+│              │ Commands call Linear/Figma                       │
 │              ▼                                                  │
 │  External Services                                              │
-│  ├── Linear (via MCP) ─────── Issues, workflow, comments        │
-│  └── Figma (via MCP) ──────── Design context, assets            │
+│  ├── Linear ───────────────── Issues, workflow, comments        │
+│  └── Figma ────────────────── Design context, assets            │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -190,9 +189,28 @@ Both versions support the same commands:
 
 ## Cloud Version Features
 
+### MCP Setup (Recommended)
+
+DocFlow Cloud works best with MCP servers installed in Cursor. Without MCPs, the agent falls back to direct API calls.
+
+**Installing Linear MCP:**
+1. Open Cursor Settings → Features → MCP
+2. Add new MCP:
+   - Name: `linear`
+   - Command: `npx`
+   - Args: `-y mcp-remote https://mcp.linear.app/mcp`
+
+**Installing Figma MCP (Optional):**
+1. Add new MCP:
+   - Name: `figma`
+   - Command: `npx`
+   - Args: `-y @anthropic/mcp-figma`
+
+See [cloud/README.md](./cloud/README.md#mcp-setup) for detailed setup instructions.
+
 ### Linear Integration
 
-The cloud version uses **Linear MCP** for all spec management:
+The cloud version integrates with **Linear** for spec management (MCP preferred, curl fallback):
 
 - **Issues** = Specs (features, bugs, chores, ideas)
 - **Projects** = Features or user stories
@@ -203,7 +221,7 @@ The cloud version uses **Linear MCP** for all spec management:
 
 ### Design Integration
 
-The cloud version includes **Figma MCP** for design context:
+The cloud version can integrate with **Figma** for design context (requires Figma MCP):
 
 - Access Figma specs directly from Linear issues
 - Get colors, spacing, typography

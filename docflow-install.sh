@@ -179,7 +179,6 @@ done
 if [ "$MODE" == "cloud" ]; then
   download_file ".cursor/commands/docflow-update.md" ".cursor/commands/docflow-update.md"
   download_file ".cursor/commands/docflow-setup.md" ".cursor/commands/docflow-setup.md"
-  download_file ".cursor/mcp.json" ".cursor/mcp.json"
 else
   download_file ".cursor/commands/docflow-setup.md" ".cursor/commands/docflow-setup.md"
 fi
@@ -380,6 +379,10 @@ if [ "$MODE" == "cloud" ]; then
   echo "   • Test the Linear connection"
   echo "   • Help fill out project context"
   echo "   • Create initial issues in Linear"
+  echo ""
+  echo -e "   ${YELLOW}💡 TIP:${NC} Install Linear MCP in Cursor for best experience:"
+  echo "      Cursor Settings → Features → MCP → Add:"
+  echo "      Name: linear | Command: npx | Args: -y mcp-remote https://mcp.linear.app/mcp"
 else
   echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
   echo -e "${CYAN}║${NC}                    ${YELLOW}NEXT STEPS${NC}                              ${CYAN}║${NC}"

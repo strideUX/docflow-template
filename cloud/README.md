@@ -11,8 +11,9 @@ DocFlow Cloud is a hybrid spec-driven development workflow where work items live
 ### 1. Prerequisites
 
 - Linear account with API key
-- Cursor IDE with MCP support
-- (Optional) Figma account for design integration
+- Cursor IDE
+- **Recommended:** Linear MCP installed in Cursor (see [MCP Setup](#mcp-setup))
+- (Optional) Figma account + MCP for design integration
 
 ### 2. Install with Unified Installer
 
@@ -75,14 +76,46 @@ The setup command will:
 
 ---
 
+## MCP Setup
+
+DocFlow Cloud works best with MCP (Model Context Protocol) servers installed in Cursor. MCPs provide cleaner API interactions and better handling of rich content.
+
+### Installing Linear MCP (Recommended)
+
+1. Open Cursor Settings → Features → MCP
+2. Add the Linear MCP:
+   - **Name:** `linear`
+   - **Command:** `npx`
+   - **Args:** `-y mcp-remote https://mcp.linear.app/mcp`
+3. The MCP will use `LINEAR_API_KEY` from your environment
+
+### Installing Figma MCP (Optional)
+
+1. Open Cursor Settings → Features → MCP
+2. Add the Figma MCP:
+   - **Name:** `figma`
+   - **Command:** `npx`
+   - **Args:** `-y @anthropic/mcp-figma`
+3. Set `FIGMA_ACCESS_TOKEN` in your environment
+
+### Without MCPs
+
+DocFlow Cloud still works without MCPs installed. The agent will fall back to direct API calls using curl and GraphQL. This is fully functional but:
+- Slightly messier for complex markdown content
+- Manual URL handling for attachments
+- No design context extraction from Figma
+
+**We recommend installing MCPs for the best experience.**
+
+---
+
 ## What's Included
 
 ```
 template/
 ├── .cursor/
 │   ├── rules/docflow.mdc    # Workflow rules
-│   ├── commands/            # Slash commands
-│   └── mcp.json             # MCP configuration
+│   └── commands/            # Slash commands
 │
 ├── docflow/
 │   ├── context/             # Project understanding
@@ -181,6 +214,8 @@ When Linear issues have Figma attachments:
 
 This enables design-accurate implementations without manual spec copying.
 
+**Requires:** Figma MCP installed in Cursor + `FIGMA_ACCESS_TOKEN` in environment.
+
 ---
 
 ## Updating DocFlow
@@ -212,6 +247,7 @@ Quick steps:
 ## Documentation
 
 - **[DOCFLOW-CLOUD-SPEC.md](./DOCFLOW-CLOUD-SPEC.md)** - Full specification
+- **[LINEAR-SETUP-GUIDE.md](./LINEAR-SETUP-GUIDE.md)** - Linear structure guide
 - **[template/AGENTS.md](./template/AGENTS.md)** - AI agent instructions
 - **[template/.cursor/rules/docflow.mdc](./template/.cursor/rules/docflow.mdc)** - Complete workflow rules
 
@@ -237,4 +273,3 @@ This is part of the DocFlow project. See the main README for contribution guidel
 ---
 
 *DocFlow Cloud v3.0.0*
-

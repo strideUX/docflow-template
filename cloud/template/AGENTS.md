@@ -69,8 +69,7 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 project/
 ├── .cursor/
 │   ├── rules/docflow.mdc    # Workflow rules (synced from source)
-│   ├── commands/            # Slash commands (synced from source)
-│   └── mcp.json             # MCP server configuration
+│   └── commands/            # Slash commands (synced from source)
 │
 ├── docflow/
 │   ├── context/             # Project understanding (LOCAL)
@@ -196,22 +195,38 @@ When a Linear issue has a Figma attachment:
 
 ---
 
-## 🛠️ MCP Tools Available
+## 🛠️ Linear API Access
 
-### Linear MCP
-- Create/read/update issues
-- Query by status, assignee, labels
-- Add comments and attachments
+### MCP-First, Curl Fallback
 
-### Figma MCP
+For all Linear operations:
+1. **Try MCP first** - If Linear MCP is installed in Cursor, use it
+2. **Fall back to curl** - If MCP unavailable, use direct GraphQL API
+
+**MCP (when available):**
+```typescript
+linear_getTeams()
+linear_createIssue({ teamId, title, description, ... })
+linear_updateIssue(id, { stateId, ... })
+```
+
+**Curl fallback:**
+```bash
+source .env && curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "{ teams { nodes { id name } } }"}' | jq .
+```
+
+### Figma MCP (Optional)
+If Figma MCP is installed:
 - `get_design_context` - Get UI code and specs
 - `get_screenshot` - Get visual reference
 - `get_variable_defs` - Get design tokens
 
-### DocFlow Update MCP
-- `docflow_check_update` - Check for updates
-- `docflow_update` - Sync latest rules
-- `docflow_version` - Show current version
+### MCP Setup
+MCPs are installed in **Cursor Settings → Features → MCP**, not in the project.
+See the cloud README for setup instructions.
 
 ---
 
