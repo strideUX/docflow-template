@@ -73,48 +73,54 @@ Work through the issue:
 - Follow standards.md conventions
 - Use Figma specs if available (colors, spacing, etc.)
 
-### 6. **Track Progress in Linear Comments**
-As you work, add comments to Linear issue:
+### 6. **Update Checkboxes as You Work**
 
-```markdown
-### YYYY-MM-DD - Implementation Progress
+The issue description contains acceptance criteria as checkboxes. **Update them in-place** as each criterion is completed:
 
-**Files Changed:**
-- `path/to/file.tsx` - Created component
-- `path/to/other.ts` - Added helper
+```typescript
+// Read current description
+const issue = await getIssue(issueId);
+const currentDescription = issue.description;
 
-**Decisions Made:**
-- Used [pattern] because [reason]
-- Chose [approach] over [alternative]
+// Update checkbox from [ ] to [x]
+const updatedDescription = currentDescription.replace(
+  '- [ ] Acceptance criterion 1',
+  '- [x] Acceptance criterion 1'
+);
 
-**Progress:**
-- [x] Acceptance criterion 1
-- [x] Acceptance criterion 2
-- [ ] Acceptance criterion 3 (in progress)
+// Save updated description
+updateIssue(issueId, {
+  description: updatedDescription
+});
+
+// Add progress comment
+addComment(issueId, {
+  body: '**Progress** — Completed acceptance criterion 1.'
+});
 ```
 
+**Comment format for progress:**
+```markdown
+**Progress** — Brief description of what was done.
+```
+
+**Examples:**
+- `**Progress** — Data model and types defined.`
+- `**Progress** — useLocalStorage hook implemented, moving to useTodos.`
+- `**Blocked** — Need API access from backend team.`
+
 ### 7. **Auto-Complete When Done**
-When ALL acceptance criteria are met:
+When ALL acceptance criteria checkboxes are checked:
 
 **Update Linear issue:**
 ```typescript
+// Verify all checkboxes are [x]
 updateIssue(issueId, {
   stateId: config.linear.states.REVIEW
 })
 
 addComment(issueId, {
-  body: `### ${date} - Implementation Complete
-
-**Files Changed:**
-- [list of files]
-
-**Key Decisions:**
-- [decision 1]
-- [decision 2]
-
-**Acceptance Criteria:** All met ✓
-
-Ready for code review.`
+  body: '**Ready for Review** — All acceptance criteria complete. Files: X.'
 })
 ```
 
@@ -123,7 +129,7 @@ Ready for code review.`
 ✅ Implementation complete!
 
 **Issue:** LIN-XXX
-**Status:** In Review (ready for code review)
+**Status:** In Review
 **Files changed:** X
 
 All acceptance criteria met ✓
@@ -177,10 +183,12 @@ User might say:
 - [ ] Found available work in Linear
 - [ ] Loaded issue + stack.md + standards.md
 - [ ] Checked for Figma attachments
-- [ ] Updated Linear status to IMPLEMENTING
-- [ ] Added start comment to Linear
-- [ ] Followed acceptance criteria
+- [ ] Verified status is In Progress (or updated it)
+- [ ] Added start comment if just beginning
+- [ ] Updated description checkboxes as criteria completed
 - [ ] Added progress comments to Linear
-- [ ] Updated Linear status to REVIEW when done
+- [ ] All checkboxes marked [x] when done
+- [ ] Updated Linear status to In Review when done
+- [ ] Added completion comment
 - [ ] Provided completion summary
 

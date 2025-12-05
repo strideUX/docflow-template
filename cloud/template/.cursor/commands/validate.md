@@ -45,14 +45,7 @@ updateIssue(issueId, {
 })
 
 addComment(issueId, {
-  body: `### ${date} - Code Review Passed ✅
-
-**Review Summary:**
-- All acceptance criteria addressed
-- Code follows standards
-- No unauthorized scope changes
-
-Ready for QE testing and user validation.`
+  body: '**Review Passed** — Code meets standards, ready for QE testing.'
 })
 ```
 
@@ -78,13 +71,7 @@ updateIssue(issueId, {
 })
 
 addComment(issueId, {
-  body: `### ${date} - Code Review: Changes Needed ⚠️
-
-**Issues Found:**
-1. [Issue 1 - specific guidance]
-2. [Issue 2 - specific guidance]
-
-Please address and re-submit for review.`
+  body: '**Review Failed** — [Specific issue 1], [Specific issue 2]. Returning to implementation.'
 })
 ```
 
@@ -121,12 +108,7 @@ Recognize approval phrases:
 
 ```typescript
 addComment(issueId, {
-  body: `### ${date} - QE Testing Passed ✅
-
-**Tested By:** @${username}
-**Result:** APPROVED
-
-All acceptance criteria verified in real environment.`
+  body: '**QE Passed** — All acceptance criteria verified by user.'
 })
 ```
 
@@ -147,13 +129,7 @@ updateIssue(issueId, {
 })
 
 addComment(issueId, {
-  body: `### ${date} - QE Issues Found ⚠️
-
-**Reported Issues:**
-1. [Issue user described]
-2. [Issue user described]
-
-**Returning to implementation for fixes.**`
+  body: '**QE Failed** — [Issue 1], [Issue 2]. Returning to implementation.'
 })
 ```
 

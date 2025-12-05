@@ -23,21 +23,17 @@ For each issue in progress, add session wrap comment:
 
 ```typescript
 addComment(issueId, {
-  body: `### ${date} - Session Wrap
-
-**Progress This Session:**
-- [What was accomplished]
-- [Files touched]
-
-**Current State:**
-- [Where things stand]
-
-**Next Steps:**
-- [ ] [What to do next session]
-- [ ] [What to do next session]
-
-**Blockers:** [None / Description]`
+  body: '**Session End** — [Brief progress summary]. Next: [what to do next].'
 })
+```
+
+For issues with significant progress, can expand:
+```markdown
+**Session End** — [What was accomplished].
+
+Next session:
+- [Next step 1]
+- [Next step 2]
 ```
 
 ### 3. **Summarize Session**
@@ -70,7 +66,31 @@ addComment(issueId, {
 Good session! 🎉
 ```
 
-### 4. **Offer Final Actions**
+### 4. **Post Project Update (Optional)**
+
+If work was done on a project, offer to post a project update:
+
+```markdown
+Would you like to post a project update for [Project Name]?
+
+Suggested update:
+**Health:** 🟢 On Track
+**Summary:**
+- Completed STR-101, STR-102
+- STR-456 in progress (70% done)
+- Next: QE testing on STR-102
+
+Say "post update" to publish, or "skip" to continue.
+```
+
+**If user approves, run `/project-update`:**
+- Uses session summary as update body
+- Sets health status based on blockers (onTrack if none)
+- Posts via Linear GraphQL API
+
+See `/project-update` command for implementation details.
+
+### 5. **Offer Final Actions**
 
 ```markdown
 Before you go:
@@ -119,6 +139,7 @@ User might say:
 ## Outputs
 - Progress comments added to active issues
 - Session summary provided
+- Project update posted (if approved)
 - Next session suggestions
 - Clean handoff for next session
 
@@ -130,6 +151,8 @@ User might say:
 - [ ] Summarized session accomplishments
 - [ ] Listed in-progress items
 - [ ] Noted new captures
+- [ ] Offered project update (if project work done)
+- [ ] Posted project update (if approved)
 - [ ] Suggested next session priorities
 - [ ] Offered final captures
 - [ ] Confirmed wrap complete

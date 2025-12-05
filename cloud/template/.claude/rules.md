@@ -44,8 +44,14 @@ This project uses DocFlow Cloud with Linear integration. Read these rules carefu
 ### Workflow States (in Linear)
 
 ```
-Backlog → Todo → In Progress → In Review → QA → Done
+Backlog → In Progress → In Review → QA → Done
 ```
+
+### Issue Metadata
+- **Priority:** 1=Urgent, 2=High, 3=Medium, 4=Low
+- **Estimate:** 1=XS, 2=S, 3=M, 4=L, 5=XL
+- **Checkboxes:** Update in description as criteria completed
+- **Comments:** Use `**Status** — Brief note.` format
 
 ### Natural Language Triggers
 

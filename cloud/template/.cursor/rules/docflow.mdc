@@ -77,15 +77,19 @@ Backlog In Progress  Done
 **When Creating Specs:**
 1. Create Linear issue with appropriate template
 2. Set type label (feature, bug, chore, idea)
-3. Set priority and complexity estimate
-4. Add Figma attachments if design exists
-5. Leave in Backlog state
+3. Set priority (1-4) based on urgency
+4. Set estimate (1-5) based on complexity
+5. Add Figma attachments if design exists
+6. Leave in Backlog state
+7. Add comment: `**Created** — [Brief context].`
 
 **When Activating Work:**
 1. Get developer username (git config)
-2. Assign Linear issue to developer
-3. Move to "Todo" state
-4. Add comment: "Ready for implementation"
+2. Set priority if not already set (ask or infer)
+3. Set estimate if not already set (ask or infer)
+4. Assign Linear issue to developer
+5. Move to "In Progress" state
+6. Add comment: `**Activated** — Assigned to [name], Priority: [P], Estimate: [E].`
 
 **When Reviewing (status=REVIEW):**
 1. Check Linear for issues in "In Review" state
@@ -111,22 +115,18 @@ Backlog In Progress  Done
 3. Read full issue including comments
 
 **During Implementation:**
-1. Add progress comments to Linear issue
-2. Check off acceptance criteria in comments
+1. Update description checkboxes as criteria are completed
+2. Add progress comments: `**Progress** — What was done.`
 3. Document decisions in comments (dated)
 4. If Figma attached: call Figma MCP for design specs
 
 **On Completion:**
-1. Verify all acceptance criteria met
-2. Add final implementation comment with:
-   - Files changed
-   - Key decisions made
-   - Deviations from original spec (if any)
-3. Move to "In Review" state
-4. Add comment: "Ready for code review"
+1. Verify all acceptance criteria checkboxes are checked
+2. Move to "In Review" state
+3. Add comment: `**Ready for Review** — [Brief summary]. Files: [count].`
 
 **On Blocker:**
-1. Add blocker comment to Linear issue
+1. Add comment: `**Blocked** — [What's blocking and why].`
 2. Tag PM/reviewer if needed
 
 ### QE/Validation Agent
@@ -162,10 +162,58 @@ Use Linear MCP to:
 ```
 Use Linear MCP to:
 - Create new issues
-- Update issue status
+- Update issue status, priority, estimate
+- Update issue description (including checkboxes)
 - Add comments
 - Assign users
 ```
+
+### Priority Values
+| Value | Name    | Use When                          |
+|-------|---------|-----------------------------------|
+| 0     | None    | Not yet triaged                   |
+| 1     | Urgent  | Drop everything, fix now          |
+| 2     | High    | Next up, important                |
+| 3     | Medium  | Normal priority (default)         |
+| 4     | Low     | Nice to have, when time permits   |
+
+### Estimate Values (Complexity)
+| Value | Name | Rough Effort         |
+|-------|------|----------------------|
+| 1     | XS   | < 1 hour             |
+| 2     | S    | 1-4 hours            |
+| 3     | M    | Half day to full day |
+| 4     | L    | 2-3 days             |
+| 5     | XL   | Week+                |
+
+### Acceptance Criteria as Checkboxes
+Issue descriptions contain acceptance criteria as markdown checkboxes:
+```markdown
+## Acceptance Criteria
+- [ ] First criterion
+- [ ] Second criterion
+- [x] Completed criterion
+```
+
+**During implementation:**
+1. Read current description to see checkbox state
+2. As each criterion is completed, update description with `[x]`
+3. Use `update_issue` with full updated description
+4. Add comment noting progress
+
+**This keeps the issue as the single source of truth.**
+
+### Comment Format
+Use consistent comment format for audit trail:
+```markdown
+**Status** — Brief description of action taken.
+```
+
+Examples:
+- `**Activated** — Assigned to Matt, Priority: High, Estimate: S.`
+- `**Progress** — Completed data model, starting on hooks.`
+- `**Blocked** — Waiting on API access from backend team.`
+- `**Complete** — All acceptance criteria met.`
 
 ### Figma Integration
 ```
@@ -185,6 +233,18 @@ Read .docflow.json for:
 - state IDs for status mapping
 ```
 
+### Environment Variables
+```
+Set in project .env file:
+
+LINEAR_API_KEY=lin_api_xxxxx
+
+Get key from: Linear → Settings → API → Personal API keys
+Required for: Project updates (GraphQL API)
+
+Load with: source .env
+```
+
 ---
 
 ## Commands
@@ -199,7 +259,14 @@ Read .docflow.json for:
 **`/wrap-session`**
 1. Summarize what was accomplished
 2. Update any in-progress Linear issues
-3. Note what's next
+3. Offer to post project update (health + summary)
+4. Note what's next
+
+**`/project-update [project]`**
+1. Compose update summary
+2. Set health status (onTrack, atRisk, offTrack)
+3. Post via Linear GraphQL API (requires LINEAR_API_KEY)
+4. Confirm with link
 
 **`/capture`**
 1. Ask for type: feature, bug, chore, idea

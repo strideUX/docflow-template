@@ -48,12 +48,7 @@ updateIssue(issueId, {
 })
 
 addComment(issueId, {
-  body: `### ${date} - Issue Closed ✅
-
-**Completed By:** @${username}
-**Result:** Successfully implemented and verified
-
-This issue has been completed and archived.`
+  body: '**Complete** — Verified and closed.'
 })
 ```
 

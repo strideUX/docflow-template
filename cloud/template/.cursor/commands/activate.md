@@ -44,7 +44,35 @@ Would you like to:
 3. Activate anyway (not recommended)
 ```
 
-### 3. **Get Assignee**
+### 3. **Set Priority and Estimate**
+
+**If not already set, ask or infer:**
+
+Priority values:
+| Value | Name   | Use When                        |
+|-------|--------|----------------------------------|
+| 1     | Urgent | Drop everything                 |
+| 2     | High   | Next up, important              |
+| 3     | Medium | Normal priority (default)       |
+| 4     | Low    | Nice to have                    |
+
+Estimate values (complexity):
+| Value | Name | Rough Effort         |
+|-------|------|----------------------|
+| 1     | XS   | < 1 hour             |
+| 2     | S    | 1-4 hours            |
+| 3     | M    | Half day to full day |
+| 4     | L    | 2-3 days             |
+| 5     | XL   | Week+                |
+
+**Ask user if unclear:**
+```markdown
+Before activating, let's set:
+- **Priority:** [1=Urgent, 2=High, 3=Medium, 4=Low]?
+- **Estimate:** [1=XS, 2=S, 3=M, 4=L, 5=XL]?
+```
+
+### 4. **Get Assignee**
 
 **Get current developer:**
 ```bash
@@ -55,40 +83,39 @@ git config github.user || git config user.name || "Developer"
 - If assigned to someone else, warn before changing
 - If unassigned, assign to current user
 
-### 4. **Update Linear Issue**
+### 5. **Update Linear Issue**
 
 ```typescript
 updateIssue(issueId, {
-  stateId: config.linear.states.READY,  // Todo state
-  assigneeId: currentUserId
+  stateId: config.linear.states.IMPLEMENTING,  // In Progress state
+  assigneeId: currentUserId,
+  priority: priorityValue,  // 1-4
+  estimate: estimateValue   // 1-5
 })
 
 addComment(issueId, {
-  body: `### ${date} - Activated for Implementation
-
-**Assigned to:** @${username}
-**Status:** Ready for implementation
-
-This issue is now queued for development.`
+  body: `**Activated** — Assigned to ${username}, Priority: ${priorityName}, Estimate: ${estimateName}.`
 })
 ```
 
-### 5. **Confirmation**
+### 6. **Confirmation**
 
 ```markdown
 ✅ Activated!
 
 **Issue:** LIN-XXX
 **Title:** [Title]
-**Status:** Todo (ready for implementation)
+**Status:** In Progress
 **Assigned to:** @you
+**Priority:** [High/Medium/etc]
+**Estimate:** [S/M/etc]
 
 **Acceptance Criteria:**
 - [ ] [Criterion 1]
 - [ ] [Criterion 2]
 - [ ] [Criterion 3]
 
-Run `/implement LIN-XXX` or say "implement" to start building.
+Ready to implement. I'll update checkboxes as we complete each criterion.
 ```
 
 ---
@@ -129,19 +156,23 @@ User might say:
 ---
 
 ## Outputs
-- Issue status → Todo/Ready
+- Issue status → In Progress
+- Priority set (1-4)
+- Estimate set (1-5)
 - Assignee set
 - Activation comment added
-- Ready for implementation handoff
+- Ready to begin implementation
 
 ---
 
 ## Checklist
 - [ ] Found issue to activate
 - [ ] Verified issue has required content
+- [ ] Set priority (1-4 value)
+- [ ] Set estimate (1-5 value)
 - [ ] Got current developer username
-- [ ] Updated Linear status to Ready/Todo
+- [ ] Updated Linear status to In Progress
 - [ ] Set assignee
-- [ ] Added activation comment
+- [ ] Added activation comment with priority/estimate
 - [ ] Provided confirmation with criteria
 

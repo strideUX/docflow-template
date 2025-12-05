@@ -162,13 +162,45 @@ If you find reusable patterns while coding:
 
 **Features & Bugs:**
 ```
-Backlog → Todo → In Progress → In Review → QA → Done
+Backlog → In Progress → In Review → QA → Done
 ```
 
 **Chores & Ideas:**
 ```
 Backlog → In Progress → Done
 ```
+
+---
+
+## Issue Metadata
+
+### Priority Values
+| Value | Name | Use When |
+|-------|------|----------|
+| 1 | Urgent | Drop everything |
+| 2 | High | Next up, important |
+| 3 | Medium | Normal (default) |
+| 4 | Low | Nice to have |
+
+### Estimate Values (Complexity)
+| Value | Name | Rough Effort |
+|-------|------|--------------|
+| 1 | XS | < 1 hour |
+| 2 | S | 1-4 hours |
+| 3 | M | Half to full day |
+| 4 | L | 2-3 days |
+| 5 | XL | Week+ |
+
+### Acceptance Criteria
+- Live as checkboxes in issue description: `- [ ]` / `- [x]`
+- Update in-place as each criterion is completed
+- Issue description is single source of truth
+
+### Comment Format
+```
+**Status** — Brief description.
+```
+Examples: `**Activated** — ...`, `**Progress** — ...`, `**Complete** — ...`
 
 ---
 

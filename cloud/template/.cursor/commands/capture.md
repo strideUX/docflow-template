@@ -130,7 +130,28 @@ _Captured: YYYY-MM-DD_
 _Captured: YYYY-MM-DD_
 ```
 
-### 4. **Create Linear Issue**
+### 4. **Set Priority and Estimate**
+
+Ask or infer based on context:
+
+**Priority (required for bugs, optional for others):**
+| Value | Name   | Use When                        |
+|-------|--------|----------------------------------|
+| 1     | Urgent | Drop everything                 |
+| 2     | High   | Next up, important              |
+| 3     | Medium | Normal priority (default)       |
+| 4     | Low    | Nice to have                    |
+
+**Estimate (optional at capture, can set during activation):**
+| Value | Name | Rough Effort         |
+|-------|------|----------------------|
+| 1     | XS   | < 1 hour             |
+| 2     | S    | 1-4 hours            |
+| 3     | M    | Half day to full day |
+| 4     | L    | 2-3 days             |
+| 5     | XL   | Week+                |
+
+### 5. **Create Linear Issue**
 Use Linear MCP to create issue:
 
 ```typescript
@@ -140,23 +161,30 @@ createIssue({
   title: "[Type]: [Name]",
   description: [built description],
   priority: [1-4 based on user input],
+  estimate: [1-5 if known],
   labelIds: [config.linear.labels[type]],
   stateId: config.linear.states.BACKLOG
 })
+
+// Add creation comment
+addComment(issueId, {
+  body: '**Created** — [Brief context about why this was captured].'
+})
 ```
 
-### 5. **Add Figma/Assets If Available**
+### 6. **Add Figma/Assets If Available**
 If user mentions design references:
 - Add Figma URL as attachment
 - Note any screenshots needed
 
-### 6. **Confirmation**
+### 7. **Confirmation**
 ```markdown
 ✅ Captured to Linear!
 
 **Issue:** LIN-XXX
 **Title:** [Type]: [Name]
 **Priority:** [Level]
+**Estimate:** [Size or "Not set"]
 **Status:** Backlog
 
 [View in Linear](issue-url)
@@ -208,10 +236,12 @@ User might say:
 - [ ] Type identified (feature/bug/chore/idea)
 - [ ] Minimal context gathered
 - [ ] Description built from template
+- [ ] Priority set (1-4)
+- [ ] Estimate set (1-5, optional at capture)
 - [ ] Linear issue created via MCP
 - [ ] Type label applied
 - [ ] State set to Backlog
-- [ ] Priority set
+- [ ] Creation comment added
 - [ ] Confirmation with link provided
 - [ ] User can continue current work
 

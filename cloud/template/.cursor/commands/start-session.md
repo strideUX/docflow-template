@@ -38,13 +38,7 @@ Filter: assigned to current user
 Show: Work currently being implemented
 ```
 
-**Priority 4 - Ready/Todo (ready to start):**
-```
-Query: status = "Todo" (or mapped READY state)
-Show: Issues ready for implementation
-```
-
-**Priority 5 - Backlog (prioritized):**
+**Priority 4 - Backlog (prioritized, ready to activate):**
 ```
 Query: status = "Backlog" (or mapped BACKLOG state)
 Limit: Top 5 by priority
@@ -68,16 +62,14 @@ Use this to filter "my work" vs "all work"
 - LIN-456: [Title] - Implementation complete
 
 ### 🔨 In Progress (@you)
-- LIN-789: [Title] - Currently implementing
+- LIN-789: [Title] - Priority: High, Estimate: M
 
-### ✅ Ready to Start
-- LIN-101: [Title] - Priority: High
-- LIN-102: [Title] - Priority: Medium
-
-### 📥 Backlog (Top 5)
-1. LIN-201: [Title] - High
-2. LIN-202: [Title] - Medium
-...
+### 📥 Backlog (Ready to Activate)
+| Issue | Title | Priority | Estimate |
+|-------|-------|----------|----------|
+| LIN-101 | [Title] | High | S |
+| LIN-102 | [Title] | Medium | M |
+| LIN-103 | [Title] | Low | - |
 
 **What would you like to do?**
 1. Continue work on LIN-789
@@ -133,8 +125,7 @@ User might say:
 - [ ] Queried Linear for QA issues
 - [ ] Queried Linear for Review issues  
 - [ ] Queried Linear for In Progress issues
-- [ ] Queried Linear for Ready issues
-- [ ] Queried Linear for top Backlog items
+- [ ] Queried Linear for Backlog items (with priority/estimate)
 - [ ] Got current developer username
 - [ ] Presented status dashboard
 - [ ] Loaded project context

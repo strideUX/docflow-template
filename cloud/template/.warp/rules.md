@@ -112,13 +112,22 @@ See `.cursor/commands/` for detailed command files.
 
 **Features & Bugs:**
 ```
-Backlog → Todo → In Progress → In Review → QA → Done
+Backlog → In Progress → In Review → QA → Done
 ```
 
 **Chores & Ideas:**
 ```
 Backlog → In Progress → Done
 ```
+
+---
+
+## Issue Metadata
+
+- **Priority:** 1=Urgent, 2=High, 3=Medium, 4=Low
+- **Estimate:** 1=XS, 2=S, 3=M, 4=L, 5=XL
+- **Checkboxes:** Update in description as criteria completed (`- [ ]` → `- [x]`)
+- **Comments:** Use `**Status** — Brief note.` format
 
 ---
 

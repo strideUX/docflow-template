@@ -87,19 +87,12 @@ Update Linear issue with improvements:
 ```typescript
 updateIssue(issueId, {
   description: updatedDescription,
-  priority: updatedPriority,  // if changed
-  estimate: complexity        // if set
+  priority: updatedPriority,  // 1-4 if changed
+  estimate: estimateValue     // 1-5 if set
 })
 
 addComment(issueId, {
-  body: `### ${date} - Spec Refined
-
-**Changes Made:**
-- Clarified acceptance criteria
-- Added technical approach
-- Set complexity estimate: M
-
-Ready for activation.`
+  body: '**Refined** — Clarified acceptance criteria, added technical approach, Estimate: M.'
 })
 ```
 

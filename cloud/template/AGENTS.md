@@ -32,13 +32,15 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 
 **PM/Planning Agent:**
 - Plan and refine work in Linear
-- Activate specs for implementation
+- Activate specs (set priority, estimate, assignee, move to In Progress)
 - Review and close completed work
-- Commands: /start-session, /capture, /review, /activate, /close, /wrap-session
+- Post project updates (health status + summary)
+- Commands: /start-session, /capture, /review, /activate, /close, /wrap-session, /project-update
 
 **Implementation Agent:**
 - Build features and fix bugs
-- Read specs from Linear, update progress in comments
+- Read specs from Linear, update description checkboxes as work progresses
+- Add progress comments for audit trail
 - Commands: /implement, /block
 
 **QE/Validation Agent:**
@@ -145,13 +147,57 @@ You don't need explicit commands. Recognize these phrases:
 
 **Features & Bugs:**
 ```
-Backlog → Todo → In Progress → In Review → QA → Done
+Backlog → In Progress → In Review → QA → Done
 ```
 
 **Chores & Ideas:**
 ```
 Backlog → In Progress → Done
 ```
+
+---
+
+## 📊 Issue Metadata
+
+### Priority Values
+| Value | Name   | Use When                        |
+|-------|--------|----------------------------------|
+| 1     | Urgent | Drop everything                 |
+| 2     | High   | Next up, important              |
+| 3     | Medium | Normal priority (default)       |
+| 4     | Low    | Nice to have                    |
+
+### Estimate Values (Complexity)
+| Value | Name | Rough Effort         |
+|-------|------|----------------------|
+| 1     | XS   | < 1 hour             |
+| 2     | S    | 1-4 hours            |
+| 3     | M    | Half day to full day |
+| 4     | L    | 2-3 days             |
+| 5     | XL   | Week+                |
+
+### Acceptance Criteria as Checkboxes
+Issue descriptions contain acceptance criteria as markdown checkboxes:
+```markdown
+## Acceptance Criteria
+- [ ] First criterion (pending)
+- [x] Second criterion (complete)
+```
+
+**During implementation:** Update checkboxes in-place as each criterion is completed. The issue description is the single source of truth.
+
+### Comment Format
+Use concise, consistent comments for audit trail:
+```markdown
+**Status** — Brief description.
+```
+
+Examples:
+- `**Activated** — Assigned to Matt, Priority: High, Estimate: S.`
+- `**Progress** — Completed data model, starting hooks.`
+- `**Blocked** — Waiting on API access.`
+- `**Ready for Review** — All criteria complete. Files: 4.`
+- `**Complete** — Verified and closed.`
 
 ---
 
@@ -185,9 +231,10 @@ When a Linear issue has a Figma attachment:
 
 ### Update Linear, Not Files
 - Status changes → Update Linear issue state
-- Progress notes → Add Linear comment
+- Acceptance criteria → Update checkboxes in issue description
+- Progress notes → Add Linear comment (`**Progress** — ...`)
 - Decisions → Add dated Linear comment
-- Blockers → Update Linear issue
+- Blockers → Add comment (`**Blocked** — ...`)
 
 ### Document Decisions
 - Spec-specific: In Linear issue comments (dated)

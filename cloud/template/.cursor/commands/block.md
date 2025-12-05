@@ -26,31 +26,23 @@ Ask user (or infer from context):
 
 ### 3. **Document in Linear**
 
-Add detailed blocker comment:
+Add blocker comment:
 
 ```typescript
 addComment(issueId, {
-  body: `### ${date} - 🚫 BLOCKER
-
-**Issue:** [What's blocking]
-
-**Details:**
-[Full explanation of the blocker]
-
-**Needed to Unblock:**
-- [ ] [What's needed 1]
-- [ ] [What's needed 2]
-
-**Who Can Help:**
-- [Person/team who can help]
-
-**Severity:** [Completely blocked / Partially blocked]
-
-**Work Done So Far:**
-- [Progress made before hitting blocker]
-
-@[PM or relevant person] - Need input on this.`
+  body: '**Blocked** — [What is blocking]. Need: [what is needed to unblock].'
 })
+```
+
+For complex blockers, can expand:
+```markdown
+**Blocked** — [Brief description of blocker].
+
+Needed to unblock:
+- [What's needed 1]
+- [What's needed 2]
+
+@[person] for help.
 ```
 
 ### 4. **Update Issue State (Optional)**
