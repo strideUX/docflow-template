@@ -5,6 +5,7 @@
   },
   "provider": {
     "type": "linear",
+    "teamId": null,
     "projectId": null
   },
   "statusMapping": {

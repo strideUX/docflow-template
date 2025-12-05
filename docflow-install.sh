@@ -258,6 +258,7 @@ if [ "$MODE" == "cloud" ]; then
   },
   "provider": {
     "type": "linear",
+    "teamId": null,
     "projectId": null
   },
   "statusMapping": {
@@ -275,7 +276,7 @@ EOF
   cat > .env.example << 'EOF'
 # DocFlow Cloud - Environment Configuration
 # 
-# Copy this file to .env and fill in your values
+# Copy this file to .env and add your API key
 # IMPORTANT: Never commit .env to git!
 
 # ===========================================
@@ -286,21 +287,18 @@ EOF
 LINEAR_API_KEY=
 
 # ===========================================
-# REQUIRED: Linear Team ID  
-# ===========================================
-# Get from: Linear → Settings → Teams → [Your Team]
-# Or from URL: linear.app/team/[TEAM_ID]/...
-LINEAR_TEAM_ID=
-
-# ===========================================
 # OPTIONAL: Figma Access Token
 # ===========================================
 # Get from: Figma → Settings → Personal Access Tokens
 # Only needed if using Figma MCP for design integration
 FIGMA_ACCESS_TOKEN=
 
-# NOTE: Project ID is stored in .docflow.json (not a secret)
-# Run /docflow-setup to select your project
+# ===========================================
+# NOTE: Team ID and Project ID are auto-discovered
+# ===========================================
+# Run /docflow-setup and the agent will query Linear
+# to help you select your team and project.
+# These IDs are saved to .docflow.json (not secrets).
 EOF
 
   # Create .env (copy of example for user to fill in)
@@ -363,10 +361,11 @@ if [ "$MODE" == "cloud" ]; then
   echo -e "${CYAN}║${NC}                    ${YELLOW}NEXT STEPS${NC}                              ${CYAN}║${NC}"
   echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
   echo ""
-  echo -e "   ${GREEN}1.${NC} Open ${CYAN}.env${NC} and add your Linear credentials:"
+  echo -e "   ${GREEN}1.${NC} Open ${CYAN}.env${NC} and add your Linear API key:"
   echo ""
   echo "      LINEAR_API_KEY=lin_api_your_key_here"
-  echo "      LINEAR_TEAM_ID=your_team_id"
+  echo ""
+  echo "      (Get from: Linear → Settings → API → Personal API Keys)"
   echo ""
   echo -e "   ${GREEN}2.${NC} Open in Cursor:"
   echo ""

@@ -24,16 +24,17 @@ Select "Cloud" when prompted. This creates your project with all files including
 
 ### 3. Configure Environment
 
-Open the `.env` file created in your project and add your credentials:
+Open the `.env` file created in your project and add your API key:
 
 ```bash
 # .env (secrets only - never commit!)
-LINEAR_API_KEY=lin_api_your_key_here    # Required
-LINEAR_TEAM_ID=your_team_id              # Required
+LINEAR_API_KEY=lin_api_your_key_here    # Required (only value you need!)
 FIGMA_ACCESS_TOKEN=figd_xxx              # Optional
 ```
 
-Note: Project ID is stored in `.docflow.json` (not a secret). The setup command will help you select a project.
+Get your API key from: **Linear → Settings → API → Personal API Keys**
+
+Note: Team ID and Project ID are discovered automatically during setup and saved to `.docflow.json`.
 
 ### 4. Load Environment Variables
 

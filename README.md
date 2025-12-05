@@ -23,11 +23,11 @@ The installer will prompt you for:
 
 **For Cloud (Linear) installations:**
 
-1. Open the created `.env` file and add your credentials:
+1. Open the created `.env` file and add your API key:
    ```bash
    LINEAR_API_KEY=lin_api_your_key_here
-   LINEAR_TEAM_ID=your_team_id
    ```
+   (Get from: Linear → Settings → API → Personal API Keys)
 
 2. Load environment variables (choose one):
    - **direnv (recommended):** `echo "dotenv" > .envrc && direnv allow`
@@ -355,24 +355,24 @@ The cloud version uses a `.env` file for secrets and `.docflow.json` for config:
 
 **`.env`** (never commit - secrets only):
 ```bash
-LINEAR_API_KEY=lin_api_xxx         # Required
-LINEAR_TEAM_ID=your_team_id        # Required  
+LINEAR_API_KEY=lin_api_xxx         # Required (only value you need!)
 FIGMA_ACCESS_TOKEN=figd_xxx        # Optional
 ```
 
-**`.docflow.json`** (OK to commit - config only):
+**`.docflow.json`** (OK to commit - auto-discovered by setup):
 ```json
 {
   "provider": {
     "type": "linear",
+    "teamId": "your-team-id",       // Set by /docflow-setup
     "projectId": "your-project-id"  // Set by /docflow-setup
   }
 }
 ```
 
-### Loading Environment Variables
+### Loading the API Key
 
-The MCP servers need these variables in your shell environment. Choose one approach:
+The Linear MCP needs the API key in your shell environment. Choose one approach:
 
 **Option A: direnv (Recommended)**
 ```bash
@@ -386,14 +386,13 @@ source ~/.zshrc
 # In your project
 echo "dotenv" > .envrc
 direnv allow
-# → Variables auto-load when you cd into the project!
+# → API key auto-loads when you cd into the project!
 ```
 
 **Option B: Shell Profile**
 ```bash
 # Add to ~/.zshrc or ~/.bashrc
 echo 'export LINEAR_API_KEY="lin_api_xxx"' >> ~/.zshrc
-echo 'export LINEAR_TEAM_ID="your_team_id"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
