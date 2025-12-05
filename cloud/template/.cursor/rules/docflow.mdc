@@ -302,6 +302,12 @@ Load with: source .env
 1. Add blocker comment to current issue
 2. Tag relevant people
 
+**`/attach [file] [issue]`**
+1. Determine method (GitHub link or direct upload)
+2. For committed files: create GitHub link attachment
+3. For local files: upload to Linear storage, create attachment
+4. Confirm with link
+
 ### QE Commands
 
 **`/validate [issue]`**
@@ -336,11 +342,17 @@ Load with: source .env
 ### Implement
 "let's build" / "implement this" / "start working" → `/implement`
 
+### Attach
+"attach [file]" / "link the doc" / "upload notes" → `/attach`
+
 ### Validate
 "test this" / "review implementation" → `/validate`
 
 ### QE Approval
 "looks good" / "approve" / "ship it" / "QE passed" → Mark approved
+
+### Project Update
+"post project update" / "update project status" → `/project-update`
 
 ### Status
 "what's the status" / "where are we" → `/status`

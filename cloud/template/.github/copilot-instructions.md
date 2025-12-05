@@ -211,8 +211,10 @@ Examples: `**Activated** — ...`, `**Progress** — ...`, `**Complete** — ...
 Quick reference:
 - `/start-session` - Check Linear status (PM agent)
 - `/implement [issue]` - Build it (Implementation agent)
+- `/attach [file] [issue]` - Attach files to issue (Implementation agent)
 - `/validate [issue]` - Test it (QE agent)
 - `/close [issue]` - Move to Done (PM agent)
+- `/project-update` - Post project status update (PM agent)
 - `/status` - Query Linear (any agent)
 - `/docflow-update` - Sync rules from source
 

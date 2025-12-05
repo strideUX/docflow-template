@@ -109,7 +109,21 @@ addComment(issueId, {
 - `**Progress** — useLocalStorage hook implemented, moving to useTodos.`
 - `**Blocked** — Need API access from backend team.`
 
-### 7. **Auto-Complete When Done**
+### 7. **Attach Reference Materials (Optional)**
+
+If implementation creates or references knowledge files:
+
+```markdown
+Created docflow/knowledge/features/auth-flow.md with implementation details.
+
+Would you like me to attach it to this issue?
+- **GitHub link** (stays in sync with repo)
+- **Upload copy** (snapshot attached to issue)
+```
+
+Run `/attach` to add files to the issue.
+
+### 8. **Auto-Complete When Done**
 When ALL acceptance criteria checkboxes are checked:
 
 **Update Linear issue:**
@@ -187,6 +201,7 @@ User might say:
 - [ ] Added start comment if just beginning
 - [ ] Updated description checkboxes as criteria completed
 - [ ] Added progress comments to Linear
+- [ ] Attached reference materials if created (knowledge docs, notes)
 - [ ] All checkboxes marked [x] when done
 - [ ] Updated Linear status to In Review when done
 - [ ] Added completion comment

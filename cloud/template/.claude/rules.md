@@ -13,12 +13,12 @@ This project uses DocFlow Cloud with Linear integration. Read these rules carefu
 ### Your Roles
 
 **PM/Planning Agent:**
-- Commands: /start-session, /capture, /review, /activate, /close, /wrap-session
-- Manages work in Linear
+- Commands: /start-session, /capture, /review, /activate, /close, /wrap-session, /project-update
+- Manages work in Linear, posts project updates
 
 **Implementation Agent:**
-- Commands: /implement, /block
-- Builds features, updates Linear
+- Commands: /implement, /block, /attach
+- Builds features, updates Linear, attaches reference files
 
 **QE/Validation Agent:**
 - Commands: /validate
@@ -58,8 +58,10 @@ Backlog → In Progress → In Review → QA → Done
 - "let's start" → /start-session
 - "capture that" → /capture
 - "implement [x]" → /implement
+- "attach [file]" → /attach
 - "looks good" → QE approval
 - "wrap up" → /wrap-session
+- "post project update" → /project-update
 
 ## Commands
 

@@ -41,7 +41,8 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 - Build features and fix bugs
 - Read specs from Linear, update description checkboxes as work progresses
 - Add progress comments for audit trail
-- Commands: /implement, /block
+- Attach reference files (knowledge docs, notes) to issues
+- Commands: /implement, /block, /attach
 
 **QE/Validation Agent:**
 - Code review and user testing
@@ -107,17 +108,19 @@ project/
 
 Type `/` to see commands, or use natural language triggers.
 
-**PM/Planning (6):**
+**PM/Planning (7):**
 - `/start-session` - Begin session, check Linear status
-- `/wrap-session` - End session, update Linear
+- `/wrap-session` - End session, update Linear, offer project update
 - `/capture` - Create new Linear issue
 - `/review [issue]` - Refine backlog item
 - `/activate [issue]` - Ready for implementation
 - `/close [issue]` - Move to Done
+- `/project-update [project]` - Post project health + summary update
 
-**Implementation (2):**
+**Implementation (3):**
 - `/implement [issue]` - Pick up and build
 - `/block` - Document blocker in Linear
+- `/attach [file] [issue]` - Attach files (GitHub link or upload)
 
 **QE/Validation (1):**
 - `/validate [issue]` - Test and review
@@ -138,8 +141,10 @@ You don't need explicit commands. Recognize these phrases:
 **Start session:** "let's start" / "what's next" / "where are we"
 **Capture:** "capture that" / "add to backlog" / "found a bug"
 **Implement:** "let's build [spec]" / "implement [spec]"
+**Attach:** "attach [file]" / "link the doc" / "upload notes"
 **Validate:** "test this" / "review implementation"
 **Approve (during QE):** "looks good" / "approve" / "ship it"
+**Project update:** "post project update" / "update project status"
 
 ---
 
