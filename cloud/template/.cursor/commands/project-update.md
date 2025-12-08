@@ -223,3 +223,4 @@ When Linear MCP adds `create_project_update`:
 2. Remove environment variable requirement
 3. Update this documentation
 
+
