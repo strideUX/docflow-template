@@ -577,6 +577,317 @@ If context files already have content:
 
 ---
 
+## Migration from Local DocFlow
+
+**Detection:** `docflow/specs/` folder exists with content (backlog or complete specs)
+
+This scenario handles projects that used local DocFlow and are migrating to cloud.
+
+### Migration Overview
+
+```
+Local DocFlow                    Linear
+─────────────────────────────────────────────────
+docflow/specs/backlog/*.md   →   Issues (Backlog state)
+docflow/specs/complete/*.md  →   Issues (Done state)
+docflow/context/*            →   Keep local (unchanged)
+docflow/knowledge/*          →   Keep local (unchanged)
+docflow/ACTIVE.md            →   Remove (Linear views replace)
+docflow/INDEX.md             →   Remove (Linear views replace)
+docflow/specs/templates/*    →   Remove (Linear templates replace)
+```
+
+### Step M1: Detect Local Specs
+
+After steps 1-7 (environment, API, team, project, states, labels), check for local specs:
+
+```bash
+# Check if local specs exist
+ls docflow/specs/backlog/*.md 2>/dev/null | wc -l
+ls docflow/specs/complete/**/*.md 2>/dev/null | wc -l
+```
+
+**If local specs found:**
+```markdown
+## 📦 Local Specs Detected
+
+I found existing local DocFlow specs:
+
+| Location | Count |
+|----------|-------|
+| Backlog | [N] specs |
+| Complete | [N] specs |
+
+These need to be migrated to Linear. I'll:
+1. Parse each spec into our Linear issue template
+2. Create issues in Linear with appropriate status
+3. Preserve decision logs and notes as comments
+4. Archive the local specs folder when done
+
+Ready to migrate? (yes/no)
+```
+
+**If no local specs:** Skip to step 8 (gather project info or use existing context).
+
+---
+
+### Step M2: Parse and Import Backlog Specs
+
+For each file in `docflow/specs/backlog/*.md`:
+
+#### M2a. Parse Local Spec
+
+Read the spec file and extract:
+
+```typescript
+interface LocalSpec {
+  // From frontmatter/header
+  title: string;           // Spec title
+  type: 'feature' | 'bug' | 'chore' | 'idea';  // From filename prefix
+  status: string;          // BACKLOG
+  priority: string;        // Low, Medium, High, Urgent
+  complexity: string;      // XS, S, M, L, XL
+  
+  // From sections
+  problemStatement: string;  // ## Problem Statement
+  proposedSolution: string;  // ## Proposed Solution
+  acceptanceCriteria: string[];  // ## Acceptance Criteria (as checkboxes)
+  technicalNotes: string;    // ## Technical Notes
+  outOfScope: string;        // ## Out of Scope
+  dependencies: string;      // ## Dependencies
+  
+  // From logs (will become comments)
+  decisionLog: DecisionEntry[];  // ## Decision Log table
+  implementationNotes: string;   // ## Implementation Notes
+}
+```
+
+**Filename parsing:**
+- `feature-place-photos.md` → type: "feature", title: "Place Photos"
+- `bug-login-crash.md` → type: "bug", title: "Login Crash"
+- `idea-voice-control.md` → type: "idea", title: "Voice Control"
+
+#### M2b. Map to Linear Issue Template
+
+Transform local spec to Linear issue format:
+
+**Title:** `[Parsed title]`
+
+**Description (using our template structure):**
+```markdown
+## Context
+[Problem Statement from local spec]
+
+[Proposed Solution from local spec, if different context needed]
+
+## User Story
+<!-- Parse from spec or generate from context -->
+**As a** [inferred user type]
+**I want to** [goal from problem statement]
+**So that** [benefit]
+
+## Acceptance Criteria
+
+### Must Have
+[Parse acceptance criteria from local spec as checkboxes]
+- [ ] [Criterion 1]
+- [ ] [Criterion 2]
+
+### Should Have
+[Nice-to-haves if present in local spec]
+
+### Won't Have (Out of Scope)
+[Out of Scope section from local spec]
+
+## Technical Notes
+
+### Implementation Approach
+[Technical Notes from local spec]
+
+### Dependencies
+[Dependencies from local spec]
+
+---
+
+_Migrated from local DocFlow on [date]_
+```
+
+**Labels:**
+- Add type label (feature/bug/chore/idea)
+
+**Priority:** Map from local spec
+- Urgent → 1
+- High → 2
+- Medium → 3
+- Low → 4
+
+**Estimate:** Map complexity to points
+- XS → 1
+- S → 2
+- M → 3
+- L → 4
+- XL → 5
+
+**State:** Backlog (for backlog specs)
+
+#### M2c. Create Linear Issue
+
+```typescript
+// Via MCP
+createIssue({
+  teamId: config.teamId,
+  projectId: config.projectId,
+  title: parsedSpec.title,
+  description: formattedDescription,
+  labelIds: [typeLabelId],
+  priority: mappedPriority,
+  estimate: mappedEstimate,
+  stateId: backlogStateId
+})
+```
+
+#### M2d. Add Decision Log as Comments
+
+If the local spec has a Decision Log, add each entry as a comment:
+
+```typescript
+// For each decision in decisionLog
+addComment(issueId, {
+  body: `### ${decision.date} - ${decision.title}\n\n${decision.rationale}\n\n_Imported from local spec_`
+})
+```
+
+**Progress update:**
+```markdown
+✓ Imported: feature-place-photos → LIN-XXX
+✓ Imported: feature-ui-overhaul → LIN-XXY
+✓ Imported: idea-voice-control → LIN-XXZ
+✓ Imported: idea-caravan-mode → LIN-XYZ
+
+Backlog: 4/4 specs imported
+```
+
+---
+
+### Step M3: Import Completed Specs
+
+For each file in `docflow/specs/complete/**/*.md`:
+
+Same process as M2, but:
+- Set state to **Done** instead of Backlog
+- Add comment: `**Completed** — Imported from local DocFlow archive.`
+- Less priority on perfect formatting (these are historical)
+
+**Ask before importing completed:**
+```markdown
+## 📚 Completed Specs
+
+Found [N] completed specs in local archive.
+
+Import options:
+1. **Import all** - Create Done issues for historical tracking
+2. **Import recent** - Only specs from last 3 months
+3. **Skip** - Don't import completed (history stays in git)
+
+Which option?
+```
+
+**Progress update:**
+```markdown
+✓ Imported: feature-driving-detection → LIN-AAA (Done)
+✓ Imported: feature-map-integration → LIN-AAB (Done)
+... [N more]
+
+Complete: [N]/[N] specs imported
+```
+
+---
+
+### Step M4: Archive Local Specs
+
+After successful import:
+
+```bash
+# Create timestamped archive folder
+ARCHIVE_DATE=$(date +%Y-%m-%d)
+mv docflow/specs docflow/specs-archived-$ARCHIVE_DATE
+
+# Remove tracking files (replaced by Linear views)
+rm -f docflow/ACTIVE.md
+rm -f docflow/INDEX.md
+```
+
+**Report:**
+```markdown
+## 📁 Local Specs Archived
+
+- Specs moved to: `docflow/specs-archived-[date]/`
+- Removed: `ACTIVE.md` (replaced by Linear "In Progress" view)
+- Removed: `INDEX.md` (replaced by Linear issue list)
+
+**Note:** The archived folder is in `.gitignore`. You can delete it after 
+confirming all specs imported correctly to Linear.
+```
+
+---
+
+### Step M5: Migration Complete
+
+```markdown
+## ✅ Migration Complete!
+
+**Imported to Linear:**
+- Backlog: [N] issues created
+- Complete: [N] issues created (historical)
+- Decision logs preserved as comments
+
+**Archived locally:**
+- `docflow/specs-archived-[date]/` (safe to delete later)
+- Removed: ACTIVE.md, INDEX.md
+
+**Preserved locally:**
+- `docflow/context/` - Project understanding (unchanged)
+- `docflow/knowledge/` - ADRs, notes, product docs (unchanged)
+
+**Linear Project:**
+- [Project Name] configured
+- [View project](linear-project-url)
+- [View backlog](linear-backlog-url)
+
+---
+
+You're now running DocFlow Cloud! 🚀
+
+**Next steps:**
+- `/start-session` - See your Linear backlog
+- `/status` - Check current state
+- Use Linear for all spec work going forward
+```
+
+---
+
+### Migration Edge Cases
+
+**Malformed specs:**
+- If a spec can't be parsed, report it and skip
+- User can manually create issue later
+- Don't block entire migration on one bad file
+
+**Large migrations (50+ specs):**
+- Process in batches of 10
+- Show progress updates
+- Allow pause/resume if needed
+
+**Active specs (in docflow/specs/active/):**
+- These become "In Progress" issues
+- Alert user to verify they're assigned correctly
+
+**Specs with assets:**
+- Note any files in `docflow/specs/assets/`
+- Suggest manual upload to Linear or linking
+
+---
+
 ## Context to Load
 - `.env` (environment configuration)
 - `.docflow.json` (workflow configuration)
@@ -592,6 +903,8 @@ User might say:
 - "connect to linear" / "set up linear"
 - "initialize project" / "start new project"
 - "I have a PRD" / "here's my project doc"
+- "migrate to linear" / "migrate to cloud"
+- "import my specs" / "move specs to linear"
 
 **Run this command when detected.**
 
@@ -599,24 +912,48 @@ User might say:
 
 ## Outputs
 - `.env` validated
-- `.docflow.json` status mapping verified
-- `docflow/context/*` files populated
-- Initial Linear issues created
-- Project ready for development
+- `.docflow.json` status mapping verified with team/project IDs
+- `docflow/context/*` files preserved or populated
+- Linear project created/configured
+- Project description synced to Linear
+
+**For migrations:**
+- Local specs imported as Linear issues
+- Decision logs preserved as comments
+- Local specs archived to `specs-archived-[date]/`
+- ACTIVE.md and INDEX.md removed
+- Project ready for cloud workflow
 
 ---
 
 ## Checklist
+
+### Environment & Connection
 - [ ] Checked .env file exists
 - [ ] Validated LINEAR_API_KEY
 - [ ] Tested Linear API connection
 - [ ] Selected/saved team ID to .docflow.json
-- [ ] Selected/saved project ID to .docflow.json
+- [ ] Selected/saved project ID to .docflow.json (or created new)
 - [ ] Verified workflow state mapping
 - [ ] Verified/created labels
-- [ ] Gathered project information
+
+### Migration (if local specs exist)
+- [ ] Detected local specs in docflow/specs/
+- [ ] Parsed backlog specs into Linear template format
+- [ ] Created Linear issues for backlog (Backlog state)
+- [ ] Asked about importing completed specs
+- [ ] Created Linear issues for completed (Done state)
+- [ ] Imported decision logs as comments
+- [ ] Archived local specs folder
+- [ ] Removed ACTIVE.md and INDEX.md
+
+### Project Context
+- [ ] Used existing context files (or gathered new info)
+- [ ] Verified overview.md, stack.md, standards.md are filled
 - [ ] Asked about project links (repo, Figma, docs, etc.)
-- [ ] Filled context files (including Links section)
 - [ ] Synced project description to Linear
-- [ ] Created initial issues in Linear
-- [ ] Provided setup confirmation
+
+### Completion
+- [ ] Provided setup/migration summary
+- [ ] Showed Linear project links
+- [ ] Gave next step commands
