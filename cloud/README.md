@@ -71,7 +71,10 @@ cursor /path/to/your/project
 The setup command will:
 - Validate your `.env` configuration
 - Test the Linear connection
+- Help you select team and project
+- Gather project links (repo, Figma, docs)
 - Help you fill project context
+- Sync project description to Linear
 - Create initial Linear issues
 
 ---
@@ -119,7 +122,7 @@ template/
 │
 ├── docflow/
 │   ├── context/             # Project understanding
-│   │   ├── overview.md      # Vision, goals
+│   │   ├── overview.md      # Vision, goals, links
 │   │   ├── stack.md         # Tech stack
 │   │   └── standards.md     # Code conventions
 │   │
@@ -137,6 +140,16 @@ template/
 ├── .docflow.json            # Workflow configuration
 ├── .gitignore               # Ignores .env
 └── AGENTS.md                # AI agent instructions
+
+templates/                   # Issue & project templates
+├── issues/
+│   ├── quick-capture.md     # Fast capture (default in Linear)
+│   ├── feature.md           # Full feature template
+│   ├── bug.md               # Bug report template
+│   ├── chore.md             # Maintenance template
+│   └── idea.md              # Idea exploration template
+└── projects/
+    └── project.md           # Project description format
 ```
 
 ---
@@ -151,56 +164,128 @@ template/
 | **Context** | Local | Fast access, version-controlled |
 | **Knowledge** | Local | Persists with code |
 | **Rules** | Local (synced) | No external dependency |
+| **Templates** | Local | Reference for Linear setup |
 
 ### Workflow
 
 ```
-BACKLOG → READY → IMPLEMENTING → REVIEW → TESTING → COMPLETE
-   │         │          │           │         │         │
- Linear   Linear     Linear      Linear    Linear    Linear
+┌─────────────────────────────────────────────────────────────────────┐
+│                            INTAKE                                    │
+├─────────────────────────────────────────────────────────────────────┤
+│  Quick Capture (with `triage` label) ──► /refine ──► BACKLOG       │
+│  /capture (from IDE) ─────────────────────────────► BACKLOG        │
+└─────────────────────────────────────────────────────────────────────┘
+                                │
+                                │ /refine (spec refinement)
+                                ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  BACKLOG → READY → IMPLEMENTING → REVIEW → QA → COMPLETE           │
+│     │        │          │            │       │        │             │
+│  Linear   Linear     Linear       Linear  Linear   Linear           │
+│  Backlog   Todo    In Progress  In Review   QA      Done            │
+│                         │            │       │                      │
+│                    Code + Tests   Code    Manual                    │
+│                    + Docs        Review   Testing                   │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Three-Agent Model
 
-1. **PM Agent**: Plans, activates, reviews, closes
-2. **Implementation Agent**: Builds features
+1. **PM Agent**: Captures, triages, refines, activates, reviews code, closes
+2. **Implementation Agent**: Builds features (code + tests + docs)
 3. **QE Agent**: Validates with user
 
 ---
 
 ## Commands
 
+### Planning Commands
 ```
-/start-session   - Begin work session
-/capture         - Create new Linear issue
-/implement       - Pick up and build issue
-/validate        - Test implementation
+/start-session   - Begin work session, see queues
+/capture         - Create new Linear issue (with template)
+/refine          - Triage raw captures OR refine specs
+/activate        - Assign and move to Ready
 /close           - Archive completed work
-/status          - Check current state
-/docflow-update  - Sync rules from source
+```
+
+### Implementation Commands
+```
+/implement       - Pick up and build (code + tests + docs)
+/block           - Document blocker
+/attach          - Add files to issue
+```
+
+### Review & QE Commands
+```
+/review          - Code review (post-implementation)
+/validate        - Manual QE testing
+```
+
+### System Commands
+```
+/status          - Check current state + queues
+/sync-project    - Sync context to Linear project
+/docflow-update  - Sync rules from source repo
 ```
 
 ---
 
 ## Linear Setup
 
-### Required Linear Structure
+### Required Labels
 
-1. **Team**: Create or use existing team
-2. **Workflow States**: Configure to match DocFlow statuses
-3. **Labels**: Create labels for spec types (feature, bug, chore, idea)
-4. **Issue Templates**: (Optional) Create templates matching DocFlow specs
+| Label | Color | Purpose |
+|-------|-------|---------|
+| `triage` | Orange | Raw captures needing classification |
+| `feature` | Green | New functionality |
+| `bug` | Red | Defect reports |
+| `chore` | Gray | Maintenance work |
+| `idea` | Purple | Future exploration |
 
-### Recommended Workflow States
+### Required Workflow States
 
-| Linear State | DocFlow Status |
-|--------------|----------------|
-| Backlog | BACKLOG |
-| Todo | READY |
-| In Progress | IMPLEMENTING |
-| In Review | REVIEW |
-| QA | TESTING |
-| Done | COMPLETE |
+| Linear State | DocFlow Status | Description |
+|--------------|----------------|-------------|
+| Backlog | BACKLOG | Ideas, raw captures |
+| Todo | READY | Refined, ready to implement |
+| In Progress | IMPLEMENTING | Being built |
+| In Review | REVIEW | Awaiting code review |
+| QA | TESTING | Manual testing |
+| Done | COMPLETE | Shipped |
+
+### Issue Templates
+
+Set **Quick Capture** as the default template in Linear. Copy from `templates/issues/quick-capture.md`.
+
+Full templates for each type are in `templates/issues/`.
+
+See **[LINEAR-SETUP-GUIDE.md](./LINEAR-SETUP-GUIDE.md)** for complete setup instructions.
+
+---
+
+## Acceptance Criteria Structure
+
+All issues use a three-part acceptance criteria structure:
+
+```markdown
+## Acceptance Criteria
+
+### Functionality
+- [ ] [What the feature/fix must do]
+
+### Tests
+- [ ] Tests written for core functionality
+- [ ] Edge cases covered
+- [ ] N/A - No tests needed
+
+### Documentation
+- [ ] Code documented
+- [ ] Knowledge base updated (if significant)
+- [ ] Context files updated (if architecture changes)
+- [ ] N/A - No documentation needed
+```
+
+This ensures implementation includes **code + tests + documentation**.
 
 ---
 
@@ -215,6 +300,18 @@ When Linear issues have Figma attachments:
 This enables design-accurate implementations without manual spec copying.
 
 **Requires:** Figma MCP installed in Cursor + `FIGMA_ACCESS_TOKEN` in environment.
+
+---
+
+## Link Capture
+
+During development, when you share useful links (GitHub, Figma, docs), the agent will ask:
+
+> "Would you like me to save this to your project's Related Links?"
+
+If yes:
+1. Link is added to `docflow/context/overview.md`
+2. You can run `/sync-project` to update Linear
 
 ---
 
@@ -248,6 +345,7 @@ Quick steps:
 
 - **[DOCFLOW-CLOUD-SPEC.md](./DOCFLOW-CLOUD-SPEC.md)** - Full specification
 - **[LINEAR-SETUP-GUIDE.md](./LINEAR-SETUP-GUIDE.md)** - Linear structure guide
+- **[templates/](./templates/)** - Issue and project templates
 - **[template/AGENTS.md](./template/AGENTS.md)** - AI agent instructions
 - **[template/.cursor/rules/docflow.mdc](./template/.cursor/rules/docflow.mdc)** - Complete workflow rules
 
