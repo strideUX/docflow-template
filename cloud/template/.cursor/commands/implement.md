@@ -26,8 +26,10 @@ Check the issue's acceptance criteria for specific test and documentation requir
 
 ### 1. **Find Available Work**
 Query Linear MCP for issues with:
-- Status = "Todo" (READY) or "In Progress" (IMPLEMENTING)
+- Status = "Todo" (READY), "In Progress" (IMPLEMENTING), or "Blocked" (BLOCKED)
 - Assigned to current user OR unassigned
+
+**Note:** Blocked issues can be resumed when the blocker is resolved.
 
 **Get current username:**
 ```bash
@@ -71,7 +73,14 @@ updateIssue(issueId, {
 })
 ```
 
-Add start comment:
+**If resuming from Blocked state:**
+```typescript
+addComment(issueId, {
+  body: "**Unblocked** — [What resolved the blocker]. Resuming implementation."
+})
+```
+
+**If starting fresh:**
 ```typescript
 addComment(issueId, {
   body: "### " + date + " - Implementation Started\n\nBeginning work on this issue."
@@ -229,10 +238,12 @@ Then `/validate LIN-XXX` for QE testing.
 
 ## On Blocker
 
-If you hit a blocker, run `/block` instead:
-- Add blocker comment to Linear issue
-- Keep in current state or move to review
-- Explain what's blocking
+If you hit a blocker, run `/block`:
+- Moves issue to "Blocked" state
+- Documents what's blocking and what's needed
+- Tags relevant people for help
+
+When the blocker is resolved, run `/implement` again to resume.
 
 ---
 
@@ -251,14 +262,16 @@ User might say:
 - "let's work on LIN-XXX"
 - "start implementation"
 - "pick up [issue]"
+- "resume [issue]" / "unblock [issue]"
 
 **Run this command when detected.**
 
 ---
 
 ## Outputs
-- Linear issue status → IMPLEMENTING (at start)
+- Linear issue status → IMPLEMENTING (at start, or when resuming from BLOCKED)
 - Progress comments added to Linear
+- Unblock comment if resuming from Blocked state
 - Implementation completed
 - Linear issue status → REVIEW (at end)
 - Brief completion summary
@@ -266,12 +279,12 @@ User might say:
 ---
 
 ## Checklist
-- [ ] Found available work in Linear
+- [ ] Found available work in Linear (including Blocked issues)
 - [ ] Loaded issue + stack.md + standards.md
 - [ ] Checked for Figma attachments
 - [ ] Showed implementation checklist reminder
-- [ ] Verified status is In Progress (or updated it)
-- [ ] Added start comment if just beginning
+- [ ] Verified status is In Progress (or updated from Todo/Blocked)
+- [ ] Added start comment (or unblock comment if resuming from Blocked)
 - [ ] Wrote tests alongside code
 - [ ] Updated description checkboxes as criteria completed
 - [ ] Added progress comments to Linear

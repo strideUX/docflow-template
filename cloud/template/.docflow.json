@@ -12,6 +12,7 @@
     "BACKLOG": "Backlog",
     "READY": "Todo",
     "IMPLEMENTING": "In Progress",
+    "BLOCKED": "Blocked",
     "REVIEW": "In Review",
     "TESTING": "QA",
     "COMPLETE": "Done"

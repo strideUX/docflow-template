@@ -14,6 +14,7 @@ End a work session by saving progress and noting what's next.
 
 Check Linear for:
 - Issues currently in progress (assigned to user)
+- Issues currently blocked (assigned to user)
 - Any issues that moved states during session
 - Any new issues created during session
 
@@ -48,6 +49,11 @@ Next session:
 - LIN-101: [Title] → Done ✓
 - LIN-102: [Title] → In Review
 
+### 🚫 Blocked (Needs Attention)
+- LIN-234: [Title]
+  - Blocker: [brief description]
+  - Needs: [what's needed to unblock]
+
 ### 🔨 In Progress (Continued Next Time)
 - LIN-456: [Title]
   - Progress: [brief]
@@ -59,8 +65,9 @@ Next session:
 
 ### 🎯 Suggested Next Session
 1. Test LIN-102 (in QA)
-2. Continue LIN-456
-3. Start LIN-789 (high priority)
+2. Check on LIN-234 (blocked)
+3. Continue LIN-456
+4. Start LIN-789 (high priority)
 
 ---
 Good session! 🎉

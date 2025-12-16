@@ -31,14 +31,20 @@ Query: status = "In Review" (or mapped REVIEW state)
 Show: Issues needing code review
 ```
 
-**Priority 3 - In Progress (active work):**
+**Priority 3 - Blocked (needs attention):**
+```
+Query: status = "Blocked" (or mapped BLOCKED state)
+Show: Issues waiting for feedback, dependency, or decision
+```
+
+**Priority 4 - In Progress (active work):**
 ```
 Query: status = "In Progress" (or mapped IMPLEMENTING state)
 Filter: assigned to current user
 Show: Work currently being implemented
 ```
 
-**Priority 4 - Backlog (prioritized, ready to activate):**
+**Priority 5 - Backlog (prioritized, ready to activate):**
 ```
 Query: status = "Backlog" (or mapped BACKLOG state)
 Limit: Top 5 by priority
@@ -61,6 +67,9 @@ Use this to filter "my work" vs "all work"
 ### 👀 Needs Review
 - LIN-456: [Title] - Implementation complete
 
+### 🚫 Blocked
+- LIN-234: [Title] - [Brief blocker description]
+
 ### 🔨 In Progress (@you)
 - LIN-789: [Title] - Priority: High, Estimate: M
 
@@ -75,8 +84,9 @@ Use this to filter "my work" vs "all work"
 1. Continue work on LIN-789
 2. Test LIN-123 (QA)
 3. Review LIN-456
-4. Start something new
-5. Capture new work
+4. Resume LIN-234 (if unblocked)
+5. Start something new
+6. Capture new work
 ```
 
 ### 5. **Load Project Context**
@@ -123,11 +133,12 @@ User might say:
 ## Checklist
 - [ ] Read .docflow.json config
 - [ ] Queried Linear for QA issues
-- [ ] Queried Linear for Review issues  
+- [ ] Queried Linear for Review issues
+- [ ] Queried Linear for Blocked issues
 - [ ] Queried Linear for In Progress issues
 - [ ] Queried Linear for Backlog items (with priority/estimate)
 - [ ] Got current developer username
-- [ ] Presented status dashboard
+- [ ] Presented status dashboard (including Blocked section)
 - [ ] Loaded project context
 - [ ] Waiting for user direction
 

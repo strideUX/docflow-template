@@ -22,6 +22,9 @@ const qa = await linearClient.issues({
 const review = await linearClient.issues({ 
   filter: { state: { name: { eq: "In Review" } } }
 });
+const blocked = await linearClient.issues({ 
+  filter: { state: { name: { eq: "Blocked" } } }
+});
 const inProgress = await linearClient.issues({ 
   filter: { state: { name: { eq: "In Progress" } } }
 });
@@ -52,6 +55,11 @@ Filter for issues assigned to current user.
 | 🧪 QA Testing | X | LIN-123 |
 | 👀 In Review | X | - |
 
+### 🚫 Blocked
+| Issue | Title | Blocker |
+|-------|-------|---------|
+| LIN-234 | [Title] | [Brief blocker] |
+
 ### 📈 In Progress
 | Issue | Title | Assignee |
 |-------|-------|----------|
@@ -72,6 +80,7 @@ Filter for issues assigned to current user.
 
 ### Quick Actions
 - `/validate LIN-123` - Test QA item
+- `/implement LIN-234` - Resume blocked issue (if unblocked)
 - `/implement LIN-789` - Start high priority
 - `/capture` - Add new work
 ```
@@ -85,8 +94,9 @@ For quick check:
 User: "quick status"
 
 Agent:
-📊 **Status:** 1 in QA, 2 in progress, 3 ready, 12 backlog
+📊 **Status:** 1 in QA, 1 blocked, 2 in progress, 3 ready, 12 backlog
 🔥 **Action needed:** LIN-123 needs your testing
+🚫 **Blocked:** LIN-234 waiting on [blocker]
 ```
 
 ---
@@ -138,9 +148,9 @@ User might say:
 ---
 
 ## Checklist
-- [ ] Queried Linear for all states
+- [ ] Queried Linear for all states (including Blocked)
 - [ ] Got current username
 - [ ] Filtered user's items
-- [ ] Presented dashboard
+- [ ] Presented dashboard with Blocked section
 - [ ] Suggested next actions
 

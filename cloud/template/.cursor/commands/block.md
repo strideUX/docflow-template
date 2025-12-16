@@ -1,7 +1,7 @@
 # Block (Implementation Agent)
 
 ## Overview
-Document a blocker on the current issue and request help.
+Move an issue to Blocked status when implementation cannot proceed due to a dependency, needed feedback, or decision.
 
 **Agent Role:** Implementation Agent (builder)  
 **Frequency:** When implementation cannot proceed
@@ -13,7 +13,7 @@ Document a blocker on the current issue and request help.
 ### 1. **Identify Current Issue**
 
 Check what's currently being worked on:
-- Query Linear for issues assigned to current user in "In Progress" state
+- Query Linear for issues assigned to current user in "In Progress" or "In Review" state
 - Or use issue from recent context
 
 ### 2. **Gather Blocker Details**
@@ -22,15 +22,24 @@ Ask user (or infer from context):
 - What specifically is blocking progress?
 - What's needed to unblock?
 - Who needs to help? (PM decision, external dependency, etc.)
-- How severe? (Completely blocked vs partially blocked)
 
-### 3. **Document in Linear**
+### 3. **Move to Blocked State**
+
+Update issue status to Blocked:
+
+```typescript
+updateIssue(issueId, {
+  stateId: config.linear.states.BLOCKED
+})
+```
+
+### 4. **Document Blocker in Linear**
 
 Add blocker comment:
 
 ```typescript
 addComment(issueId, {
-  body: '**Blocked** — [What is blocking]. Need: [what is needed to unblock].'
+  body: '**Blocked** — [What is blocking]. Needs: [what is needed to unblock].'
 })
 ```
 
@@ -38,14 +47,14 @@ For complex blockers, can expand:
 ```markdown
 **Blocked** — [Brief description of blocker].
 
-Needed to unblock:
+**Needs to unblock:**
 - [What's needed 1]
 - [What's needed 2]
 
-@[person] for help.
+**Who can help:** @[person]
 ```
 
-### 3b. **Notify Relevant People (Optional)**
+### 5. **Notify Relevant People (Optional)**
 
 If someone specific needs to help, add them as a subscriber so they get notified:
 
@@ -67,38 +76,22 @@ To find user IDs:
 list_users({ query: "cory" })  // Returns user ID
 ```
 
-### 4. **Update Issue State (Optional)**
-
-Depending on blocker type:
-
-**If needs PM decision:**
-```typescript
-// Keep in progress but flag
-addLabel(issueId, "blocked")
-```
-
-**If completely stuck:**
-```typescript
-updateIssue(issueId, {
-  stateId: config.linear.states.REVIEW  // Send back for help
-})
-```
-
-### 5. **Confirmation**
+### 6. **Confirmation**
 
 ```markdown
-🚫 Blocker documented on LIN-XXX
+🚫 Issue blocked: LIN-XXX
 
 **Issue:** [Title]
 **Blocker:** [Brief description]
-**Status:** Flagged for help
+**Status:** Blocked
+**Needs:** [What's needed to unblock]
 
-I've tagged the relevant people in Linear. 
+I've moved this to Blocked status and tagged relevant people in Linear.
 
 **What you can do:**
 1. Work on a different issue: `/status`
 2. Wait for help on this blocker
-3. Try a different approach: [suggestion if applicable]
+3. When unblocked: `/implement LIN-XXX` to resume
 ```
 
 ---
@@ -122,6 +115,15 @@ I've tagged the relevant people in Linear.
 
 ---
 
+## Resuming from Blocked
+
+When the blocker is resolved, use `/implement LIN-XXX` to:
+1. Move issue back to "In Progress"
+2. Add unblock comment: `**Unblocked** — [What resolved the blocker].`
+3. Resume implementation
+
+---
+
 ## Context to Load
 - Current Linear issue
 - Implementation notes so far
@@ -135,25 +137,25 @@ User might say:
 - "can't proceed" / "need help"
 - "stuck on this" / "hit a wall"
 - "need PM input"
+- "waiting on [something]"
 
 **Run this command when detected.**
 
 ---
 
 ## Outputs
+- Issue moved to Blocked state in Linear
 - Blocker documented in Linear comment
-- Issue flagged/labeled appropriately
-- Relevant people tagged
-- User informed of options
+- Relevant people tagged/subscribed
+- User informed of options and how to resume
 
 ---
 
 ## Checklist
 - [ ] Identified current issue
 - [ ] Gathered blocker details
+- [ ] Moved issue to Blocked state
 - [ ] Added detailed blocker comment to Linear
-- [ ] Tagged relevant people
-- [ ] Added blocked label (if applicable)
-- [ ] Updated state (if applicable)
-- [ ] Provided next step options
+- [ ] Tagged/subscribed relevant people
+- [ ] Provided next step options (including how to resume)
 

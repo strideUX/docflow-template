@@ -205,7 +205,7 @@ Designer                    PM Tool (Linear)              Agent
 | Content | Linear Equivalent | Purpose |
 |---------|-------------------|---------|
 | **Specs** | Issues | Work items (features, bugs, chores, ideas) |
-| **Workflow State** | Workflow States | BACKLOG → COMPLETE progression |
+| **Workflow State** | Workflow States | BACKLOG → COMPLETE progression (includes BLOCKED) |
 | **Spec Types** | Labels | feature, bug, chore, idea |
 | **Priority** | Priority field | Urgent, High, Medium, Low |
 | **Complexity** | Estimate/Points | S, M, L, XL |
@@ -282,6 +282,7 @@ type DocFlowStatus =
   | 'BACKLOG' 
   | 'READY' 
   | 'IMPLEMENTING' 
+  | 'BLOCKED'
   | 'REVIEW' 
   | 'TESTING' 
   | 'COMPLETE';
@@ -346,6 +347,7 @@ interface StatusMapping {
   BACKLOG: string;     // Provider's backlog state
   READY: string;       // Provider's ready/todo state
   IMPLEMENTING: string; // Provider's in-progress state
+  BLOCKED: string;     // Provider's blocked state (needs feedback/dependency)
   REVIEW: string;      // Provider's review state
   TESTING: string;     // Provider's QA state
   COMPLETE: string;    // Provider's done state
@@ -356,6 +358,7 @@ const linearStatusMapping: StatusMapping = {
   BACKLOG: 'Backlog',
   READY: 'Todo',
   IMPLEMENTING: 'In Progress',
+  BLOCKED: 'Blocked',
   REVIEW: 'In Review',
   TESTING: 'QA',
   COMPLETE: 'Done'
@@ -366,6 +369,7 @@ const jiraStatusMapping: StatusMapping = {
   BACKLOG: 'Open',
   READY: 'Ready for Dev',
   IMPLEMENTING: 'In Development',
+  BLOCKED: 'Blocked',
   REVIEW: 'Code Review',
   TESTING: 'In QA',
   COMPLETE: 'Closed'
@@ -428,6 +432,7 @@ Organization                    (workspace)
         "BACKLOG": "state-id-backlog",
         "READY": "state-id-todo",
         "IMPLEMENTING": "state-id-in-progress",
+        "BLOCKED": "state-id-blocked",
         "REVIEW": "state-id-in-review",
         "TESTING": "state-id-qa",
         "COMPLETE": "state-id-done"
@@ -439,6 +444,7 @@ Organization                    (workspace)
     "BACKLOG": "Backlog",
     "READY": "Todo",
     "IMPLEMENTING": "In Progress",
+    "BLOCKED": "Blocked",
     "REVIEW": "In Review",
     "TESTING": "QA",
     "COMPLETE": "Done"

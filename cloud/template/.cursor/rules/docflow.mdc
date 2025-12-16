@@ -16,8 +16,9 @@ DocFlow Cloud is a hybrid spec-driven workflow:
 
 ### On Every Interaction
 1. **Check Linear** for "In Progress" issues (know current state)
-2. **Scan Linear** for issues needing review (status=REVIEW)
-3. **Scan Linear** for issues ready for QE (status=QA)
+2. **Scan Linear** for "Blocked" issues (may need attention)
+3. **Scan Linear** for issues needing review (status=REVIEW)
+4. **Scan Linear** for issues ready for QE (status=QA)
 
 ### When Starting/Planning New Work
 **Load these to understand scope:**
@@ -59,10 +60,18 @@ DocFlow Cloud is a hybrid spec-driven workflow:
 
 ### Full Workflow (Features & Bugs)
 ```
-BACKLOG → READY → IMPLEMENTING → REVIEW → TESTING → COMPLETE
-   │         │          │           │         │         │
- Linear   Linear     Linear     Linear    Linear    Linear
-Backlog    Todo    In Progress In Review    QA       Done
+BACKLOG → READY → IMPLEMENTING ──→ REVIEW → TESTING → COMPLETE
+   │         │          │            │         │         │
+ Linear   Linear     Linear       Linear    Linear    Linear
+Backlog    Todo    In Progress  In Review    QA       Done
+                        │            │
+                        ▼            │
+                    BLOCKED ◄────────┘
+                        │
+                      Linear
+                     Blocked
+                        │
+                        └──→ (back to IMPLEMENTING when unblocked)
 ```
 
 **What each state means:**
@@ -72,6 +81,7 @@ Backlog    Todo    In Progress In Review    QA       Done
 | BACKLOG | Backlog | Raw ideas or refined specs awaiting prioritization |
 | READY | Todo | Refined, prioritized, ready to pick up |
 | IMPLEMENTING | In Progress | Code + Tests + Docs being written |
+| BLOCKED | Blocked | Stuck - needs feedback, dependency, or decision |
 | REVIEW | In Review | Implementation complete, awaiting code review (agentic or human) |
 | TESTING | QA | Code review passed, manual testing by user |
 | COMPLETE | Done | Verified and shipped |
@@ -196,8 +206,13 @@ Backlog In Progress  Done
    ```
 
 **On Blocker:**
-1. Add comment: `**Blocked** — [What's blocking and why].`
-2. Tag PM/reviewer if needed
+1. Move to "Blocked" state
+2. Add comment: `**Blocked** — [What's blocking and why]. Needs: [what's needed to unblock].`
+3. Tag PM/reviewer if needed
+
+**Resuming from Blocked:**
+- When blocker is resolved, `/implement` moves issue back to "In Progress"
+- Add comment: `**Unblocked** — [What resolved the blocker].`
 
 ### QE/Validation Agent
 
@@ -282,7 +297,8 @@ Use consistent comment format for audit trail:
 Examples:
 - `**Activated** — Assigned to Matt, Priority: High, Estimate: S.`
 - `**Progress** — Completed data model, starting on hooks.`
-- `**Blocked** — Waiting on API access from backend team.`
+- `**Blocked** — Waiting on API access from backend team. Needs: Backend team to provision credentials.`
+- `**Unblocked** — API access granted, resuming implementation.`
 - `**Complete** — All acceptance criteria met.`
 
 ### Team Collaboration
@@ -410,8 +426,9 @@ Load with: source .env
 5. Begin implementation (code + tests + docs)
 
 **`/block`**
-1. Add blocker comment to current issue
-2. Tag relevant people
+1. Move issue to "Blocked" state
+2. Add blocker comment with details
+3. Tag relevant people
 
 **`/attach [file] [issue]`**
 1. Determine method (GitHub link or direct upload)
@@ -634,7 +651,7 @@ This workflow is designed to work with multiple PM tools. Linear is the first pr
 - Comment format
 
 ### What's Provider-Agnostic
-- Workflow stages (BACKLOG → COMPLETE)
+- Workflow stages (BACKLOG → COMPLETE, including BLOCKED)
 - Agent roles and responsibilities
 - Context loading strategy
 - Local file structure
