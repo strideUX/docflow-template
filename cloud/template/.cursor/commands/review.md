@@ -1,171 +1,76 @@
 # Review (PM/Planning Agent)
 
 ## Overview
-Context-aware review command that handles two scenarios:
-
-1. **Spec Refinement** (issue in Backlog/Todo) - Refine acceptance criteria, prepare for implementation
-2. **Code Review** (issue in Review state) - Analyze implementation, verify quality, approve for QA
+Code review for completed implementations. Analyzes code changes, verifies acceptance criteria, tests, and documentation before approving for QA testing.
 
 **Agent Role:** PM/Planning Agent (orchestrator)  
-**Frequency:** When refining specs OR reviewing completed implementation
+**Frequency:** When implementation is complete (status = In Review)
+
+**Note:** For spec refinement (backlog items), use `/refine` instead.
 
 ---
 
 ## Steps
 
-### 1. **Find Issue and Determine Review Type**
+### 1. **Find Issues Awaiting Review**
 
 **If user specified issue (LIN-XXX):**
 - Query that specific issue from Linear
-- Check issue state to determine review type
+- Verify it's in "In Review" state
 
 **If not specified:**
-- Query Linear for issues needing review
-- Prioritize: In Review state first, then Backlog
+- Query Linear for issues in "In Review" state
 - Show list and ask which to review
 
-**Determine review type:**
-```
-If state == "In Review" (REVIEW):
-  → Code Review (implementation complete, needs verification)
-
-If state == "Backlog" or "Todo":
-  → Spec Refinement (preparing for implementation)
-```
-
----
-
-## SPEC REFINEMENT (Backlog/Todo Issues)
-
-### 2a. **Load Context for Spec Review**
-From Linear MCP:
-- Full description
-- All comments
-- Attachments (Figma, etc.)
-- Current labels and priority
-
-Also load:
-- `docflow/context/overview.md` (ensure alignment)
-- `docflow/knowledge/INDEX.md` (check for related decisions)
-
-### 3a. **Assess Spec Completeness**
-
-Check issue has:
-
-**Required:**
-- [ ] Clear, specific title
-- [ ] Context explaining "why"
-- [ ] User story (for features)
-- [ ] Acceptance criteria (testable)
-- [ ] Type label (feature/bug/chore/idea)
-- [ ] Priority set
-
-**Nice to Have:**
-- [ ] Technical notes/approach
-- [ ] Complexity estimate
-- [ ] Design references (Figma)
-- [ ] Dependencies noted
-
-### 4a. **Present Spec Assessment**
-
 ```markdown
-## 📋 Spec Review: LIN-XXX
+## 🔍 Code Review Queue
 
-**Title:** [Current title]
-**Type:** [feature/bug/chore/idea]
-**Priority:** [priority]
+Found [N] issues awaiting code review:
 
-### Current State:
-✅ Has context
-✅ Has user story
-⚠️ Acceptance criteria need detail
-❌ Missing technical approach
+| Issue | Title | Completed By | Files |
+|-------|-------|--------------|-------|
+| LIN-201 | [Title] | @developer | 5 files |
+| LIN-202 | [Title] | @developer | 3 files |
 
-### Acceptance Criteria:
-- [ ] [Criterion 1] ← Could be more specific
-- [ ] [Criterion 2]
-
-### Suggested Improvements:
-1. Add measurable criteria for [X]
-2. Clarify edge cases for [Y]
-3. Add technical approach notes
-
-Would you like me to:
-1. Refine the acceptance criteria
-2. Add technical notes
-3. Mark as ready to activate
-4. Something else
+Which would you like to review?
 ```
 
-### 5a. **Refine Spec Based on Discussion**
-
-Update Linear issue with improvements:
-
-```typescript
-updateIssue(issueId, {
-  description: updatedDescription,
-  priority: updatedPriority,  // 1-4 if changed
-  estimate: estimateValue     // 1-5 if set
-})
-
-addComment(issueId, {
-  body: '**Refined** — Clarified acceptance criteria, added technical approach, Estimate: M.'
-})
-```
-
-### 6a. **Spec Review Confirmation**
-
-```markdown
-✅ Spec review complete!
-
-**Issue:** LIN-XXX
-**Status:** Refined and ready
-
-**Updated:**
-- Acceptance criteria clarified
-- Technical approach added
-- Complexity: M
-
-Ready to `/activate LIN-XXX` when you want to start.
-```
-
----
-
-## CODE REVIEW (In Review Issues)
-
-### 2b. **Load Context for Code Review**
+### 2. **Load Review Context**
 
 From Linear MCP:
 - Full description (with acceptance criteria)
-- All comments (especially implementation notes)
+- All comments (especially implementation/completion notes)
 - Files changed (from completion comment)
 
 Also load:
 - `docflow/context/standards.md` (code quality rules)
-- Implementation comments from Linear
 - Changed files (use codebase search/read)
+- Test files if mentioned
 
-### 3b. **Analyze Implementation**
+### 3. **Analyze Implementation**
 
 **Review the actual code changes:**
 
 1. **Find changed files** from the completion comment
-2. **Read each file** and analyze:
+2. **Read each significant file** and analyze:
    - Does it follow `standards.md` conventions?
    - Is the code well-structured and readable?
    - Are there any obvious issues or anti-patterns?
    - Is error handling appropriate?
+   - Are types properly defined (TypeScript)?
 
 3. **Check tests:**
    - Were tests written?
    - Do tests cover the acceptance criteria?
    - Are edge cases considered?
+   - Do tests follow project patterns?
 
 4. **Check documentation:**
    - Were significant decisions documented?
    - Is code commented appropriately?
+   - Was knowledge base updated (if needed)?
 
-### 4b. **Present Code Review**
+### 4. **Present Code Review**
 
 ```markdown
 ## 🔍 Code Review: LIN-XXX
@@ -176,20 +81,28 @@ Also load:
 
 ---
 
-### Acceptance Criteria Check
-- [x] Criterion 1 - Verified in `file.tsx`
-- [x] Criterion 2 - Verified
-- [ ] Criterion 3 - ⚠️ Not found / incomplete
+### Acceptance Criteria Verification
 
-### Tests Check
-- [x] Tests written: `file.test.tsx`
-- [x] Core functionality covered
-- [ ] Edge cases: ⚠️ Missing error case test
+| Criterion | Status | Verified In |
+|-----------|--------|-------------|
+| [Criterion 1] | ✅ | `file.tsx:42` |
+| [Criterion 2] | ✅ | `hook.ts:15` |
+| [Criterion 3] | ⚠️ | Not found |
 
-### Documentation Check
-- [x] Code comments adequate
-- [x] Knowledge base updated (or N/A)
-- [x] Context files updated (or N/A)
+### Tests Verification
+
+- **Test file:** `component.test.tsx`
+- **Coverage:**
+  - ✅ Core functionality tested
+  - ✅ Happy path covered
+  - ⚠️ Error case missing
+- **Status:** Tests passing / failing
+
+### Documentation Verification
+
+- ✅ Code comments adequate
+- ✅ Knowledge base: N/A (no significant patterns)
+- ✅ Context files: N/A (no architecture changes)
 
 ---
 
@@ -197,19 +110,21 @@ Also load:
 
 **Standards Compliance:** ✅ Good | ⚠️ Minor issues | ❌ Needs work
 
-**Findings:**
+**Review Findings:**
 
 ✅ **Good:**
 - Clean component structure
 - Proper TypeScript types
 - Error handling present
+- Follows existing patterns
 
-⚠️ **Suggestions:**
-- Consider extracting [X] to a hook
-- Add JSDoc to public function [Y]
+⚠️ **Suggestions (non-blocking):**
+- Consider extracting [X] to a custom hook
+- Could add JSDoc to public function [Y]
 
-❌ **Issues (must fix):**
-- [Issue that must be addressed]
+❌ **Issues (must fix before approval):**
+- [Critical issue that must be addressed]
+- [Another blocking issue]
 
 ---
 
@@ -217,10 +132,10 @@ Also load:
 
 **✅ APPROVE** - Ready for QA testing
 OR
-**⚠️ REQUEST CHANGES** - See issues above
+**⚠️ REQUEST CHANGES** - Issues above must be fixed first
 ```
 
-### 5b. **Take Action Based on Review**
+### 5. **Take Action Based on Review**
 
 **If APPROVE:**
 ```typescript
@@ -229,7 +144,17 @@ updateIssue(issueId, {
 })
 
 addComment(issueId, {
-  body: '**Code Review Passed** ✅\n\nAll criteria verified. Code quality good. Ready for QA testing.'
+  body: `**Code Review Passed** ✅
+
+**Verified:**
+- All acceptance criteria met
+- Tests adequate  
+- Code quality good
+
+**Suggestions (optional):**
+- [Non-blocking suggestions]
+
+Ready for QA testing.`
 })
 ```
 
@@ -240,11 +165,17 @@ updateIssue(issueId, {
 })
 
 addComment(issueId, {
-  body: '**Code Review: Changes Requested** ⚠️\n\n**Issues to address:**\n- [Issue 1]\n- [Issue 2]\n\nPlease fix and move back to Review when ready.'
+  body: `**Code Review: Changes Requested** ⚠️
+
+**Issues to address:**
+1. [Issue 1 - specific guidance]
+2. [Issue 2 - specific guidance]
+
+Please fix and move back to Review when ready.`
 })
 ```
 
-### 6b. **Code Review Confirmation**
+### 6. **Confirmation**
 
 **If approved:**
 ```markdown
@@ -258,135 +189,86 @@ addComment(issueId, {
 - Tests adequate
 - Code quality good
 
-Ready for `/validate LIN-XXX` to begin QE testing.
+Next: `/validate LIN-XXX` to begin QE testing.
 ```
 
 **If changes requested:**
 ```markdown
 ⚠️ Code review complete - changes needed
 
-**Issue:** LIN-XXX
+**Issue:** LIN-XXX  
 **Status:** In Progress (returned for fixes)
 
 **Issues to address:**
-- [Issue 1]
-- [Issue 2]
+1. [Issue 1]
+2. [Issue 2]
 
-Move back to Review when fixed.
+Fix these and move back to Review when ready.
 ```
 
 ---
 
-## Bulk Review
+## Review Depth
 
-**For backlog/spec review:**
-```
-User: "review the backlog"
+The code review should be **meaningful but not exhaustive**:
 
-Agent: Found 5 items in backlog. Let me assess each...
+**DO check:**
+- Acceptance criteria are actually met (verify in code)
+- Tests exist and cover main functionality
+- Code follows `standards.md` patterns
+- No obvious bugs or anti-patterns
+- Error handling is present
+- Types are properly defined
 
-**Ready to activate:**
-- LIN-101: [Title] ✅ Complete
-- LIN-103: [Title] ✅ Complete
+**DON'T get stuck on:**
+- Minor style preferences (that's what linters are for)
+- Hypothetical future issues
+- Over-optimization
+- Bikeshedding
 
-**Need refinement:**
-- LIN-102: [Title] ⚠️ Missing AC
-- LIN-104: [Title] ⚠️ Needs tech notes
-- LIN-105: [Title] ⚠️ Unclear scope
-
-Would you like to refine the incomplete ones?
-```
-
-**For code review queue:**
-```
-User: "what needs code review"
-
-Agent: Found 2 items awaiting code review:
-
-**In Review:**
-- LIN-201: [Title] - Completed by [dev], [X] files
-- LIN-202: [Title] - Completed by [dev], [Y] files
-
-Would you like me to review one?
-```
+**Goal:** Verify the implementation is solid enough for QA, not perfect.
 
 ---
 
 ## Context to Load
-
-**For Spec Review:**
-- Linear issue (full details)
-- `docflow/context/overview.md`
-- `docflow/knowledge/INDEX.md`
-- Related features/decisions if relevant
-
-**For Code Review:**
-- Linear issue (full details + comments)
+- Linear issue (full details + all comments)
 - `docflow/context/standards.md`
 - Changed files (from completion comment)
 - Test files
+- Related files if needed for context
 
 ---
 
 ## Natural Language Triggers
-
-**Spec Review:**
-- "review [issue]" / "refine [issue]"
-- "prepare [issue]" / "is [issue] ready"
-- "look at backlog" / "check backlog"
-- "get [issue] ready"
-
-**Code Review:**
 - "review [issue]" (when issue is in Review state)
 - "code review [issue]"
 - "check the implementation"
 - "review the changes"
-
-**Run this command when detected.**
+- "what needs code review"
 
 ---
 
 ## Outputs
-
-**Spec Review:**
-- Issue assessed for completeness
-- Improvements identified
-- Issue updated in Linear
-- Ready for activation
-
-**Code Review:**
 - Implementation analyzed
 - Quality assessed against standards
 - Tests verified
+- Documentation checked
 - Approved → moved to QA
 - OR Changes requested → moved back to In Progress
 
 ---
 
 ## Checklist
-
-**Spec Review:**
-- [ ] Found issue to review
-- [ ] Determined review type (spec refinement)
-- [ ] Loaded issue + overview.md + knowledge INDEX
-- [ ] Assessed spec completeness
-- [ ] Presented assessment to user
-- [ ] Made agreed improvements
-- [ ] Updated Linear issue
-- [ ] Added refinement comment
-- [ ] Confirmed ready status
-
-**Code Review:**
-- [ ] Found issue to review
-- [ ] Determined review type (code review)
-- [ ] Loaded issue + standards.md + changed files
+- [ ] Found issue in Review state
+- [ ] Loaded issue + standards.md + completion comments
+- [ ] Identified changed files from completion comment
 - [ ] Read and analyzed implementation code
-- [ ] Verified acceptance criteria met
+- [ ] Verified each acceptance criterion in code
 - [ ] Checked tests exist and cover requirements
-- [ ] Checked documentation updated (or N/A)
+- [ ] Checked documentation (or verified N/A appropriate)
 - [ ] Assessed code quality against standards
-- [ ] Presented review findings
+- [ ] Presented detailed review findings
+- [ ] Made approval decision
 - [ ] Updated Linear status (QA or back to In Progress)
 - [ ] Added review comment with findings
-- [ ] Confirmed next steps
-
+- [ ] Confirmed next steps to user

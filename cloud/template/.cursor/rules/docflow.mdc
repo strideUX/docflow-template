@@ -69,12 +69,27 @@ Backlog    Todo    In Progress In Review    QA       Done
 
 | State | Linear | What Happens |
 |-------|--------|--------------|
-| BACKLOG | Backlog | Raw ideas, needs refinement |
+| BACKLOG | Backlog | Raw ideas or refined specs awaiting prioritization |
 | READY | Todo | Refined, prioritized, ready to pick up |
 | IMPLEMENTING | In Progress | Code + Tests + Docs being written |
 | REVIEW | In Review | Implementation complete, awaiting code review (agentic or human) |
 | TESTING | QA | Code review passed, manual testing by user |
 | COMPLETE | Done | Verified and shipped |
+
+### Intake/Triage Flow
+```
+Quick Capture (with `triage` label)
+        │
+        │ /refine (triage path)
+        ▼
+    BACKLOG (typed, templated)
+        │
+        │ /refine (refinement path)
+        ▼
+      READY
+```
+
+**Triage label:** Issues with `triage` label are raw captures needing classification and structure.
 
 ### Simplified Workflow (Chores & Ideas)
 ```
@@ -90,7 +105,7 @@ Backlog In Progress  Done
 
 ### PM/Planning Agent
 
-**When Creating Specs:**
+**When Creating Specs (from IDE via /capture):**
 1. Create Linear issue with appropriate template
 2. Set type label (feature, bug, chore, idea)
 3. Set priority (1-4) based on urgency
@@ -99,15 +114,31 @@ Backlog In Progress  Done
 6. Leave in Backlog state
 7. Add comment: `**Created** — [Brief context].`
 
+**When Triaging (issues with `triage` label via /refine):**
+1. Find issues with `triage` label
+2. Analyze raw content
+3. Suggest type classification (feature/bug/chore/idea)
+4. Apply appropriate template structure
+5. Remove `triage` label, add type label
+6. Add comment: `**Triaged** — Classified as [type], template applied.`
+
+**When Refining (templated backlog items via /refine):**
+1. Load issue + overview.md + knowledge INDEX
+2. Assess completeness (context, user story, acceptance criteria)
+3. Identify gaps and improvements
+4. Refine acceptance criteria, add technical notes
+5. Set complexity estimate if not set
+6. Add comment: `**Refined** — [What was improved]. Ready for activation.`
+
 **When Activating Work:**
 1. Get developer username (git config)
 2. Set priority if not already set (ask or infer)
 3. Set estimate if not already set (ask or infer)
 4. Assign Linear issue to developer
-5. Move to "In Progress" state
+5. Move to "Todo" state
 6. Add comment: `**Activated** — Assigned to [name], Priority: [P], Estimate: [E].`
 
-**When Reviewing (status=REVIEW) - Code Review:**
+**When Reviewing Code (status=REVIEW via /review):**
 1. Check Linear for issues in "In Review" state
 2. Read issue description + all implementation comments
 3. Load `docflow/context/standards.md`
@@ -117,7 +148,7 @@ Backlog In Progress  Done
    - Look for obvious issues or anti-patterns
    - Verify error handling is appropriate
 5. **Verify acceptance criteria:**
-   - All functionality criteria checked
+   - All functionality criteria checked in code
    - Tests written and cover requirements
    - Documentation updated (or N/A appropriate)
 6. **Make decision:**
@@ -321,7 +352,8 @@ Load with: source .env
 **`/start-session`**
 1. Query Linear for current user's issues
 2. Show: QA issues, Review issues, In Progress issues, Ready issues
-3. Ask what to work on
+3. Show: Triage queue (issues with `triage` label)
+4. Ask what to work on
 
 **`/wrap-session`**
 1. Summarize what was accomplished
@@ -347,10 +379,16 @@ Load with: source .env
 3. Create Linear issue with template
 4. Set to Backlog
 
-**`/review [issue]`**
-1. Query Linear for issue
-2. Refine description, acceptance criteria
-3. Update issue
+**`/refine [issue]`** ← Combined triage + refinement
+1. Query Linear for issue (or show triage/refinement queues)
+2. **If `triage` label or missing structure:**
+   - Classify type (feature/bug/chore/idea)
+   - Apply template structure
+   - Remove `triage` label, add type label
+3. **If templated:**
+   - Assess completeness
+   - Refine acceptance criteria, technical notes
+   - Prepare for activation
 
 **`/activate [issue]`**
 1. Get assignee (current user or specified)
@@ -366,10 +404,10 @@ Load with: source .env
 
 **`/implement [issue]`**
 1. Query Linear for issue
-2. Load into context
+2. Load into context + show implementation checklist
 3. Read Figma if attached
 4. Move to In Progress
-5. Begin implementation
+5. Begin implementation (code + tests + docs)
 
 **`/block`**
 1. Add blocker comment to current issue
@@ -381,10 +419,18 @@ Load with: source .env
 3. For local files: upload to Linear storage, create attachment
 4. Confirm with link
 
+### Review Commands
+
+**`/review [issue]`** ← Code review only (post-implementation)
+1. Query Linear for issues in "In Review" state
+2. Load implementation details + standards.md
+3. Analyze code changes, verify tests/docs
+4. Approve → QA, or Request changes → In Progress
+
 ### QE Commands
 
 **`/validate [issue]`**
-1. Query Linear for issue
+1. Query Linear for issue in QA state
 2. Show acceptance criteria
 3. Guide user through testing
 
@@ -393,6 +439,7 @@ Load with: source .env
 **`/status`**
 1. Query Linear for current state
 2. Show active work, blocked items, what's ready
+3. Show triage queue count
 
 **`/docflow-update`**
 1. Check source repo for updates
@@ -410,21 +457,27 @@ Load with: source .env
 "wrap it up" / "I'm done" / "save progress" → `/wrap-session`
 
 ### Capture
-"capture that" / "add to backlog" / "found a bug" → `/capture`
+"capture that" / "add to backlog" / "found a bug" / "new idea" → `/capture`
+
+### Refine (Triage + Spec Refinement)
+"refine [issue]" / "triage [issue]" → `/refine`
+"what needs triage" / "triage queue" → Show triage queue
+"prepare [issue]" / "get [issue] ready" → `/refine`
+"clean up backlog" → Show triage + refinement queues
 
 ### Implement
 "let's build" / "implement this" / "start working" → `/implement`
 
-### Review (context-aware)
-"review [issue]" → `/review` (determines type based on issue state)
-"code review" / "check the implementation" → `/review` (code review)
-"refine [issue]" / "prepare [issue]" → `/review` (spec refinement)
+### Review (Code Review Only)
+"review [issue]" (when in Review state) → `/review`
+"code review" / "check the implementation" → `/review`
+"what needs code review" → Show review queue
 
 ### Attach
 "attach [file]" / "link the doc" / "upload notes" → `/attach`
 
 ### Validate
-"test this" / "review implementation" → `/validate`
+"test this" / "QE test" / "manual testing" → `/validate`
 
 ### QE Approval
 "looks good" / "approve" / "ship it" / "QE passed" → Mark approved
