@@ -179,14 +179,25 @@ templates/                   # Issue & project templates
                                 │ /refine (spec refinement)
                                 ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  BACKLOG → READY → IMPLEMENTING → REVIEW → QA → COMPLETE           │
-│     │        │          │            │       │        │             │
-│  Linear   Linear     Linear       Linear  Linear   Linear           │
-│  Backlog   Todo    In Progress  In Review   QA      Done            │
-│                         │            │       │                      │
-│                    Code + Tests   Code    Manual                    │
-│                    + Docs        Review   Testing                   │
+│  BACKLOG → READY → IMPLEMENTING ──→ REVIEW → QA → COMPLETE         │
+│     │        │          │              │      │        │            │
+│  Linear   Linear     Linear         Linear  Linear  Linear          │
+│  Backlog   Todo    In Progress     In Review  QA     Done           │
+│                         │              │      │                     │
+│                         ▼              │      │                     │
+│                     BLOCKED ◄──────────┘      │                     │
+│                         │                     │                     │
+│                      Linear                   │                     │
+│                     Blocked                   │                     │
+│                         │                     │                     │
+│                         └──► (resume when unblocked)                │
 └─────────────────────────────────────────────────────────────────────┘
+
+Terminal States (via /close):
+- Done      → Verified and shipped
+- Archived  → Deferred to future  
+- Canceled  → Won't do
+- Duplicate → Already exists elsewhere
 ```
 
 ### Three-Agent Model
@@ -195,23 +206,38 @@ templates/                   # Issue & project templates
 2. **Implementation Agent**: Builds features (code + tests + docs)
 3. **QE Agent**: Validates with user
 
+### Team Collaboration Features
+
+**Race Condition Prevention:**
+- Before activating or implementing, agent checks if issue is assigned to someone else
+- Warns before taking over work someone may already be doing
+
+**Stale Work Detection:**
+- Dashboard shows issues sitting too long in active states
+- In Progress > 7 days, Review/QA > 3 days triggers warning
+
+**Dependency Tracking:**
+- Block command can link to blocking issues
+- Dashboards surface issues with unresolved dependencies
+- "Blocked by LIN-XXX (In Progress @sarah)"
+
 ---
 
 ## Commands
 
 ### Planning Commands
 ```
-/start-session   - Begin work session, see queues
+/start-session   - Begin work session, see queues + stale + dependencies
 /capture         - Create new Linear issue (with template)
 /refine          - Triage raw captures OR refine specs
-/activate        - Assign and move to Ready
-/close           - Archive completed work
+/activate        - Assign and move to Ready (with race condition check)
+/close           - Close work (Done/Archived/Canceled/Duplicate)
 ```
 
 ### Implementation Commands
 ```
-/implement       - Pick up and build (code + tests + docs)
-/block           - Document blocker
+/implement       - Pick up and build (with assignment check)
+/block           - Move to Blocked state + link dependencies
 /attach          - Add files to issue
 ```
 
@@ -223,7 +249,7 @@ templates/                   # Issue & project templates
 
 ### System Commands
 ```
-/status          - Check current state + queues
+/status          - Check state + queues + stale items + dependencies
 /sync-project    - Sync context to Linear project
 /docflow-update  - Sync rules from source repo
 ```
@@ -249,9 +275,13 @@ templates/                   # Issue & project templates
 | Backlog | BACKLOG | Ideas, raw captures |
 | Todo | READY | Refined, ready to implement |
 | In Progress | IMPLEMENTING | Being built |
+| Blocked | BLOCKED | Waiting on feedback, dependency, or decision |
 | In Review | REVIEW | Awaiting code review |
 | QA | TESTING | Manual testing |
 | Done | COMPLETE | Shipped |
+| Archived | ARCHIVED | Deferred to future (not canceled) |
+| Canceled | CANCELED | Decision made not to pursue |
+| Duplicate | DUPLICATE | Already exists elsewhere |
 
 ### Issue Templates
 

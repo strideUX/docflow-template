@@ -50,10 +50,13 @@ Configure your team's workflow states to match DocFlow:
 | Backlog | Backlog | BACKLOG | Ideas, raw captures, needs refinement |
 | Todo | Unstarted | READY | Refined, prioritized, ready to implement |
 | In Progress | Started | IMPLEMENTING | Code + tests + docs being written |
+| Blocked | Started | BLOCKED | Waiting on feedback, dependency, or decision |
 | In Review | Started | REVIEW | Implementation complete, code review |
 | QA | Started | TESTING | Code review passed, manual testing |
 | Done | Completed | COMPLETE | Verified and shipped |
-| Canceled | Canceled | - | Won't do |
+| Archived | Completed | ARCHIVED | Deferred to future (not canceled, may revisit) |
+| Canceled | Canceled | CANCELED | Decision made not to pursue |
+| Duplicate | Canceled | DUPLICATE | Already exists elsewhere |
 
 ---
 
