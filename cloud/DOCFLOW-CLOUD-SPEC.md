@@ -285,7 +285,10 @@ type DocFlowStatus =
   | 'BLOCKED'
   | 'REVIEW' 
   | 'TESTING' 
-  | 'COMPLETE';
+  | 'COMPLETE'
+  | 'ARCHIVED'    // Terminal: deferred to future
+  | 'CANCELED'    // Terminal: won't do
+  | 'DUPLICATE';  // Terminal: already exists
 
 type SpecType = 'feature' | 'bug' | 'chore' | 'idea';
 
@@ -351,6 +354,10 @@ interface StatusMapping {
   REVIEW: string;      // Provider's review state
   TESTING: string;     // Provider's QA state
   COMPLETE: string;    // Provider's done state
+  // Terminal states (optional - for edge cases)
+  ARCHIVED?: string;   // Provider's archived/deferred state
+  CANCELED?: string;   // Provider's canceled state
+  DUPLICATE?: string;  // Provider's duplicate state
 }
 
 // Example: Linear mapping
@@ -361,7 +368,10 @@ const linearStatusMapping: StatusMapping = {
   BLOCKED: 'Blocked',
   REVIEW: 'In Review',
   TESTING: 'QA',
-  COMPLETE: 'Done'
+  COMPLETE: 'Done',
+  ARCHIVED: 'Archived',
+  CANCELED: 'Canceled',
+  DUPLICATE: 'Duplicate'
 };
 
 // Example: Jira mapping
@@ -372,7 +382,10 @@ const jiraStatusMapping: StatusMapping = {
   BLOCKED: 'Blocked',
   REVIEW: 'Code Review',
   TESTING: 'In QA',
-  COMPLETE: 'Closed'
+  COMPLETE: 'Closed',
+  ARCHIVED: 'Deferred',
+  CANCELED: "Won't Do",
+  DUPLICATE: 'Duplicate'
 };
 ```
 
@@ -435,7 +448,10 @@ Organization                    (workspace)
         "BLOCKED": "state-id-blocked",
         "REVIEW": "state-id-in-review",
         "TESTING": "state-id-qa",
-        "COMPLETE": "state-id-done"
+        "COMPLETE": "state-id-done",
+        "ARCHIVED": "state-id-archived",
+        "CANCELED": "state-id-canceled",
+        "DUPLICATE": "state-id-duplicate"
       }
     }
   },
@@ -447,7 +463,10 @@ Organization                    (workspace)
     "BLOCKED": "Blocked",
     "REVIEW": "In Review",
     "TESTING": "QA",
-    "COMPLETE": "Done"
+    "COMPLETE": "Done",
+    "ARCHIVED": "Archived",
+    "CANCELED": "Canceled",
+    "DUPLICATE": "Duplicate"
   }
 }
 ```

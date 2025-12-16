@@ -15,6 +15,9 @@
     "BLOCKED": "Blocked",
     "REVIEW": "In Review",
     "TESTING": "QA",
-    "COMPLETE": "Done"
+    "COMPLETE": "Done",
+    "ARCHIVED": "Archived",
+    "CANCELED": "Canceled",
+    "DUPLICATE": "Duplicate"
   }
 }

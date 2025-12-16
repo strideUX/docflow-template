@@ -86,6 +86,14 @@ Backlog    Todo    In Progress  In Review    QA       Done
 | TESTING | QA | Code review passed, manual testing by user |
 | COMPLETE | Done | Verified and shipped |
 
+**Terminal States (via `/close`):**
+
+| State | Linear | What Happens |
+|-------|--------|--------------|
+| ARCHIVED | Archived | Deferred to future - not canceled, just not now |
+| CANCELED | Canceled | Decision made not to pursue |
+| DUPLICATE | Duplicate | Already exists - link to original issue |
+
 ### Intake/Triage Flow
 ```
 Quick Capture (with `triage` label)
@@ -412,9 +420,10 @@ Load with: source .env
 3. Move to Todo state
 
 **`/close [issue]`**
-1. Verify in QA state and approved
-2. Move to Done state
-3. Add completion comment
+1. Determine terminal state (default: Done)
+2. For Done: verify QA approval
+3. Move to terminal state (Done/Archived/Canceled/Duplicate)
+4. Add appropriate comment
 
 ### Implementation Commands
 
@@ -498,6 +507,12 @@ Load with: source .env
 
 ### QE Approval
 "looks good" / "approve" / "ship it" / "QE passed" → Mark approved
+
+### Close (Terminal States)
+"close [issue]" / "mark complete" / "this is done" → `/close` (Done)
+"archive [issue]" / "defer [issue]" / "put on hold" → `/close` (Archived)
+"cancel [issue]" / "won't do" / "kill [issue]" → `/close` (Canceled)
+"duplicate of LIN-XXX" / "same as LIN-XXX" → `/close` (Duplicate)
 
 ### Project Update
 "post project update" / "update project status" → `/project-update`
