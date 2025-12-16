@@ -32,6 +32,11 @@ DocFlow Cloud is a hybrid spec-driven workflow:
 - `docflow/context/standards.md` (code conventions)
 - If issue has Figma attachment → call Figma MCP for design context
 
+**Remember: Implementation = Code + Tests + Docs**
+- Write tests alongside code
+- Document significant decisions to knowledge base
+- Update context files if architecture changes
+
 ### When Reviewing (status=REVIEW)
 **Load these for quality assessment:**
 - Linear issue being reviewed
@@ -59,6 +64,17 @@ BACKLOG → READY → IMPLEMENTING → REVIEW → TESTING → COMPLETE
  Linear   Linear     Linear     Linear    Linear    Linear
 Backlog    Todo    In Progress In Review    QA       Done
 ```
+
+**What each state means:**
+
+| State | Linear | What Happens |
+|-------|--------|--------------|
+| BACKLOG | Backlog | Raw ideas, needs refinement |
+| READY | Todo | Refined, prioritized, ready to pick up |
+| IMPLEMENTING | In Progress | Code + Tests + Docs being written |
+| REVIEW | In Review | Implementation complete, awaiting code review (agentic or human) |
+| TESTING | QA | Code review passed, manual testing by user |
+| COMPLETE | Done | Verified and shipped |
 
 ### Simplified Workflow (Chores & Ideas)
 ```
@@ -91,17 +107,26 @@ Backlog In Progress  Done
 5. Move to "In Progress" state
 6. Add comment: `**Activated** — Assigned to [name], Priority: [P], Estimate: [E].`
 
-**When Reviewing (status=REVIEW):**
+**When Reviewing (status=REVIEW) - Code Review:**
 1. Check Linear for issues in "In Review" state
-2. Read issue description + comments
-3. Verify acceptance criteria met
-4. Check code against standards
-5. If approved:
-   - Move to "QA" state
-   - Add comment: "✅ Code review passed. Ready for QE testing."
-6. If issues found:
-   - Move back to "In Progress"
-   - Add comment with specific changes needed
+2. Read issue description + all implementation comments
+3. Load `docflow/context/standards.md`
+4. **Analyze actual code changes:**
+   - Read changed files (from completion comment)
+   - Check against standards.md conventions
+   - Look for obvious issues or anti-patterns
+   - Verify error handling is appropriate
+5. **Verify acceptance criteria:**
+   - All functionality criteria checked
+   - Tests written and cover requirements
+   - Documentation updated (or N/A appropriate)
+6. **Make decision:**
+   - If approved:
+     - Move to "QA" state
+     - Add comment: "✅ Code review passed. [Summary of what was verified]"
+   - If issues found:
+     - Move back to "In Progress"
+     - Add comment with specific issues to address
 
 **When Closing (after QE approval):**
 1. Move to "Done" state
@@ -113,17 +138,31 @@ Backlog In Progress  Done
 1. Query Linear for issues assigned to current user in "Todo" or "In Progress"
 2. If multiple, ask user which to work on
 3. Read full issue including comments
+4. Show implementation checklist reminder (code + tests + docs)
 
 **During Implementation:**
-1. Update description checkboxes as criteria are completed
-2. Add progress comments: `**Progress** — What was done.`
-3. Document decisions in comments (dated)
-4. If Figma attached: call Figma MCP for design specs
+1. Write tests alongside code (not after)
+2. Update description checkboxes as criteria are completed
+3. Add progress comments: `**Progress** — What was done.`
+4. Document decisions in comments (dated)
+5. If Figma attached: call Figma MCP for design specs
+6. Document significant patterns/decisions to knowledge base (see Documentation Rules below)
 
 **On Completion:**
-1. Verify all acceptance criteria checkboxes are checked
+1. Verify ALL acceptance criteria checkboxes are checked:
+   - Functionality criteria
+   - Tests criteria (or marked N/A)
+   - Documentation criteria (or marked N/A)
 2. Move to "In Review" state
-3. Add comment: `**Ready for Review** — [Brief summary]. Files: [count].`
+3. Add detailed comment:
+   ```markdown
+   **Ready for Review** —
+   
+   **Summary:** [What was built/fixed]
+   **Files Changed:** [count]
+   **Tests:** [what was tested]
+   **Documentation:** [docs added/updated or N/A]
+   ```
 
 **On Blocker:**
 1. Add comment: `**Blocked** — [What's blocking and why].`
@@ -376,6 +415,11 @@ Load with: source .env
 ### Implement
 "let's build" / "implement this" / "start working" → `/implement`
 
+### Review (context-aware)
+"review [issue]" → `/review` (determines type based on issue state)
+"code review" / "check the implementation" → `/review` (code review)
+"refine [issue]" / "prepare [issue]" → `/review` (spec refinement)
+
 ### Attach
 "attach [file]" / "link the doc" / "upload notes" → `/attach`
 
@@ -436,6 +480,63 @@ Format for implementation notes:
 - Use codebase_search to find existing code
 - Check docflow/knowledge/ for existing patterns
 - Avoid duplicating functionality
+
+---
+
+## Documentation Rules
+
+### When to Document (Significant Changes Only)
+
+Documentation is required when changes are **significant**. Mark documentation criteria as N/A if no significant documentation is needed.
+
+**Document in `docflow/knowledge/` when:**
+- **decisions/** - Architectural or significant technical decisions
+  - Choosing between approaches (e.g., "Why we use X over Y")
+  - Trade-offs made and rationale
+- **notes/** - Gotchas, learnings, non-obvious solutions
+  - Things that would trip up future developers
+  - Workarounds for library/framework issues
+- **features/** - Complex feature explanations
+  - Multi-component features that need overview
+  - Non-obvious data flows or interactions
+
+**Update `docflow/context/` when:**
+- `stack.md` - Adding new technology, changing patterns
+- `standards.md` - New conventions, updated guidelines
+- `overview.md` - Scope changes, new links
+
+### Auto-Update Knowledge INDEX
+
+When adding new documentation to `docflow/knowledge/`:
+1. Add entry to `docflow/knowledge/INDEX.md`
+2. Include: file path, title, brief description, date added
+
+**INDEX.md entry format:**
+```markdown
+| [Title](path/to/file.md) | Brief description | YYYY-MM-DD |
+```
+
+### Documentation Comment Format
+
+When documentation is added during implementation, add a Linear comment:
+
+```markdown
+**Documentation Updated** —
+- Added: `docflow/knowledge/decisions/adr-[name].md` - [Brief description]
+- Updated: `docflow/context/stack.md` - [What changed]
+
+[Links available in repo after merge]
+```
+
+### What NOT to Document
+
+Don't create documentation for:
+- Trivial changes (rename, small refactor)
+- Standard patterns already in standards.md
+- Temporary solutions being replaced soon
+- Information already in the spec/issue
+
+**Git history + spec details + significant docs = complete history**
 
 ### Capture Useful Links
 When the user shares or mentions a useful link during conversation:

@@ -1,12 +1,24 @@
 # Implement (Implementation Agent)
 
 ## Overview
-Pick up a Linear issue and build it. Auto-complete when done.
+Pick up a Linear issue and build it. Implementation includes code, tests, and documentation. Auto-complete when done.
 
 **Agent Role:** Implementation Agent (builder)  
 **Frequency:** When starting implementation work
 
 **This receives the handoff from PM Agent.**
+
+---
+
+## Implementation Includes
+
+Implementation is not just code. A complete implementation includes:
+
+1. **Code** - The actual feature/fix
+2. **Tests** - Unit tests, integration tests as appropriate
+3. **Documentation** - Code comments, knowledge base updates (when significant)
+
+Check the issue's acceptance criteria for specific test and documentation requirements.
 
 ---
 
@@ -66,14 +78,32 @@ addComment(issueId, {
 })
 ```
 
-### 5. **Begin Implementation**
+### 5. **Show Implementation Checklist**
+
+At the start of implementation, remind about requirements:
+
+```markdown
+📋 **Implementation Checklist**
+
+As you build, remember to:
+- [ ] Write tests alongside code (per acceptance criteria)
+- [ ] Document decisions in Linear comments
+- [ ] Update knowledge base for significant patterns/decisions
+- [ ] Update context files if architecture changes
+
+When complete, I'll move to REVIEW and add a summary.
+```
+
+### 6. **Begin Implementation**
 Work through the issue:
 - Follow acceptance criteria from description
 - Adhere to stack.md patterns
 - Follow standards.md conventions
 - Use Figma specs if available (colors, spacing, etc.)
+- **Write tests** as you implement (not after)
+- **Document decisions** in Linear comments as you make them
 
-### 6. **Update Checkboxes as You Work**
+### 7. **Update Checkboxes as You Work**
 
 The issue description contains acceptance criteria as checkboxes. **Update them in-place** as each criterion is completed:
 
@@ -109,33 +139,71 @@ addComment(issueId, {
 - `**Progress** — useLocalStorage hook implemented, moving to useTodos.`
 - `**Blocked** — Need API access from backend team.`
 
-### 7. **Attach Reference Materials (Optional)**
+### 8. **Document Significant Decisions/Patterns**
 
-If implementation creates or references knowledge files:
+When significant decisions or patterns emerge during implementation:
 
-```markdown
-Created docflow/knowledge/features/auth-flow.md with implementation details.
+**Add to Knowledge Base:**
+- `docflow/knowledge/decisions/` - Architectural decisions (ADRs)
+- `docflow/knowledge/notes/` - Gotchas, learnings, non-obvious solutions
+- `docflow/knowledge/features/` - Complex feature explanations
 
-Would you like me to attach it to this issue?
-- **GitHub link** (stays in sync with repo)
-- **Upload copy** (snapshot attached to issue)
+**Update Context Files (if architecture changes):**
+- `docflow/context/stack.md` - New technologies, patterns
+- `docflow/context/standards.md` - New conventions
+
+**After adding documentation, update the index:**
+```bash
+# Add new entry to docflow/knowledge/INDEX.md
 ```
 
-Run `/attach` to add files to the issue.
+**Add comment to Linear issue with links:**
+```markdown
+**Documentation Updated** —
+- Added: `docflow/knowledge/decisions/adr-auth-strategy.md` - Auth approach decision
+- Updated: `docflow/context/stack.md` - Added NextAuth section
 
-### 8. **Auto-Complete When Done**
-When ALL acceptance criteria checkboxes are checked:
+[View in repo after merge]
+```
+
+**Attach to issue (optional):**
+Run `/attach` to link files directly to the issue.
+
+### 9. **Auto-Complete When Done**
+When ALL acceptance criteria checkboxes are checked (functionality, tests, docs):
+
+**Verify completion:**
+- [ ] All functionality criteria checked
+- [ ] Tests criteria checked (or marked N/A)
+- [ ] Documentation criteria checked (or marked N/A)
 
 **Update Linear issue:**
 ```typescript
-// Verify all checkboxes are [x]
+// Verify all checkboxes are [x] or N/A
 updateIssue(issueId, {
   stateId: config.linear.states.REVIEW
 })
+```
 
-addComment(issueId, {
-  body: '**Ready for Review** — All acceptance criteria complete. Files: X.'
-})
+**Add detailed completion comment:**
+```markdown
+**Ready for Review** —
+
+**Summary:** [Brief description of what was built/fixed]
+
+**Files Changed:** [count] files
+- `path/to/main-file.tsx` - [primary change]
+- `path/to/component.tsx` - [what was added/changed]
+- `path/to/file.test.tsx` - [tests added]
+
+**Tests:**
+- [X] unit tests for [component/function]
+- [X] integration test for [flow] (if applicable)
+
+**Documentation:**
+- [List any docs added/updated, or "N/A - no significant changes"]
+
+**Acceptance Criteria:** [X]/[Y] complete
 ```
 
 **Brief summary to user:**
@@ -144,14 +212,18 @@ addComment(issueId, {
 
 **Issue:** LIN-XXX
 **Status:** In Review
-**Files changed:** X
+**Files changed:** [count]
 
-All acceptance criteria met ✓
+**Completed:**
+- ✓ Functionality criteria
+- ✓ Tests written
+- ✓ Documentation updated (or N/A)
 
-Run `/validate LIN-XXX` or say "validate" to begin QE testing.
+**Next:** Run `/review LIN-XXX` for code review, or wait for human review.
+Then `/validate LIN-XXX` for QE testing.
 ```
 
-**This hands off to QE Agent.**
+**This hands off to Review (agentic or human), then QE Agent.**
 
 ---
 
@@ -197,13 +269,17 @@ User might say:
 - [ ] Found available work in Linear
 - [ ] Loaded issue + stack.md + standards.md
 - [ ] Checked for Figma attachments
+- [ ] Showed implementation checklist reminder
 - [ ] Verified status is In Progress (or updated it)
 - [ ] Added start comment if just beginning
+- [ ] Wrote tests alongside code
 - [ ] Updated description checkboxes as criteria completed
 - [ ] Added progress comments to Linear
-- [ ] Attached reference materials if created (knowledge docs, notes)
-- [ ] All checkboxes marked [x] when done
+- [ ] Documented significant decisions/patterns in knowledge base
+- [ ] Updated INDEX.md if new knowledge docs added
+- [ ] Added documentation comment with links (if docs updated)
+- [ ] All checkboxes marked [x] or N/A when done
 - [ ] Updated Linear status to In Review when done
-- [ ] Added completion comment
+- [ ] Added detailed completion comment (summary, files, tests, docs)
 - [ ] Provided completion summary
 
