@@ -54,6 +54,29 @@ For complex blockers, can expand:
 **Who can help:** @[person]
 ```
 
+### 4b. **Link Dependencies (If Blocked by Another Issue)**
+
+If blocked by another Linear issue, create a formal dependency:
+
+```typescript
+// Via Linear MCP or GraphQL
+updateIssue(issueId, {
+  blockedByIssueIds: ["blocking-issue-id"]  // LIN-XXX
+})
+```
+
+**The blocker comment should reference the blocking issue:**
+```markdown
+**Blocked** — Waiting on API endpoint implementation.
+
+**Blocked by:** LIN-250 (API: User preferences endpoint)
+**Status of blocker:** In Progress (@cory)
+
+Will resume once LIN-250 is complete.
+```
+
+**This creates a trackable dependency that shows in dashboards.**
+
 ### 5. **Notify Relevant People (Optional)**
 
 If someone specific needs to help, add them as a subscriber so they get notified:
@@ -99,19 +122,24 @@ I've moved this to Blocked status and tagged relevant people in Linear.
 ## Common Blocker Types
 
 **Technical Blocker:**
-- Missing API/dependency
+- Missing API/dependency → **Link the blocking issue if it exists**
 - Architecture decision needed
 - Performance issue
 
 **Requirements Blocker:**
 - Unclear acceptance criteria
 - Conflicting requirements
-- Missing design
+- Missing design → **Link to design task if it exists**
 
 **External Blocker:**
 - Waiting on third party
 - Access/permissions needed
 - Environment issue
+
+**Dependency Blocker:**
+- Another issue must complete first → **Always link the blocking issue**
+- Creates trackable relationship in Linear
+- Shows in dependency views and `/status` dashboards
 
 ---
 
@@ -155,7 +183,8 @@ User might say:
 - [ ] Identified current issue
 - [ ] Gathered blocker details
 - [ ] Moved issue to Blocked state
-- [ ] Added detailed blocker comment to Linear
+- [ ] Linked blocking issue (if dependency blocker)
+- [ ] Added detailed blocker comment to Linear (with issue link if applicable)
 - [ ] Tagged/subscribed relevant people
 - [ ] Provided next step options (including how to resume)
 

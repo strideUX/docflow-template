@@ -51,6 +51,10 @@ Limit: Top 5 by priority
 Show: What's coming up
 ```
 
+**Also check:**
+- **Dependencies:** Issues with "blocked by" relationships where blocker is incomplete
+- **Stale work:** Issues in active states (In Progress, Review, QA) for extended periods
+
 ### 3. **Get Current Developer Info**
 ```bash
 git config github.user || git config user.name || "Developer"
@@ -69,6 +73,13 @@ Use this to filter "my work" vs "all work"
 
 ### 🚫 Blocked
 - LIN-234: [Title] - [Brief blocker description]
+
+### ⚠️ Stale (needs attention)
+- LIN-200: [Title] - In Review for 5 days (no activity)
+- LIN-180: [Title] - In Progress for 10 days (@sarah)
+
+### 🔗 Has Dependencies
+- LIN-300: [Title] - Blocked by LIN-250 (In Progress @cory)
 
 ### 🔨 In Progress (@you)
 - LIN-789: [Title] - Priority: High, Estimate: M
@@ -137,8 +148,10 @@ User might say:
 - [ ] Queried Linear for Blocked issues
 - [ ] Queried Linear for In Progress issues
 - [ ] Queried Linear for Backlog items (with priority/estimate)
+- [ ] Checked for stale issues (>3 days in active state without activity)
+- [ ] Checked for dependency relationships (blocked by incomplete issues)
 - [ ] Got current developer username
-- [ ] Presented status dashboard (including Blocked section)
+- [ ] Presented status dashboard (including Blocked, Stale, Dependencies)
 - [ ] Loaded project context
 - [ ] Waiting for user direction
 

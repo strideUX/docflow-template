@@ -72,7 +72,30 @@ Before activating, let's set:
 - **Estimate:** [1=XS, 2=S, 3=M, 4=L, 5=XL]?
 ```
 
-### 4. **Get Assignee**
+### 4. **Check Assignment (Prevent Race Conditions)**
+
+**First, check if issue is already assigned:**
+```typescript
+const issue = await getIssue(issueId);
+
+if (issue.assignee) {
+  // Already assigned to someone
+  if (issue.assignee.id !== currentUserId) {
+    // Assigned to someone ELSE - warn and confirm
+    return promptUser(`⚠️ LIN-XXX is already assigned to @${issue.assignee.name}.
+    
+    Options:
+    1. Pick a different issue
+    2. Reassign to yourself (will notify ${issue.assignee.name})
+    3. Cancel`);
+  }
+  // Assigned to you already - proceed
+}
+```
+
+**This prevents two developers from accidentally working on the same issue.**
+
+### 5. **Set Assignee**
 
 **Default: Assign to current developer:**
 ```bash
@@ -82,10 +105,6 @@ git config github.user || git config user.name || "Developer"
 **If user specifies someone else:**
 - "assign to cory" → assign to that team member
 - Query `list_users` to find user ID by name/email
-
-**Check if already assigned:**
-- If assigned to someone else, warn before changing
-- If unassigned, assign to specified user (or current user)
 
 **Assignment options:**
 ```typescript
@@ -97,7 +116,7 @@ updateIssue(issueId, { assignee: "cory" })  // by name
 updateIssue(issueId, { assignee: "cory@example.com" })  // by email
 ```
 
-### 5. **Update Linear Issue**
+### 6. **Update Linear Issue**
 
 ```typescript
 updateIssue(issueId, {
@@ -112,7 +131,7 @@ addComment(issueId, {
 })
 ```
 
-### 6. **Confirmation**
+### 7. **Confirmation**
 
 ```markdown
 ✅ Activated!

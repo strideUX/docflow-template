@@ -51,7 +51,31 @@ git config github.user || git config user.name || "Developer"
 - Show what's assigned to others (if any)
 - Suggest checking with PM Agent
 
-### 3. **Load Full Context**
+### 3. **Check Assignment (Prevent Race Conditions)**
+
+Before starting work, verify assignment:
+
+```typescript
+const issue = await getIssue(issueId);
+
+if (issue.assignee && issue.assignee.id !== currentUserId) {
+  // Assigned to someone else - warn before taking over
+  return promptUser(`⚠️ ${issue.identifier} is assigned to @${issue.assignee.name}.
+  
+  They may already be working on this.
+  
+  Options:
+  1. Pick a different issue
+  2. Take over (reassign to yourself - will notify them)
+  3. Check with @${issue.assignee.name} first`);
+}
+
+// If unassigned or assigned to current user, proceed
+```
+
+**This prevents two developers from accidentally working on the same issue.**
+
+### 4. **Load Full Context**
 Load everything needed:
 - Full issue from Linear (description, comments, attachments)
 - `docflow/context/stack.md` (technical patterns)
@@ -64,7 +88,7 @@ Call Figma MCP: get_design_context(fileKey, nodeId)
 → Get colors, spacing, component structure
 ```
 
-### 4. **Update Linear Issue Status**
+### 5. **Update Linear Issue Status**
 Use Linear MCP to update:
 ```typescript
 updateIssue(issueId, {
@@ -87,7 +111,7 @@ addComment(issueId, {
 })
 ```
 
-### 5. **Show Implementation Checklist**
+### 6. **Show Implementation Checklist**
 
 At the start of implementation, remind about requirements:
 
@@ -103,7 +127,7 @@ As you build, remember to:
 When complete, I'll move to REVIEW and add a summary.
 ```
 
-### 6. **Begin Implementation**
+### 7. **Begin Implementation**
 Work through the issue:
 - Follow acceptance criteria from description
 - Adhere to stack.md patterns
@@ -112,7 +136,7 @@ Work through the issue:
 - **Write tests** as you implement (not after)
 - **Document decisions** in Linear comments as you make them
 
-### 7. **Update Checkboxes as You Work**
+### 8. **Update Checkboxes as You Work**
 
 The issue description contains acceptance criteria as checkboxes. **Update them in-place** as each criterion is completed:
 
@@ -148,7 +172,7 @@ addComment(issueId, {
 - `**Progress** — useLocalStorage hook implemented, moving to useTodos.`
 - `**Blocked** — Need API access from backend team.`
 
-### 8. **Document Significant Decisions/Patterns**
+### 9. **Document Significant Decisions/Patterns**
 
 When significant decisions or patterns emerge during implementation:
 
@@ -178,7 +202,7 @@ When significant decisions or patterns emerge during implementation:
 **Attach to issue (optional):**
 Run `/attach` to link files directly to the issue.
 
-### 9. **Auto-Complete When Done**
+### 10. **Auto-Complete When Done**
 When ALL acceptance criteria checkboxes are checked (functionality, tests, docs):
 
 **Verify completion:**
@@ -280,6 +304,7 @@ User might say:
 
 ## Checklist
 - [ ] Found available work in Linear (including Blocked issues)
+- [ ] Checked assignment (warn if assigned to someone else)
 - [ ] Loaded issue + stack.md + standards.md
 - [ ] Checked for Figma attachments
 - [ ] Showed implementation checklist reminder

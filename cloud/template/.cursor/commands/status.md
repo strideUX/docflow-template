@@ -34,6 +34,19 @@ const todo = await linearClient.issues({
 const backlog = await linearClient.issues({ 
   filter: { state: { name: { eq: "Backlog" } } }
 });
+
+// Check for stale issues (in active state for extended time)
+// Active states: In Progress (>7 days), In Review (>3 days), QA (>3 days)
+const staleIssues = [...inProgress, ...review, ...qa].filter(issue => {
+  const daysSinceUpdate = daysSince(issue.updatedAt);
+  if (issue.state.name === 'In Progress') return daysSinceUpdate > 7;
+  return daysSinceUpdate > 3;
+});
+
+// Check for dependency issues (blocked by incomplete issues)
+const withDependencies = await linearClient.issues({
+  filter: { blockedBy: { some: { state: { type: { neq: "completed" } } } } }
+});
 ```
 
 ### 2. **Get Current User's Work**
@@ -59,6 +72,17 @@ Filter for issues assigned to current user.
 | Issue | Title | Blocker |
 |-------|-------|---------|
 | LIN-234 | [Title] | [Brief blocker] |
+
+### ⚠️ Stale (needs attention)
+| Issue | Title | State | Days | Assignee |
+|-------|-------|-------|------|----------|
+| LIN-200 | [Title] | In Review | 5 | @sarah |
+| LIN-180 | [Title] | In Progress | 10 | @cory |
+
+### 🔗 Has Dependencies
+| Issue | Title | Blocked By |
+|-------|-------|------------|
+| LIN-300 | [Title] | LIN-250 (In Progress) |
 
 ### 📈 In Progress
 | Issue | Title | Assignee |
@@ -97,6 +121,7 @@ Agent:
 📊 **Status:** 1 in QA, 1 blocked, 2 in progress, 3 ready, 12 backlog
 🔥 **Action needed:** LIN-123 needs your testing
 🚫 **Blocked:** LIN-234 waiting on [blocker]
+⚠️ **Stale:** LIN-200 in review for 5 days
 ```
 
 ---
@@ -149,8 +174,10 @@ User might say:
 
 ## Checklist
 - [ ] Queried Linear for all states (including Blocked)
+- [ ] Checked for stale issues (extended time in active state)
+- [ ] Checked for dependency relationships
 - [ ] Got current username
 - [ ] Filtered user's items
-- [ ] Presented dashboard with Blocked section
+- [ ] Presented dashboard with Blocked, Stale, Dependencies sections
 - [ ] Suggested next actions
 
