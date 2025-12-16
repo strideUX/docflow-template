@@ -43,6 +43,16 @@ AGENT INSTRUCTIONS:
 - **Phase**: [Planning / Development / Beta / Production]
 - **Timeline**: [Key dates or milestones]
 
+## Links
+
+### Repository
+- **GitHub**: [https://github.com/org/repo]
+
+### Related Links
+<!-- Add links as they come up during development -->
+<!-- Examples: Figma files, documentation, APIs, external services -->
+- [Link name](URL) - Brief description
+
 ---
 
 *Last Updated: YYYY-MM-DD*

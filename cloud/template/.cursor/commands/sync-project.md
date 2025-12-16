@@ -51,6 +51,8 @@ Load all three context files:
 - Vision (1-2 sentences)
 - Key Goals (top 3)
 - Current Phase
+- Repository link (if set)
+- Related links (if any)
 
 **From stack.md:**
 - Core technologies (Frontend, Backend)
@@ -99,6 +101,14 @@ Extract the vision statement from overview.md (1-2 sentences, under 255 chars):
 - [Convention 1]
 - [Convention 2]
 - [Convention 3]
+
+---
+
+### Links
+- **Repository:** [GitHub URL if set]
+- [Related link 1]
+- [Related link 2]
+<!-- Only include links that are populated in overview.md -->
 
 ---
 
@@ -200,6 +210,13 @@ A simple, elegant todo app for testing DocFlow Cloud workflows.
 - Feature-based file organization
 - Zod validation at boundaries
 - Conventional commits
+
+---
+
+### Links
+- **Repository:** [github.com/strideUX/todue](https://github.com/strideUX/todue)
+- [Figma Designs](https://figma.com/file/abc123) - UI mockups
+- [Convex Dashboard](https://dashboard.convex.dev/project/todue)
 
 ---
 

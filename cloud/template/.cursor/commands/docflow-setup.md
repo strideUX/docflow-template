@@ -375,6 +375,37 @@ Which would you like to do?
 - Infer stack and patterns
 - Ask user to confirm
 
+### 8a. **Gather Project Links**
+
+After gathering project information, ask about links:
+
+```markdown
+## 🔗 Project Links
+
+Let's capture important links for this project:
+
+**Repository:**
+- What's the GitHub/GitLab URL for this project?
+- (If not yet created, we can add this later)
+
+**Related Links** (optional):
+- Figma designs?
+- Documentation?
+- External APIs or services?
+- Deployment dashboards?
+
+Share any links you'd like to keep handy, or say "skip" to add later.
+```
+
+**When user provides links:**
+- Save repository URL to overview.md Links section
+- Save each related link with a brief description
+- These will sync to Linear project description
+
+**If user skips:**
+- Leave Links section with placeholder
+- Note they can add links anytime and run `/sync-project`
+
 ---
 
 ### 9. **Fill Context Files**
@@ -502,6 +533,7 @@ Should I create these as Linear issues?
 - ✓ overview.md filled
 - ✓ stack.md configured
 - ✓ standards.md ready
+- ✓ Links captured (repo + related)
 - ✓ Project synced to Linear
 
 **Initial Work:**
@@ -516,7 +548,9 @@ Next commands:
 - `/capture` - Add more work items
 - `/implement [issue]` - Pick up and build
 
-**Remember:** If you update `docflow/context/` files, run `/sync-project` to keep Linear in sync.
+**Remember:** 
+- If you update `docflow/context/` files, run `/sync-project` to keep Linear in sync
+- When you encounter useful links during development, I'll ask if you want to save them
 
 Happy building! 🚀
 ```
@@ -581,7 +615,8 @@ User might say:
 - [ ] Verified workflow state mapping
 - [ ] Verified/created labels
 - [ ] Gathered project information
-- [ ] Filled context files
+- [ ] Asked about project links (repo, Figma, docs, etc.)
+- [ ] Filled context files (including Links section)
 - [ ] Synced project description to Linear
 - [ ] Created initial issues in Linear
 - [ ] Provided setup confirmation

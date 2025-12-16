@@ -391,6 +391,9 @@ Load with: source .env
 ### Sync Project
 "sync project" / "update project description" → `/sync-project`
 
+### Save Link
+"save this link" / "add to links" / "remember this link" → Add to overview.md Links + offer sync
+
 ### Status
 "what's the status" / "where are we" → `/status`
 
@@ -433,6 +436,36 @@ Format for implementation notes:
 - Use codebase_search to find existing code
 - Check docflow/knowledge/ for existing patterns
 - Avoid duplicating functionality
+
+### Capture Useful Links
+When the user shares or mentions a useful link during conversation:
+- **GitHub repos** (their own or dependencies)
+- **Figma files** or design links
+- **Documentation** (APIs, libraries, guides)
+- **Dashboards** (deployment, analytics, services)
+- **External services** (APIs, third-party tools)
+
+**Prompt the user:**
+```
+I noticed you shared [link]. Would you like me to save this to your project's Related Links?
+
+This will:
+1. Add it to docflow/context/overview.md
+2. Sync to your Linear project description (via /sync-project)
+
+Save this link? (yes/no)
+```
+
+**If yes:**
+1. Add to the Links section in `docflow/context/overview.md`
+2. Use format: `- [Link name](URL) - Brief description`
+3. Ask for a brief description if not obvious
+4. Offer to run `/sync-project` to update Linear
+
+**Don't prompt for:**
+- Temporary links (localhost, preview URLs)
+- Links already in the project
+- Links shared just for reference in conversation
 
 ---
 
