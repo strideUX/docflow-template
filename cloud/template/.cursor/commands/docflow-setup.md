@@ -853,14 +853,84 @@ Backlog: 4/4 specs imported
 
 ### Step M3: Import Completed Specs
 
+For completed specs, offer **CSV export** as the primary method (faster for bulk historical data).
+
+**Ask user for import method:**
+```markdown
+## 📚 Completed Specs
+
+Found [N] completed specs in local archive.
+
+**Import options:**
+1. **CSV export** (Recommended) - Generate CSV, import via Linear UI
+2. **Individual API** - Create each issue via API (slower)
+3. **Skip** - Don't import completed (history stays in git)
+
+Which option?
+```
+
+---
+
+#### Option 1: CSV Export (Recommended for 10+ specs)
+
+Generate a CSV file that can be imported via Linear's built-in import:
+
+**Generate CSV file:**
+```bash
+# Create: docflow/completed-specs-import.csv
+```
+
+**CSV columns:**
+```csv
+Title,Description,State,Labels,Priority,Estimate,Created,Completed
+"Feature: Driving Detection","## Context\n...",Done,feature,2,3,2025-09-19,2025-12-01
+"Feature: Map Integration","## Context\n...",Done,feature,2,2,2025-10-15,2025-12-01
+```
+
+**For each completed spec, extract:**
+
+| CSV Column | Source | Example |
+|------------|--------|---------|
+| Title | Spec title (from header or filename) | "Feature: Driving Detection" |
+| Description | Full spec content (Context, Acceptance Criteria, etc.) | Markdown content |
+| State | Always "Done" for completed | Done |
+| Labels | Filename prefix | feature, bug, chore, idea |
+| Priority | `**Priority**` field mapped | 1=Urgent, 2=High, 3=Medium, 4=Low |
+| Estimate | `**Complexity**` field mapped | 1=XS, 2=S, 3=M, 4=L, 5=XL |
+| Created | `**Created**` date | 2025-09-19 |
+| Completed | `**Completed**` date | 2025-12-01 |
+
+**After generating CSV:**
+```markdown
+## ✅ CSV Generated
+
+Created: `docflow/completed-specs-import.csv`
+Contains: [N] completed specs
+
+**To import into Linear:**
+1. Go to Linear → Team Settings → Import/Export
+2. Click "Import Issues"
+3. Upload the CSV file
+4. Map columns (should auto-detect)
+5. Set Project to: [Project Name]
+6. Import!
+
+After import, you can delete the CSV file.
+```
+
+---
+
+#### Option 2: Individual API (For smaller batches)
+
+If user prefers API or has < 10 specs:
+
 For each file in `docflow/specs/complete/**/*.md`:
 
-Same process as M2, but:
+Same process as M2 (backlog), but:
 - Set state to **Done** instead of Backlog
 - **Set `createdAt`** from spec's `**Created**` date
 - **Set `completedAt`** from spec's `**Completed**` date
-- Add comment: `**Completed** — Imported from local DocFlow archive.`
-- Less priority on perfect formatting (these are historical)
+- Include type label from filename prefix
 
 **Create completed issue with dates:**
 ```typescript
@@ -869,30 +939,13 @@ createIssue({
   projectId: config.projectId,
   title: parsedSpec.title,
   description: formattedDescription,
-  labelIds: [typeLabelId],
+  labelIds: [typeLabelId],  // IMPORTANT: Include type label
   priority: mappedPriority,
   estimate: mappedEstimate,
   stateId: doneStateId,
-  // Preserve original dates from local spec
-  createdAt: parsedSpec.created,     // "2025-09-19" → when spec was created
-  completedAt: parsedSpec.completed  // "2025-12-01" → when spec was completed
+  createdAt: parsedSpec.created,     // "2025-09-19"
+  completedAt: parsedSpec.completed  // "2025-12-01"
 })
-```
-
-**If dates not found in spec:** Default to today's date.
-
-**Ask before importing completed:**
-```markdown
-## 📚 Completed Specs
-
-Found [N] completed specs in local archive.
-
-Import options:
-1. **Import all** - Create Done issues for historical tracking
-2. **Import recent** - Only specs from last 3 months
-3. **Skip** - Don't import completed (history stays in git)
-
-Which option?
 ```
 
 **Progress update:**
@@ -903,6 +956,15 @@ Which option?
 
 Complete: [N]/[N] specs imported
 ```
+
+---
+
+#### Option 3: Skip
+
+If user skips completed specs:
+- History remains in git (specs-archived folder)
+- Only backlog/active specs migrated to Linear
+- User can import later if needed
 
 ---
 
