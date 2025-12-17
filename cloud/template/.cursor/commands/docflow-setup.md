@@ -678,9 +678,46 @@ If no date found, default to today's date.
 **Filename parsing:**
 - `feature-place-photos.md` → type: "feature", title: "Place Photos"
 - `bug-login-crash.md` → type: "bug", title: "Login Crash"
+- `chore-cleanup.md` → type: "chore", title: "Cleanup"
 - `idea-voice-control.md` → type: "idea", title: "Voice Control"
 
-#### M2b. Map to Linear Issue Template
+#### M2b. Look Up Label ID for Issue Type
+
+**IMPORTANT:** Each issue must have the correct type label applied.
+
+Before creating issues, query Linear for the team's labels:
+
+```typescript
+// Via MCP
+const labels = await linear_getLabels({ teamId: config.teamId });
+
+// Or via GraphQL
+query {
+  team(id: "TEAM_ID") {
+    labels {
+      nodes { id name }
+    }
+  }
+}
+```
+
+**Map filename prefix to label:**
+
+| Filename Prefix | Label Name | Example |
+|-----------------|------------|---------|
+| `feature-*` | feature | feature-place-photos.md |
+| `bug-*` | bug | bug-login-crash.md |
+| `chore-*` | chore | chore-cleanup.md |
+| `idea-*` | idea | idea-voice-control.md |
+
+**Find the label ID:**
+```typescript
+const typeLabelId = labels.find(l => l.name.toLowerCase() === parsedType)?.id;
+```
+
+If label not found, warn user and continue without label.
+
+#### M2c. Map to Linear Issue Template
 
 Transform local spec to Linear issue format:
 
@@ -725,8 +762,10 @@ Transform local spec to Linear issue format:
 _Migrated from local DocFlow on [date]_
 ```
 
-**Labels:**
-- Add type label (feature/bug/chore/idea)
+**Labels (REQUIRED):**
+- Use the `typeLabelId` from step M2b
+- This applies the type label (feature/bug/chore/idea) to the issue
+- **Do not skip this** - issues without type labels are harder to filter
 
 **Priority:** Map from local spec
 - Urgent → 1
@@ -743,9 +782,9 @@ _Migrated from local DocFlow on [date]_
 
 **State:** Backlog (for backlog specs)
 
-#### M2c. Create Linear Issue
+#### M2d. Create Linear Issue
 
-**Include original dates when creating issues:**
+**Include original dates AND type label when creating issues:**
 
 ```typescript
 // Via MCP
@@ -754,7 +793,8 @@ createIssue({
   projectId: config.projectId,
   title: parsedSpec.title,
   description: formattedDescription,
-  labelIds: [typeLabelId],
+  // IMPORTANT: Include type label from step M2b
+  labelIds: [typeLabelId],  // e.g., label ID for "feature", "bug", etc.
   priority: mappedPriority,
   estimate: mappedEstimate,
   stateId: backlogStateId,
@@ -788,7 +828,7 @@ source .env && curl -s -X POST https://api.linear.app/graphql \
 
 **Note:** Linear accepts `createdAt` for data import scenarios. Format as ISO 8601.
 
-#### M2d. Add Decision Log as Comments
+#### M2e. Add Decision Log as Comments
 
 If the local spec has a Decision Log, add each entry as a comment:
 
