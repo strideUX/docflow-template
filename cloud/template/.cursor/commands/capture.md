@@ -152,19 +152,25 @@ Ask or infer based on context:
 | 5     | XL   | Week+                |
 
 ### 5. **Create Linear Issue**
+
+Check `.docflow.json` for project configuration including default milestone.
+
 Use Linear MCP to create issue:
 
 ```typescript
 // Linear MCP call
 createIssue({
   teamId: config.linear.teamId,
+  projectId: config.linear.projectId,
   title: "[Type]: [Name]",
   description: [built description],
   priority: [1-4 based on user input],
   estimate: [1-5 if known],
   labelIds: [config.linear.labels[type]],
   stateId: config.linear.states.BACKLOG,
-  assignee: [optional - if user specifies]  // "me", name, or email
+  assignee: [optional - if user specifies],  // "me", name, or email
+  // Milestone (optional) - use default from config if set
+  projectMilestoneId: config.linear.defaultMilestoneId  // null if not configured
 })
 
 // Add creation comment
@@ -184,6 +190,21 @@ createIssue({
 
 By default, leave unassigned (goes to backlog for later activation).
 
+**Optional Milestone Override:**
+If user says "add to Q1 milestone" or "put this in MVP":
+```typescript
+// Query milestones if needed
+const milestones = await linear_getProjectMilestones({ projectId });
+const milestoneId = milestones.find(m => m.name.includes(userMention))?.id;
+
+createIssue({
+  ...
+  projectMilestoneId: milestoneId
+})
+```
+
+If no milestone configured and user doesn't specify, `projectMilestoneId` is null (not set).
+
 ### 6. **Add Figma/Assets If Available**
 If user mentions design references:
 - Add Figma URL as attachment
@@ -197,11 +218,12 @@ If user mentions design references:
 **Title:** [Type]: [Name]
 **Priority:** [Level]
 **Estimate:** [Size or "Not set"]
+**Milestone:** [Milestone name or "None"]
 **Status:** Backlog
 
 [View in Linear](issue-url)
 
-You can continue with current work. Refine later with `/review LIN-XXX`.
+You can continue with current work. Refine later with `/refine LIN-XXX`.
 ```
 
 ---
@@ -250,6 +272,7 @@ User might say:
 - [ ] Description built from template
 - [ ] Priority set (1-4)
 - [ ] Estimate set (1-5, optional at capture)
+- [ ] Milestone set (optional - uses default from config or user override)
 - [ ] Linear issue created via MCP
 - [ ] Type label applied
 - [ ] State set to Backlog

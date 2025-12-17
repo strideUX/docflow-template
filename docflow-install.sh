@@ -427,7 +427,8 @@ if [ "$MODE" == "cloud" ]; then
   "provider": {
     "type": "linear",
     "teamId": null,
-    "projectId": null
+    "projectId": null,
+    "defaultMilestoneId": null
   },
   "statusMapping": {
     "BACKLOG": "Backlog",

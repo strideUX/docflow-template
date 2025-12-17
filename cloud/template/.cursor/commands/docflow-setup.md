@@ -347,7 +347,76 @@ What would you like to do?
 
 ---
 
-### 8. **Gather Project Information**
+### 8. **Check for Milestones (Optional)**
+
+Milestones are optional in Linear. If the project doesn't have milestones, skip this step.
+
+Query Linear for project milestones:
+
+**MCP:**
+```typescript
+// Get milestones for the project
+linear_getProjectMilestones({ projectId: config.projectId })
+```
+
+**GraphQL fallback:**
+```bash
+source .env && curl -s -X POST https://api.linear.app/graphql \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "query { project(id: \"PROJECT_ID\") { projectMilestones { nodes { id name targetDate sortOrder } } } }"
+  }' | jq '.data.project.projectMilestones.nodes'
+```
+
+**If milestones exist:**
+```markdown
+## 📅 Project Milestones
+
+I found these milestones in your project:
+
+| # | Milestone | Target Date |
+|---|-----------|-------------|
+| 1 | Q4 2025 | 2025-12-31 |
+| 2 | Q1 2026 | 2026-03-31 |
+| 3 | MVP Launch | 2026-01-15 |
+
+**For new/backlog issues:**
+- Which milestone should new backlog items default to? (number or "none")
+
+**For migration (if applicable):**
+- Should I auto-assign completed specs to milestones based on completion date?
+- Should I assign backlog specs to a specific milestone?
+```
+
+**Store milestone preference:**
+- Save default milestone ID to `.docflow.json` for future `/capture` commands
+- Can be overridden per-issue
+
+**If no milestones:**
+```markdown
+No milestones found in this project. You can:
+1. **Create milestones** in Linear → Project → Milestones
+2. **Skip** - Issues won't be assigned to milestones
+
+Milestones are optional but useful for organizing work by release or quarter.
+```
+
+**Update `.docflow.json` with milestone config:**
+```json
+{
+  "provider": {
+    "type": "linear",
+    "teamId": "...",
+    "projectId": "...",
+    "defaultMilestoneId": null  // or milestone ID
+  }
+}
+```
+
+---
+
+### 9. **Gather Project Information**
 
 ```markdown
 ## 📋 Project Setup
@@ -784,7 +853,7 @@ _Migrated from local DocFlow on [date]_
 
 #### M2d. Create Linear Issue
 
-**Include original dates AND type label when creating issues:**
+**Include original dates, type label, AND milestone when creating issues:**
 
 ```typescript
 // Via MCP
@@ -799,7 +868,9 @@ createIssue({
   estimate: mappedEstimate,
   stateId: backlogStateId,
   // Preserve original creation date from local spec
-  createdAt: parsedSpec.created  // "2025-12-02" → ISO date
+  createdAt: parsedSpec.created,  // "2025-12-02" → ISO date
+  // Assign to milestone if configured (from step 8)
+  projectMilestoneId: config.defaultMilestoneId  // or null if none
 })
 ```
 
@@ -899,6 +970,12 @@ Title,Description,State,Labels,Priority,Estimate,Created,Completed
 | Estimate | `**Complexity**` field mapped | 1=XS, 2=S, 3=M, 4=L, 5=XL |
 | Created | `**Created**` date | 2025-09-19 |
 | Completed | `**Completed**` date | 2025-12-01 |
+| Milestone | Auto-map from folder or user selection | Q4 2025 |
+
+**Milestone auto-mapping for completed specs:**
+- If folder is `complete/2025-Q4/` → map to Q4 2025 milestone (if exists)
+- If folder is `complete/2025-Q3/` → map to Q3 2025 milestone (if exists)
+- If no matching milestone → leave blank or use default
 
 **After generating CSV:**
 ```markdown
@@ -932,7 +1009,7 @@ Same process as M2 (backlog), but:
 - **Set `completedAt`** from spec's `**Completed**` date
 - Include type label from filename prefix
 
-**Create completed issue with dates:**
+**Create completed issue with dates and milestone:**
 ```typescript
 createIssue({
   teamId: config.teamId,
@@ -944,7 +1021,9 @@ createIssue({
   estimate: mappedEstimate,
   stateId: doneStateId,
   createdAt: parsedSpec.created,     // "2025-09-19"
-  completedAt: parsedSpec.completed  // "2025-12-01"
+  completedAt: parsedSpec.completed, // "2025-12-01"
+  // Auto-map milestone from folder (e.g., complete/2025-Q4/ → Q4 2025 milestone)
+  projectMilestoneId: mappedMilestoneId  // or null if no match
 })
 ```
 

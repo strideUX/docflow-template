@@ -128,9 +128,10 @@ Backlog In Progress  Done
 2. Set type label (feature, bug, chore, idea)
 3. Set priority (1-4) based on urgency
 4. Set estimate (1-5) based on complexity
-5. Add Figma attachments if design exists
-6. Leave in Backlog state
-7. Add comment: `**Created** — [Brief context].`
+5. Set milestone (optional - use default from config or user override)
+6. Add Figma attachments if design exists
+7. Leave in Backlog state
+8. Add comment: `**Created** — [Brief context].`
 
 **When Triaging (issues with `triage` label via /refine):**
 1. Find issues with `triage` label
@@ -352,10 +353,26 @@ When issue has Figma attachment:
 ```
 Read .docflow.json for:
 - teamId (required)
-- initiativeId (optional scope)
-- defaultProjectId (optional)
+- projectId (required for project-scoped work)
+- defaultMilestoneId (optional - auto-assign new issues to this milestone)
 - label IDs for spec types
 - state IDs for status mapping
+```
+
+### Milestones (Optional)
+```
+Milestones organize work by release, quarter, or target date.
+
+When creating issues:
+- If defaultMilestoneId is set in config → use it
+- If user specifies milestone → override default
+- If no milestone configured → leave blank (null)
+
+Query milestones:
+  linear_getProjectMilestones({ projectId })
+
+Assign milestone:
+  createIssue({ ..., projectMilestoneId: milestoneId })
 ```
 
 ### Environment Variables
