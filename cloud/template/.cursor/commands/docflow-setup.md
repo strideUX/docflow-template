@@ -648,6 +648,10 @@ interface LocalSpec {
   priority: string;        // Low, Medium, High, Urgent
   complexity: string;      // XS, S, M, L, XL
   
+  // Dates from metadata (preserve original timestamps)
+  created: string;         // **Created**: 2025-12-02
+  completed?: string;      // **Completed**: 2025-12-01 (only for done specs)
+  
   // From sections
   problemStatement: string;  // ## Problem Statement
   proposedSolution: string;  // ## Proposed Solution
@@ -661,6 +665,15 @@ interface LocalSpec {
   implementationNotes: string;   // ## Implementation Notes
 }
 ```
+
+**Date parsing:**
+Extract dates from the metadata header:
+```
+**Created**: 2025-12-02     → created: "2025-12-02"
+**Completed**: 2025-12-01   → completed: "2025-12-01"
+```
+
+If no date found, default to today's date.
 
 **Filename parsing:**
 - `feature-place-photos.md` → type: "feature", title: "Place Photos"
@@ -732,6 +745,8 @@ _Migrated from local DocFlow on [date]_
 
 #### M2c. Create Linear Issue
 
+**Include original dates when creating issues:**
+
 ```typescript
 // Via MCP
 createIssue({
@@ -742,9 +757,36 @@ createIssue({
   labelIds: [typeLabelId],
   priority: mappedPriority,
   estimate: mappedEstimate,
-  stateId: backlogStateId
+  stateId: backlogStateId,
+  // Preserve original creation date from local spec
+  createdAt: parsedSpec.created  // "2025-12-02" → ISO date
 })
 ```
+
+**Via GraphQL API (if MCP doesn't support createdAt):**
+```bash
+source .env && curl -s -X POST https://api.linear.app/graphql \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation CreateIssue($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { id identifier } } }",
+    "variables": {
+      "input": {
+        "teamId": "TEAM_ID",
+        "projectId": "PROJECT_ID",
+        "title": "TITLE",
+        "description": "DESCRIPTION",
+        "labelIds": ["LABEL_ID"],
+        "priority": 3,
+        "estimate": 2,
+        "stateId": "STATE_ID",
+        "createdAt": "2025-12-02T00:00:00.000Z"
+      }
+    }
+  }'
+```
+
+**Note:** Linear accepts `createdAt` for data import scenarios. Format as ISO 8601.
 
 #### M2d. Add Decision Log as Comments
 
@@ -775,8 +817,29 @@ For each file in `docflow/specs/complete/**/*.md`:
 
 Same process as M2, but:
 - Set state to **Done** instead of Backlog
+- **Set `createdAt`** from spec's `**Created**` date
+- **Set `completedAt`** from spec's `**Completed**` date
 - Add comment: `**Completed** — Imported from local DocFlow archive.`
 - Less priority on perfect formatting (these are historical)
+
+**Create completed issue with dates:**
+```typescript
+createIssue({
+  teamId: config.teamId,
+  projectId: config.projectId,
+  title: parsedSpec.title,
+  description: formattedDescription,
+  labelIds: [typeLabelId],
+  priority: mappedPriority,
+  estimate: mappedEstimate,
+  stateId: doneStateId,
+  // Preserve original dates from local spec
+  createdAt: parsedSpec.created,     // "2025-09-19" → when spec was created
+  completedAt: parsedSpec.completed  // "2025-12-01" → when spec was completed
+})
+```
+
+**If dates not found in spec:** Default to today's date.
 
 **Ask before importing completed:**
 ```markdown
