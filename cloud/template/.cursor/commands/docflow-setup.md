@@ -652,6 +652,30 @@ If context files already have content:
 
 This scenario handles projects that used local DocFlow and are migrating to cloud.
 
+---
+
+### ⚠️ CRITICAL: Migration Must Preserve Data
+
+**Before creating ANY issue, you MUST extract and include:**
+
+| Field | Source | REQUIRED |
+|-------|--------|----------|
+| **Type Label** | Filename prefix (`feature-`, `bug-`, etc.) | ✅ YES |
+| **Created Date** | `**Created**: YYYY-MM-DD` in spec header | ✅ YES |
+| **Completed Date** | `**Completed**: YYYY-MM-DD` (for done specs) | ✅ YES |
+| **Priority** | `**Priority**: High/Medium/Low` | ✅ YES |
+| **Estimate** | `**Complexity**: S/M/L/XL` | ✅ YES |
+| **Milestone** | From config or folder mapping | Optional |
+
+**If any field is missing from the spec, ask the user or use sensible defaults.**
+
+**DO NOT create issues without:**
+1. Parsing the `**Created**` date from the spec
+2. Looking up and applying the type label
+3. For completed specs: parsing the `**Completed**` date
+
+---
+
 ### Migration Overview
 
 ```
@@ -666,9 +690,30 @@ docflow/INDEX.md             →   Remove (Linear views replace)
 docflow/specs/templates/*    →   Remove (Linear templates replace)
 ```
 
-### Step M1: Detect Local Specs
+### Step M1: Pre-Migration Checklist
 
-After steps 1-7 (environment, API, team, project, states, labels), check for local specs:
+**Before migrating, confirm these are complete:**
+
+- [ ] Step 4: Team selected and saved to `.docflow.json`
+- [ ] Step 5: Project selected/created and saved to `.docflow.json`
+- [ ] Step 6: Workflow states verified
+- [ ] Step 7: Labels verified (feature, bug, chore, idea exist)
+- [ ] Step 8: **Milestones checked** - if project has milestones, ask user which to use
+
+**Milestone Check (Step 8 - Don't Skip!):**
+```typescript
+// Query milestones for the project
+const milestones = await linear_getProjectMilestones({ projectId });
+
+if (milestones.length > 0) {
+  // Show milestones and ask user for default
+  // Save choice to config.defaultMilestoneId
+}
+```
+
+### Step M1b: Detect Local Specs
+
+Check for local specs:
 
 ```bash
 # Check if local specs exist
@@ -687,11 +732,13 @@ I found existing local DocFlow specs:
 | Backlog | [N] specs |
 | Complete | [N] specs |
 
-These need to be migrated to Linear. I'll:
-1. Parse each spec into our Linear issue template
-2. Create issues in Linear with appropriate status
-3. Preserve decision logs and notes as comments
-4. Archive the local specs folder when done
+**I will preserve for each issue:**
+- ✅ Original **created date** (from `**Created**: YYYY-MM-DD`)
+- ✅ Original **completed date** (from `**Completed**: YYYY-MM-DD`)
+- ✅ **Type label** (feature/bug/chore/idea from filename)
+- ✅ **Priority** and **estimate** from spec metadata
+- ✅ **Milestone** (from config or folder mapping)
+- ✅ Decision logs as comments
 
 Ready to migrate? (yes/no)
 ```
@@ -910,14 +957,26 @@ addComment(issueId, {
 })
 ```
 
-**Progress update:**
+**Progress update (show what was preserved for each):**
 ```markdown
 ✓ Imported: feature-place-photos → LIN-XXX
+  Label: feature | Created: 2025-12-02 | Priority: Low | Est: S
+
 ✓ Imported: feature-ui-overhaul → LIN-XXY
+  Label: feature | Created: 2025-12-03 | Priority: High | Est: XL
+
 ✓ Imported: idea-voice-control → LIN-XXZ
+  Label: idea | Created: 2025-11-15 | Priority: Low | Est: M
+
 ✓ Imported: idea-caravan-mode → LIN-XYZ
+  Label: idea | Created: 2025-11-20 | Priority: Low | Est: L
 
 Backlog: 4/4 specs imported
+```
+
+**If any field couldn't be parsed, show warning:**
+```markdown
+⚠️ feature-xyz: Could not parse Created date, using today
 ```
 
 ---
@@ -1027,10 +1086,14 @@ createIssue({
 })
 ```
 
-**Progress update:**
+**Progress update (show preserved dates):**
 ```markdown
 ✓ Imported: feature-driving-detection → LIN-AAA (Done)
+  Label: feature | Created: 2025-09-19 | Completed: 2025-12-01
+
 ✓ Imported: feature-map-integration → LIN-AAB (Done)
+  Label: feature | Created: 2025-10-05 | Completed: 2025-12-01
+
 ... [N more]
 
 Complete: [N]/[N] specs imported
@@ -1179,14 +1242,21 @@ User might say:
 - [ ] Selected/saved team ID to .docflow.json
 - [ ] Selected/saved project ID to .docflow.json (or created new)
 - [ ] Verified workflow state mapping
-- [ ] Verified/created labels
+- [ ] Verified/created labels (feature, bug, chore, idea)
+- [ ] **Checked for milestones** (Step 8) - asked user if any exist
 
 ### Migration (if local specs exist)
 - [ ] Detected local specs in docflow/specs/
-- [ ] Parsed backlog specs into Linear template format
-- [ ] Created Linear issues for backlog (Backlog state)
-- [ ] Asked about importing completed specs
-- [ ] Created Linear issues for completed (Done state)
+- [ ] **For EACH issue created, verified:**
+  - [ ] Type label applied (from filename prefix)
+  - [ ] `createdAt` set (from `**Created**: YYYY-MM-DD`)
+  - [ ] Priority set (from `**Priority**` field)
+  - [ ] Estimate set (from `**Complexity**` field)
+  - [ ] Milestone set (if configured)
+- [ ] **For completed issues, also verified:**
+  - [ ] `completedAt` set (from `**Completed**: YYYY-MM-DD`)
+  - [ ] State set to Done
+- [ ] Showed progress with field values for each import
 - [ ] Imported decision logs as comments
 - [ ] Archived local specs folder
 - [ ] Removed ACTIVE.md and INDEX.md
