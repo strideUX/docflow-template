@@ -147,7 +147,7 @@ Agent:
 ---
 
 ## Context to Load
-- `.docflow.json` (Linear config)
+- `.docflow/config.json` (Linear config)
 - Linear queries only
 - No local files needed
 

@@ -390,7 +390,7 @@ I found these milestones in your project:
 ```
 
 **Store milestone preference:**
-- Save default milestone ID to `.docflow.json` for future `/capture` commands
+- Save default milestone ID to `.docflow/config.json` for future `/capture` commands
 - Can be overridden per-issue
 
 **If no milestones:**
@@ -481,7 +481,7 @@ Share any links you'd like to keep handy, or say "skip" to add later.
 
 Based on gathered information, update:
 
-**docflow/context/overview.md:**
+**{paths.content}/context/overview.md:**
 ```markdown
 # Project Overview
 
@@ -504,7 +504,7 @@ Based on gathered information, update:
 ...
 ```
 
-**docflow/context/stack.md:**
+**{paths.content}/context/stack.md:**
 ```markdown
 # Tech Stack
 
@@ -520,7 +520,7 @@ Based on gathered information, update:
 ...
 ```
 
-**docflow/context/standards.md:**
+**{paths.content}/context/standards.md:**
 - Keep template defaults
 - Customize based on detected patterns
 
@@ -618,7 +618,7 @@ Next commands:
 - `/implement [issue]` - Pick up and build
 
 **Remember:** 
-- If you update `docflow/context/` files, run `/sync-project` to keep Linear in sync
+- If you update `{paths.content}/context/` files, run `/sync-project` to keep Linear in sync
 - When you encounter useful links during development, I'll ask if you want to save them
 
 Happy building! 🚀
@@ -683,8 +683,8 @@ Local DocFlow                    Linear
 ─────────────────────────────────────────────────
 docflow/specs/backlog/*.md   →   Issues (Backlog state)
 docflow/specs/complete/*.md  →   Issues (Done state)
-docflow/context/*            →   Keep local (unchanged)
-docflow/knowledge/*          →   Keep local (unchanged)
+{paths.content}/context/*    →   Keep local (unchanged)
+{paths.content}/knowledge/*  →   Keep local (unchanged)
 docflow/ACTIVE.md            →   Remove (Linear views replace)
 docflow/INDEX.md             →   Remove (Linear views replace)
 docflow/specs/templates/*    →   Remove (Linear templates replace)
@@ -694,8 +694,8 @@ docflow/specs/templates/*    →   Remove (Linear templates replace)
 
 **Before migrating, confirm these are complete:**
 
-- [ ] Step 4: Team selected and saved to `.docflow.json`
-- [ ] Step 5: Project selected/created and saved to `.docflow.json`
+- [ ] Step 4: Team selected and saved to `.docflow/config.json`
+- [ ] Step 5: Project selected/created and saved to `.docflow/config.json`
 - [ ] Step 6: Workflow states verified
 - [ ] Step 7: Labels verified (feature, bug, chore, idea exist)
 - [ ] Step 8: **Milestones checked** - if project has milestones, ask user which to use
@@ -1153,8 +1153,8 @@ confirming all specs imported correctly to Linear.
 - Removed: ACTIVE.md, INDEX.md
 
 **Preserved locally:**
-- `docflow/context/` - Project understanding (unchanged)
-- `docflow/knowledge/` - ADRs, notes, product docs (unchanged)
+- `{paths.content}/context/` - Project understanding (unchanged)
+- `{paths.content}/knowledge/` - ADRs, notes, product docs (unchanged)
 
 **Linear Project:**
 - [Project Name] configured
@@ -1239,8 +1239,8 @@ User might say:
 - [ ] Checked .env file exists
 - [ ] Validated LINEAR_API_KEY
 - [ ] Tested Linear API connection
-- [ ] Selected/saved team ID to .docflow.json
-- [ ] Selected/saved project ID to .docflow.json (or created new)
+- [ ] Selected/saved team ID to .docflow/config.json
+- [ ] Selected/saved project ID to .docflow/config.json (or created new)
 - [ ] Verified workflow state mapping
 - [ ] Verified/created labels (feature, bug, chore, idea)
 - [ ] **Checked for milestones** (Step 8) - asked user if any exist

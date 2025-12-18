@@ -43,7 +43,7 @@ From Linear MCP:
 - Files changed (from completion comment)
 
 Also load:
-- `docflow/context/standards.md` (code quality rules)
+- `{paths.content}/context/standards.md` (code quality rules)
 - Changed files (use codebase search/read)
 - Test files if mentioned
 
@@ -232,7 +232,7 @@ The code review should be **meaningful but not exhaustive**:
 
 ## Context to Load
 - Linear issue (full details + all comments)
-- `docflow/context/standards.md`
+- `{paths.content}/context/standards.md`
 - Changed files (from completion comment)
 - Test files
 - Related files if needed for context

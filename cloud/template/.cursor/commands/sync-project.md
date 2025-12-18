@@ -1,7 +1,7 @@
 # Sync Project (PM/Planning Agent)
 
 ## Overview
-Synchronize the Linear project description with local context files. Generates a concise summary from `docflow/context/` and updates the Linear project.
+Synchronize the Linear project description with local context files. Generates a concise summary from `{paths.content}/context/` and updates the Linear project.
 
 **Agent Role:** PM/Planning Agent  
 **Frequency:** After updating context files, during setup, or on-demand
@@ -19,7 +19,7 @@ Synchronize the Linear project description with local context files. Generates a
 ## Source of Truth
 
 ```
-docflow/context/
+{paths.content}/context/
 ├── overview.md   ──► Project vision, goals, scope
 ├── stack.md      ──► Tech stack, architecture
 └── standards.md  ──► Key conventions
@@ -40,9 +40,9 @@ Linear Project Description
 ### 1. **Read Context Files**
 
 Load all three context files:
-- `docflow/context/overview.md`
-- `docflow/context/stack.md`
-- `docflow/context/standards.md`
+- `{paths.content}/context/overview.md`
+- `{paths.content}/context/stack.md`
+- `{paths.content}/context/standards.md`
 
 ### 2. **Extract Key Information**
 
@@ -112,15 +112,15 @@ Extract the vision statement from overview.md (1-2 sentences, under 255 chars):
 
 ---
 
-📁 *Full details in `docflow/context/`*
+📁 *Full details in `{paths.content}/context/`*
 🔄 *Last synced: [YYYY-MM-DD]*
 ```
 
 ### 4. **Get Project ID**
 
-Read from `.docflow.json`:
+Read from `.docflow/config.json`:
 ```bash
-cat .docflow.json | jq -r '.provider.projectId'
+cat .docflow/config.json | jq -r '.provider.projectId'
 ```
 
 Or query Linear for current project.
@@ -160,7 +160,7 @@ curl -s -X POST https://api.linear.app/graphql \
 ✅ Project synced!
 
 **Project:** [Name]
-**Updated:** Description synced from docflow/context/
+**Updated:** Description synced from {paths.content}/context/
 
 **Summary includes:**
 - Vision and goals from overview.md
@@ -220,7 +220,7 @@ A simple, elegant todo app for testing DocFlow Cloud workflows.
 
 ---
 
-📁 *Full details in `docflow/context/`*
+📁 *Full details in `{paths.content}/context/`*
 🔄 *Last synced: 2025-12-05*
 ```
 
@@ -245,10 +245,10 @@ Setup complete!
 ---
 
 ## Context to Load
-- `docflow/context/overview.md`
-- `docflow/context/stack.md`
-- `docflow/context/standards.md`
-- `.docflow.json` (for project ID)
+- `{paths.content}/context/overview.md`
+- `{paths.content}/context/stack.md`
+- `{paths.content}/context/standards.md`
+- `.docflow/config.json` (for project ID and paths)
 - `.env` (for API key if using curl)
 
 ---

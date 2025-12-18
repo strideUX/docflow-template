@@ -171,9 +171,9 @@ All assigned to @you. Ready to implement.
 ---
 
 ## Context to Load
-- `.docflow.json` (Linear config)
+- `.docflow/config.json` (Linear config)
 - Target issue from Linear
-- `docflow/context/overview.md` (verify alignment)
+- `{paths.content}/context/overview.md` (verify alignment)
 
 ---
 

@@ -126,7 +126,7 @@ See you next time! 👋
 ---
 
 ## Context to Load
-- `.docflow.json` (Linear config)
+- `.docflow/config.json` (Linear config)
 - Linear queries for current state
 - Session context (what was worked on)
 

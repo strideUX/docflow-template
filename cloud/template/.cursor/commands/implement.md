@@ -78,8 +78,8 @@ if (issue.assignee && issue.assignee.id !== currentUserId) {
 ### 4. **Load Full Context**
 Load everything needed:
 - Full issue from Linear (description, comments, attachments)
-- `docflow/context/stack.md` (technical patterns)
-- `docflow/context/standards.md` (code quality rules)
+- `{paths.content}/context/stack.md` (technical patterns)
+- `{paths.content}/context/standards.md` (code quality rules)
 
 **Check for Figma attachments:**
 If issue has Figma link attached:
@@ -177,24 +177,24 @@ addComment(issueId, {
 When significant decisions or patterns emerge during implementation:
 
 **Add to Knowledge Base:**
-- `docflow/knowledge/decisions/` - Architectural decisions (ADRs)
-- `docflow/knowledge/notes/` - Gotchas, learnings, non-obvious solutions
-- `docflow/knowledge/features/` - Complex feature explanations
+- `{paths.content}/knowledge/decisions/` - Architectural decisions (ADRs)
+- `{paths.content}/knowledge/notes/` - Gotchas, learnings, non-obvious solutions
+- `{paths.content}/knowledge/features/` - Complex feature explanations
 
 **Update Context Files (if architecture changes):**
-- `docflow/context/stack.md` - New technologies, patterns
-- `docflow/context/standards.md` - New conventions
+- `{paths.content}/context/stack.md` - New technologies, patterns
+- `{paths.content}/context/standards.md` - New conventions
 
 **After adding documentation, update the index:**
 ```bash
-# Add new entry to docflow/knowledge/INDEX.md
+# Add new entry to {paths.content}/knowledge/INDEX.md
 ```
 
 **Add comment to Linear issue with links:**
 ```markdown
 **Documentation Updated** —
-- Added: `docflow/knowledge/decisions/adr-auth-strategy.md` - Auth approach decision
-- Updated: `docflow/context/stack.md` - Added NextAuth section
+- Added: `{paths.content}/knowledge/decisions/adr-auth-strategy.md` - Auth approach decision
+- Updated: `{paths.content}/context/stack.md` - Added NextAuth section
 
 [View in repo after merge]
 ```
@@ -273,8 +273,8 @@ When the blocker is resolved, run `/implement` again to resume.
 
 ## Context to Load
 - Linear issue (full details + comments)
-- `docflow/context/stack.md`
-- `docflow/context/standards.md`
+- `{paths.content}/context/stack.md`
+- `{paths.content}/context/standards.md`
 - Figma design context (if attached)
 - Use codebase_search as needed
 

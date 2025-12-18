@@ -35,7 +35,7 @@ FIGMA_ACCESS_TOKEN=figd_xxx              # Optional
 
 Get your API key from: **Linear → Settings → API → Personal API Keys**
 
-Note: Team ID and Project ID are discovered automatically during setup and saved to `.docflow.json`.
+Note: Team ID and Project ID are discovered automatically during setup and saved to `.docflow/config.json`.
 
 ### 4. Load Environment Variables
 
@@ -340,7 +340,7 @@ During development, when you share useful links (GitHub, Figma, docs), the agent
 > "Would you like me to save this to your project's Related Links?"
 
 If yes:
-1. Link is added to `docflow/context/overview.md`
+1. Link is added to `{content-folder}/context/overview.md`
 2. You can run `/sync-project` to update Linear
 
 ---
@@ -365,7 +365,7 @@ See [DOCFLOW-CLOUD-SPEC.md](./DOCFLOW-CLOUD-SPEC.md) for detailed migration guid
 
 Quick steps:
 1. Set up Linear with matching structure
-2. Configure `.docflow.json`
+2. Configure `.docflow/config.json`
 3. Migrate existing specs to Linear issues
 4. Remove local `docflow/specs/`, `INDEX.md`, `ACTIVE.md`
 

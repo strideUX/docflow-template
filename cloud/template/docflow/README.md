@@ -3,27 +3,35 @@
 This project uses DocFlow Cloud - a hybrid workflow where:
 - **Work items (specs)** live in Linear
 - **Project understanding** lives locally in git
+- **Framework config & templates** live in `.docflow/`
 
 ---
 
 ## Directory Structure
 
 ```
-docflow/
-├── context/           # Project fundamentals (LOCAL)
-│   ├── overview.md    # Vision, goals, scope
-│   ├── stack.md       # Tech stack, architecture
-│   └── standards.md   # Code conventions
+.docflow/                  # FRAMEWORK (updatable)
+├── config.json            # Provider settings, paths
+├── version                # For upgrade detection
+└── templates/             # Issue templates with agent instructions
+
+{this-folder}/             # PROJECT CONTENT (this folder)
+├── context/               # Project fundamentals
+│   ├── overview.md        # Vision, goals, scope
+│   ├── stack.md           # Tech stack, architecture
+│   └── standards.md       # Code conventions
 │
-├── knowledge/         # Project knowledge (LOCAL)
-│   ├── INDEX.md       # Knowledge inventory
-│   ├── decisions/     # Architecture Decision Records
-│   ├── features/      # Complex feature documentation
-│   ├── notes/         # Learnings, gotchas, tips
-│   └── product/       # Personas, user flows
+├── knowledge/             # Project knowledge
+│   ├── INDEX.md           # Knowledge inventory
+│   ├── decisions/         # Architecture Decision Records
+│   ├── features/          # Complex feature documentation
+│   ├── notes/             # Learnings, gotchas, tips
+│   └── product/           # Personas, user flows
 │
-└── README.md          # This file
+└── README.md              # This file
 ```
+
+**Note:** This folder name is configurable. See `paths.content` in `.docflow/config.json`.
 
 ---
 
@@ -84,8 +92,9 @@ These are **replaced by Linear**:
 
 ## Configuration
 
-See `.docflow.json` in project root for:
+See `.docflow/config.json` for:
 - DocFlow version
+- `paths.content` - This folder name (default: "docflow")
 - Linear team/project IDs
 - Status mappings
 

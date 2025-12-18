@@ -99,7 +99,12 @@ A hybrid architecture that separates concerns:
 │  │  ├── AGENTS.md                    ← synced from source repo        │ │
 │  │  ├── WARP.md                      ← synced from source repo        │ │
 │  │  │                                                                  │ │
-│  │  ├── docflow/                                                       │ │
+│  │  ├── .docflow/                    (FRAMEWORK - updatable)          │ │
+│  │  │   ├── config.json              (version + provider config)      │ │
+│  │  │   ├── version                  (for upgrade detection)          │ │
+│  │  │   └── templates/               (issue templates)                │ │
+│  │  │                                                                  │ │
+│  │  ├── {content-folder}/            (PROJECT - configurable name)    │ │
 │  │  │   ├── context/                 (LOCAL - understanding layer)    │ │
 │  │  │   │   ├── overview.md          (project vision, goals)          │ │
 │  │  │   │   ├── stack.md             (tech stack, architecture)       │ │
@@ -113,8 +118,6 @@ A hybrid architecture that separates concerns:
 │  │  │   │   └── product/             (personas, flows)                │ │
 │  │  │   │                                                              │ │
 │  │  │   └── README.md                (how to use docflow)             │ │
-│  │  │                                                                  │ │
-│  │  └── .docflow.json                (config: version + provider IDs) │ │
 │  │                                                                     │ │
 │  │  Agent reads rules locally - no MCP dependency for core!           │ │
 │  └────────────────────────────────────────────────────────────────────┘ │
@@ -185,14 +188,17 @@ Designer                    PM Tool (Linear)              Agent
 | **Slash Commands** | `.cursor/commands/*.md` | Command implementations |
 | **Agent Instructions** | `AGENTS.md` | Role-based agent guidance |
 | **Platform Configs** | `WARP.md`, `.claude/` | Tool-specific setup |
-| **Project Overview** | `docflow/context/overview.md` | Vision, goals, scope |
-| **Tech Stack** | `docflow/context/stack.md` | Architecture, dependencies |
-| **Code Standards** | `docflow/context/standards.md` | Conventions, patterns |
-| **ADRs** | `docflow/knowledge/decisions/` | Architectural decisions |
-| **Feature Docs** | `docflow/knowledge/features/` | Complex feature explanations |
-| **Notes** | `docflow/knowledge/notes/` | Learnings, gotchas |
-| **Product Docs** | `docflow/knowledge/product/` | Personas, user flows |
-| **Config** | `.docflow.json` | Version + provider config |
+| **Framework Config** | `.docflow/config.json` | Version + provider config |
+| **Templates** | `.docflow/templates/` | Issue templates with agent instructions |
+| **Project Overview** | `{content}/context/overview.md` | Vision, goals, scope |
+| **Tech Stack** | `{content}/context/stack.md` | Architecture, dependencies |
+| **Code Standards** | `{content}/context/standards.md` | Conventions, patterns |
+| **ADRs** | `{content}/knowledge/decisions/` | Architectural decisions |
+| **Feature Docs** | `{content}/knowledge/features/` | Complex feature explanations |
+| **Notes** | `{content}/knowledge/notes/` | Learnings, gotchas |
+| **Product Docs** | `{content}/knowledge/product/` | Personas, user flows |
+
+**Note:** `{content}` refers to the configurable content folder (default: "docflow", set via `paths.content` in `.docflow/config.json`).
 
 **Why Local:**
 - Agent needs instant access (no network call)
@@ -419,41 +425,20 @@ Organization                    (workspace)
 ### 5.2 Project Configuration
 
 ```json
-// .docflow.json
+// .docflow/config.json
 {
-  "docflow": {
-    "version": "3.0.0",
-    "sourceRepo": "github.com/org/docflow"
+  "version": "3.0.0",
+  "sourceRepo": "github.com/org/docflow",
+  
+  "paths": {
+    "content": "docflow"    // Configurable: "docs", "project-docs", etc.
   },
   
   "provider": {
     "type": "linear",
-    
-    "linear": {
-      "teamId": "abc123-team-id",
-      "initiativeId": "xyz789-initiative-id",
-      "defaultProjectId": "proj-456-optional",
-      
-      "labels": {
-        "feature": "label-id-feature",
-        "bug": "label-id-bug",
-        "chore": "label-id-chore",
-        "idea": "label-id-idea"
-      },
-      
-      "states": {
-        "BACKLOG": "state-id-backlog",
-        "READY": "state-id-todo",
-        "IMPLEMENTING": "state-id-in-progress",
-        "BLOCKED": "state-id-blocked",
-        "REVIEW": "state-id-in-review",
-        "TESTING": "state-id-qa",
-        "COMPLETE": "state-id-done",
-        "ARCHIVED": "state-id-archived",
-        "CANCELED": "state-id-canceled",
-        "DUPLICATE": "state-id-duplicate"
-      }
-    }
+    "teamId": "abc123-team-id",
+    "projectId": "proj-456-optional",
+    "defaultMilestoneId": null
   },
   
   "statusMapping": {
@@ -470,6 +455,8 @@ Organization                    (workspace)
   }
 }
 ```
+
+**Note:** The `paths.content` setting allows customizing the content folder name (default: "docflow"). Templates live in `.docflow/templates/`.
 
 ### 5.3 Linear Issue Template
 
@@ -531,14 +518,6 @@ _See issue comments for progress updates_
 // .cursor/mcp.json
 {
   "mcpServers": {
-    "docflow-linear": {
-      "command": "npx",
-      "args": ["@docflow/provider-linear"],
-      "env": {
-        "LINEAR_API_KEY": "${LINEAR_API_KEY}",
-        "DOCFLOW_CONFIG": ".docflow.json"
-      }
-    },
     "linear": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://mcp.linear.app/mcp"],
@@ -556,6 +535,8 @@ _See issue comments for progress updates_
   }
 }
 ```
+
+**Note:** Configuration now lives in `.docflow/config.json`, not passed via env vars.
 
 ### 5.5 Cursor Background Agent Integration
 
@@ -602,8 +583,8 @@ A lightweight MCP server that syncs local DocFlow files from the central source 
 ```
 User: /docflow-update
 
-DocFlow Update MCP:
-1. Read .docflow.json → current version: 3.0.0
+DocFlow Update:
+1. Read .docflow/config.json → current version: 3.0.0
 2. Check source repo releases → latest: 3.1.0
 3. Show changelog: "3.1.0: Added X, fixed Y"
 4. Ask: "Update to 3.1.0? [y/n]"
@@ -611,12 +592,14 @@ DocFlow Update MCP:
 If yes:
 5. Download files from source repo tag v3.1.0
 6. Overwrite local files:
+   - .docflow/templates/*.md
+   - .docflow/version
    - .cursor/rules/docflow.mdc
    - .cursor/commands/*.md
    - AGENTS.md
    - WARP.md
    - .claude/* (if present)
-7. Update .docflow.json version to 3.1.0
+7. Update .docflow/config.json version to 3.1.0
 8. Report: "Updated to DocFlow 3.1.0 ✓"
 ```
 
@@ -678,18 +661,14 @@ const tools = [
 Projects can control update behavior:
 
 ```json
-// .docflow.json
+// .docflow/config.json
 {
-  "docflow": {
-    "version": "3.0.0",       // Pinned to specific version
-    // OR
-    "version": "latest",      // Always use latest
-    // OR
-    "version": "^3.0",        // Compatible with 3.x
-    
-    "autoUpdate": false,      // Don't auto-update
-    "sourceRepo": "github.com/org/docflow"
-  }
+  "version": "3.0.0",        // Pinned to specific version
+  // OR
+  "version": "latest",       // Always use latest
+  
+  "autoUpdate": false,       // Don't auto-update
+  "sourceRepo": "github.com/org/docflow"
 }
 ```
 
@@ -780,7 +759,7 @@ Agent implements with actual design specs
 #### Step 2: Configure Project
 
 ```bash
-1. Create .docflow.json with Linear config
+1. Create .docflow/config.json with Linear config
 2. Add Linear MCP to .cursor/mcp.json
 3. Set LINEAR_API_KEY environment variable
 ```
@@ -922,11 +901,22 @@ project/
 
 ```
 project/
+├── .docflow/                  ← FRAMEWORK (updatable)
+│   ├── config.json            ← Config (version + provider + paths)
+│   ├── version                ← For upgrade detection
+│   └── templates/             ← Issue templates with agent instructions
+│       ├── feature.md
+│       ├── bug.md
+│       ├── chore.md
+│       ├── idea.md
+│       └── quick-capture.md
+│
 ├── .cursor/
 │   ├── rules/docflow.mdc      ← Synced from source repo
 │   ├── commands/*.md          ← Synced from source repo
-│   └── mcp.json               ← Provider + update MCP config
-├── docflow/
+│   └── mcp.json               ← MCP config
+│
+├── {content-folder}/          ← PROJECT CONTENT (configurable, default: "docflow")
 │   ├── context/               ← LOCAL (understanding)
 │   │   ├── overview.md
 │   │   ├── stack.md
@@ -938,9 +928,11 @@ project/
 │   │   ├── notes/
 │   │   └── product/
 │   └── README.md
-├── .docflow.json              ← Config (version + provider)
+│
 └── AGENTS.md                  ← Synced from source repo
 ```
+
+**Note:** `{content-folder}` name is set via `paths.content` in `.docflow/config.json` (default: "docflow").
 
 ---
 

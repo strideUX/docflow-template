@@ -29,7 +29,7 @@ From Linear MCP, load:
 - Attachments (Figma, screenshots)
 
 Also load:
-- `docflow/context/standards.md` (for code review)
+- `{paths.content}/context/standards.md` (for code review)
 
 ### 3. **Code Review Phase (if status=REVIEW)**
 
@@ -150,7 +150,7 @@ Run `/implement LIN-XXX` to continue fixing.
 
 ## Context to Load
 - Linear issue (full details + all comments)
-- `docflow/context/standards.md`
+- `{paths.content}/context/standards.md`
 - Implementation notes from comments
 
 ---

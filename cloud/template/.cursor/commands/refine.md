@@ -183,8 +183,8 @@ From Linear MCP:
 - Current labels and priority
 
 Also load:
-- `docflow/context/overview.md` (ensure alignment)
-- `docflow/knowledge/INDEX.md` (check for related decisions)
+- `{paths.content}/context/overview.md` (ensure alignment)
+- `{paths.content}/knowledge/INDEX.md` (check for related decisions)
 
 ### 3b. **Assess Completeness**
 

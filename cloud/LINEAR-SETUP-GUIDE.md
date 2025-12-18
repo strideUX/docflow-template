@@ -11,7 +11,7 @@ This guide covers:
 2. [Workflow States](#workflow-states) - Status progression
 3. [Issue Templates](#issue-templates) - Structured issue formats
 4. [Project Setup](#project-setup) - Project description format
-5. [Configuration](#configuration) - .docflow.json setup
+5. [Configuration](#configuration) - .docflow/config.json setup
 
 ---
 
@@ -160,7 +160,7 @@ When you run `/sync-project`, it generates this format from your local context f
 
 ---
 
-📁 *Full details in `docflow/context/`*
+📁 *Full details in `{content-folder}/context/`*
 🔄 *Last synced: [YYYY-MM-DD]*
 ```
 

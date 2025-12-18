@@ -11,7 +11,7 @@ Begin a work session by checking Linear status and identifying what needs attent
 ## Steps
 
 ### 1. **Load Configuration**
-Read `.docflow.json` to get:
+Read `.docflow/config.json` to get:
 - Linear team ID
 - Status mappings
 - Any default project filters
@@ -102,8 +102,10 @@ Use this to filter "my work" vs "all work"
 
 ### 5. **Load Project Context**
 Also load:
-- `docflow/context/overview.md` (project understanding)
-- `docflow/knowledge/INDEX.md` (scan for relevant knowledge)
+- `{paths.content}/context/overview.md` (project understanding)
+- `{paths.content}/knowledge/INDEX.md` (scan for relevant knowledge)
+
+**Note:** Read `.docflow/config.json` first to get `paths.content` (default: "docflow").
 
 ### 6. **Wait for User Direction**
 User picks what to work on, then execute appropriate command:
@@ -116,8 +118,8 @@ User picks what to work on, then execute appropriate command:
 ---
 
 ## Context to Load
-- `.docflow.json` (configuration)
-- `docflow/context/overview.md` (project context)
+- `.docflow/config.json` (configuration)
+- `{paths.content}/context/overview.md` (project context)
 - Linear queries (via MCP)
 
 ---
@@ -142,7 +144,7 @@ User might say:
 ---
 
 ## Checklist
-- [ ] Read .docflow.json config
+- [ ] Read .docflow/config.json
 - [ ] Queried Linear for QA issues
 - [ ] Queried Linear for Review issues
 - [ ] Queried Linear for Blocked issues

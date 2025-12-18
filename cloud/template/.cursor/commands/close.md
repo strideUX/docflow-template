@@ -154,7 +154,7 @@ Both issues closed. Great work! 🎉
 ---
 
 ## Context to Load
-- `.docflow.json` (Linear config)
+- `.docflow/config.json` (Linear config)
 - Target issue from Linear
 - Issue comments (verify approval for Done state)
 

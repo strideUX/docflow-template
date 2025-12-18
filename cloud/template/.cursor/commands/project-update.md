@@ -148,7 +148,7 @@ User can request directly:
 ---
 
 ## Context to Load
-- Current project from `.docflow.json` or Linear query
+- Current project from `.docflow/config.json` or Linear query
 - Session accomplishments (if from wrap-session)
 - Any blockers noted during session
 
