@@ -1,6 +1,6 @@
 #!/bin/bash
 # DocFlow Unified Installer
-# Version: 3.0
+# Version: 4.0
 # 
 # Handles ALL DocFlow installation scenarios:
 #   - New project creation
@@ -20,7 +20,7 @@
 
 set -e
 
-DOCFLOW_VERSION="3.0"
+DOCFLOW_VERSION="4.0"
 RAW_BASE_LOCAL="https://raw.githubusercontent.com/strideUX/docflow-template/main/local/template"
 RAW_BASE_CLOUD="https://raw.githubusercontent.com/strideUX/docflow-template/main/cloud/template"
 
@@ -56,7 +56,7 @@ done
 
 echo ""
 echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║${NC}              ${GREEN}DocFlow ${DOCFLOW_VERSION} Installer${NC}                      ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}              ${GREEN}DocFlow ${DOCFLOW_VERSION} Installer${NC}                       ${CYAN}║${NC}"
 echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -339,12 +339,35 @@ echo -e "${YELLOW}⬇️  Installing DocFlow ${MODE} files...${NC}"
 echo ""
 
 # =====================================================
-# INSTALL SYSTEM FILES
+# INSTALL CURSOR RULES & COMMANDS
 # =====================================================
-echo "   [1/6] Installing rules and commands..."
-mkdir -p .cursor/rules .cursor/commands
+echo "   [1/7] Installing Cursor rules..."
 
-download_file ".cursor/rules/docflow.mdc" ".cursor/rules/docflow.mdc"
+if [ "$MODE" == "cloud" ]; then
+  # New folder-based rules structure
+  mkdir -p .cursor/rules/docflow-core
+  mkdir -p .cursor/rules/session-awareness
+  mkdir -p .cursor/rules/pm-agent
+  mkdir -p .cursor/rules/implementation-agent
+  mkdir -p .cursor/rules/linear-integration
+  mkdir -p .cursor/rules/figma-integration
+  mkdir -p .cursor/rules/templates
+  
+  download_file ".cursor/rules/docflow-core/RULE.md" ".cursor/rules/docflow-core/RULE.md"
+  download_file ".cursor/rules/session-awareness/RULE.md" ".cursor/rules/session-awareness/RULE.md"
+  download_file ".cursor/rules/pm-agent/RULE.md" ".cursor/rules/pm-agent/RULE.md"
+  download_file ".cursor/rules/implementation-agent/RULE.md" ".cursor/rules/implementation-agent/RULE.md"
+  download_file ".cursor/rules/linear-integration/RULE.md" ".cursor/rules/linear-integration/RULE.md"
+  download_file ".cursor/rules/figma-integration/RULE.md" ".cursor/rules/figma-integration/RULE.md"
+  download_file ".cursor/rules/templates/RULE.md" ".cursor/rules/templates/RULE.md"
+else
+  # Local mode uses single rule file (for now)
+  mkdir -p .cursor/rules
+  download_file ".cursor/rules/docflow.mdc" ".cursor/rules/docflow.mdc"
+fi
+
+echo "   [2/7] Installing commands..."
+mkdir -p .cursor/commands
 
 # Commands - common to both modes
 for cmd in start-session wrap-session capture review activate implement validate close block status docflow-setup; do
@@ -359,7 +382,7 @@ if [ "$MODE" == "cloud" ]; then
 fi
 
 # Platform adapters
-echo "   [2/6] Installing platform adapters..."
+echo "   [3/7] Installing platform adapters..."
 mkdir -p .claude/commands .warp .github
 
 download_file ".claude/rules.md" ".claude/rules.md"
@@ -385,18 +408,45 @@ cd ../..
 # INSTALL .docflow/ FRAMEWORK (Cloud) or docflow/specs (Local)
 # =====================================================
 if [ "$MODE" == "cloud" ]; then
-  echo "   [3/6] Installing .docflow/ framework..."
+  echo "   [4/7] Installing .docflow/ framework..."
   mkdir -p .docflow/templates
+  mkdir -p .docflow/rules
+  mkdir -p .docflow/scripts
+  mkdir -p .docflow/skills/linear-workflow
+  mkdir -p .docflow/skills/spec-templates
+  mkdir -p .docflow/skills/docflow-commands
   
-  # Download config, version, and templates
+  # Download config, version
   download_file ".docflow/config.json" ".docflow/config.json"
   download_file ".docflow/version" ".docflow/version"
+  
+  # Download templates
   download_file ".docflow/templates/README.md" ".docflow/templates/README.md"
   download_file ".docflow/templates/feature.md" ".docflow/templates/feature.md"
   download_file ".docflow/templates/bug.md" ".docflow/templates/bug.md"
   download_file ".docflow/templates/chore.md" ".docflow/templates/chore.md"
   download_file ".docflow/templates/idea.md" ".docflow/templates/idea.md"
   download_file ".docflow/templates/quick-capture.md" ".docflow/templates/quick-capture.md"
+  
+  # Download rules
+  download_file ".docflow/rules/core.md" ".docflow/rules/core.md"
+  download_file ".docflow/rules/linear-integration.md" ".docflow/rules/linear-integration.md"
+  download_file ".docflow/rules/pm-agent.md" ".docflow/rules/pm-agent.md"
+  download_file ".docflow/rules/implementation-agent.md" ".docflow/rules/implementation-agent.md"
+  download_file ".docflow/rules/qe-agent.md" ".docflow/rules/qe-agent.md"
+  download_file ".docflow/rules/figma-integration.md" ".docflow/rules/figma-integration.md"
+  download_file ".docflow/rules/session-awareness.md" ".docflow/rules/session-awareness.md"
+  
+  # Download scripts
+  download_file ".docflow/scripts/status-summary.sh" ".docflow/scripts/status-summary.sh"
+  download_file ".docflow/scripts/session-context.sh" ".docflow/scripts/session-context.sh"
+  download_file ".docflow/scripts/stale-check.sh" ".docflow/scripts/stale-check.sh"
+  chmod +x .docflow/scripts/*.sh
+  
+  # Download skills
+  download_file ".docflow/skills/linear-workflow/SKILL.md" ".docflow/skills/linear-workflow/SKILL.md"
+  download_file ".docflow/skills/spec-templates/SKILL.md" ".docflow/skills/spec-templates/SKILL.md"
+  download_file ".docflow/skills/docflow-commands/SKILL.md" ".docflow/skills/docflow-commands/SKILL.md"
   
   # Update content path in config if customized
   if [ "$CONTENT_FOLDER" != "docflow" ]; then
@@ -408,19 +458,19 @@ if [ "$MODE" == "cloud" ]; then
   
   echo "   ✓ .docflow/ framework installed"
 else
-  echo "   [3/6] Creating local specs structure..."
+  echo "   [4/7] Creating local specs structure..."
   mkdir -p docflow/specs/{templates,active,backlog,complete,assets}
 fi
 
 # =====================================================
 # INSTALL CONTENT FOLDER
 # =====================================================
-echo "   [4/6] Creating content directory structure..."
+echo "   [5/7] Creating content directory structure..."
 mkdir -p "${CONTENT_FOLDER}/context"
 mkdir -p "${CONTENT_FOLDER}/knowledge/{decisions,features,notes,product}"
 
 # Context templates - only install if they don't exist or are empty
-echo "   [5/6] Installing context templates..."
+echo "   [6/7] Installing context templates..."
 for ctx in overview stack standards; do
   if [ ! -f "${CONTENT_FOLDER}/context/${ctx}.md" ] || [ ! -s "${CONTENT_FOLDER}/context/${ctx}.md" ]; then
     download_file "docflow/context/${ctx}.md" "${CONTENT_FOLDER}/context/${ctx}.md"
@@ -430,7 +480,7 @@ for ctx in overview stack standards; do
 done
 
 # Knowledge base files - only install if they don't exist
-echo "   [6/6] Installing documentation..."
+echo "   [7/7] Installing documentation..."
 if [ ! -f "${CONTENT_FOLDER}/knowledge/INDEX.md" ]; then
   download_file "docflow/knowledge/INDEX.md" "${CONTENT_FOLDER}/knowledge/INDEX.md"
 fi

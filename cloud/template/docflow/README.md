@@ -3,7 +3,7 @@
 This project uses DocFlow Cloud - a hybrid workflow where:
 - **Work items (specs)** live in Linear
 - **Project understanding** lives locally in git
-- **Framework config & templates** live in `.docflow/`
+- **Framework config, rules & templates** live in `.docflow/`
 
 ---
 
@@ -13,7 +13,23 @@ This project uses DocFlow Cloud - a hybrid workflow where:
 .docflow/                  # FRAMEWORK (updatable)
 ├── config.json            # Provider settings, paths
 ├── version                # For upgrade detection
-└── templates/             # Issue templates with agent instructions
+├── rules/                 # Workflow rules (source of truth)
+│   ├── core.md            # Essential rules (always loaded)
+│   ├── pm-agent.md        # PM agent responsibilities
+│   ├── implementation-agent.md
+│   ├── qe-agent.md
+│   ├── linear-integration.md
+│   ├── figma-integration.md
+│   └── session-awareness.md
+├── scripts/               # Automation scripts
+│   ├── status-summary.sh
+│   ├── session-context.sh
+│   └── stale-check.sh
+├── skills/                # Portable Agent Skills
+│   ├── linear-workflow/
+│   ├── spec-templates/
+│   └── docflow-commands/
+└── templates/             # Issue templates
 
 {this-folder}/             # PROJECT CONTENT (this folder)
 ├── context/               # Project fundamentals
@@ -29,9 +45,17 @@ This project uses DocFlow Cloud - a hybrid workflow where:
 │   └── product/           # Personas, user flows
 │
 └── README.md              # This file
+
+.cursor/
+├── rules/                 # Cursor rule pointers
+│   ├── docflow-core/RULE.md      # Always applied
+│   ├── pm-agent/RULE.md          # Agent-decided
+│   ├── implementation-agent/RULE.md
+│   └── ...
+└── commands/              # Slash commands
 ```
 
-**Note:** This folder name is configurable. See `paths.content` in `.docflow/config.json`.
+**Note:** Content folder name is configurable via `paths.content` in `.docflow/config.json`.
 
 ---
 
@@ -105,6 +129,6 @@ See `.cursor/mcp.json` for MCP server configuration.
 ## More Information
 
 - `AGENTS.md` - AI agent instructions
-- `.cursor/rules/docflow.mdc` - Complete workflow rules
+- `.docflow/rules/` - Complete workflow rules (source of truth)
+- `.docflow/skills/` - Portable agent skills
 - `knowledge/INDEX.md` - Knowledge base inventory
-
