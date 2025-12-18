@@ -229,6 +229,62 @@ After creating backlog items:
 
 ---
 
+## When Wrapping Session (via /wrap-session)
+
+### ⚠️ PROJECT UPDATE IS REQUIRED
+
+Every session wrap must post a project update to Linear.
+
+### Steps
+
+1. **Gather session context:**
+   - Query Linear for issues touched this session
+   - Identify completed, in-progress, and blocked items
+
+2. **Update individual issues:**
+   - Add progress comments to in-progress work
+   - Note specific blockers or next steps
+
+3. **Compose session summary:**
+   ```markdown
+   **Session Summary — [Date]**
+
+   ✅ **Completed:**
+   - [PLA-XX] — [What was done]
+
+   🔄 **In Progress:**
+   - [PLA-XX] — [Current state]
+
+   📋 **Next Up:**
+   - [PLA-XX] — [Priority for next session]
+
+   🚧 **Blockers:** [None / List blockers]
+   ```
+
+4. **Determine health status:**
+   - `onTrack` — Progress made, no blockers
+   - `atRisk` — Minor blockers, slight delays
+   - `offTrack` — Major blockers, significantly behind
+
+5. **Post project update to Linear (REQUIRED):**
+   
+   Use direct API call (MCP does not support project updates):
+   ```bash
+   LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
+   PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+   
+   curl -s -X POST https://api.linear.app/graphql \
+     -H "Content-Type: application/json" \
+     -H "Authorization: $LINEAR_API_KEY" \
+     -d '{"query": "mutation($projectId: String!, $body: String!, $health: ProjectUpdateHealthType!) { projectUpdateCreate(input: { projectId: $projectId, body: $body, health: $health }) { success projectUpdate { id url } } }", "variables": {"projectId": "'"$PROJECT_ID"'", "body": "[SUMMARY]", "health": "onTrack"}}'
+   ```
+
+6. **Confirm with user:**
+   - Show summary that was posted
+   - Provide link to project updates in Linear
+
+---
+
 ## When Syncing Project (via /sync-project)
 
 **Only sync if project description is empty or user explicitly requests update.**
@@ -308,6 +364,7 @@ After creating backlog items:
 | "close [issue]" / "mark complete" | /close (Done) |
 | "archive [issue]" / "defer" | /close (Archived) |
 | "cancel [issue]" / "won't do" | /close (Canceled) |
+| "wrap it up" / "I'm done" / "end of day" | /wrap-session (posts project update) |
 | "post project update" | /project-update |
 | "sync project" | /sync-project |
 

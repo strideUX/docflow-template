@@ -269,6 +269,100 @@ Get key from: Linear → Settings → API → Personal API keys
 
 ---
 
+## Project Updates
+
+**Note:** Linear MCP does not support project updates. Use direct API call.
+
+### API Call (Shell)
+
+```bash
+# Read API key and project ID
+LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
+PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+
+# Post project update
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{
+    "query": "mutation($projectId: String!, $body: String!, $health: ProjectUpdateHealthType!) { projectUpdateCreate(input: { projectId: $projectId, body: $body, health: $health }) { success projectUpdate { id url } } }",
+    "variables": {
+      "projectId": "'"$PROJECT_ID"'",
+      "body": "**Session Summary**\n\n✅ Completed:\n- Item 1\n\n🔄 In Progress:\n- Item 2",
+      "health": "onTrack"
+    }
+  }'
+```
+
+### API Call (JavaScript/TypeScript)
+
+```typescript
+const apiKey = process.env.LINEAR_API_KEY;
+const projectId = config.provider.projectId; // from .docflow/config.json
+
+const response = await fetch('https://api.linear.app/graphql', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': apiKey,
+  },
+  body: JSON.stringify({
+    query: `
+      mutation($projectId: String!, $body: String!, $health: ProjectUpdateHealthType!) {
+        projectUpdateCreate(input: {
+          projectId: $projectId
+          body: $body
+          health: $health
+        }) {
+          success
+          projectUpdate { id url }
+        }
+      }
+    `,
+    variables: {
+      projectId,
+      body: sessionSummary,  // markdown string
+      health: 'onTrack',     // or 'atRisk', 'offTrack'
+    },
+  }),
+});
+
+const result = await response.json();
+console.log('Project update URL:', result.data.projectUpdateCreate.projectUpdate.url);
+```
+
+### Health Types
+
+| Value | When to Use |
+|-------|-------------|
+| `onTrack` | Progress made, no blockers, on schedule |
+| `atRisk` | Minor blockers, slight delays, needs attention |
+| `offTrack` | Major blockers, significantly behind |
+
+### When to Post
+
+- `/wrap-session` — **REQUIRED** at end of every session
+- `/project-update` — Manual posting anytime
+
+### Update Format
+
+```markdown
+**Session Summary — [Date]**
+
+✅ **Completed:**
+- [PLA-XX] — [What was done]
+
+🔄 **In Progress:**
+- [PLA-XX] — [Current state]
+
+📋 **Next Up:**
+- [PLA-XX] — [Priority for next session]
+
+🚧 **Blockers:** [None / List blockers]
+```
+
+---
+
 ## Intake/Triage Flow
 
 ```
