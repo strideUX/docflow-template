@@ -458,6 +458,34 @@ if [ "$MODE" == "cloud" ]; then
     fi
   fi
   
+  # Migrate from old .docflow.json if it exists
+  if [ -f ".docflow.json" ]; then
+    echo ""
+    echo -e "   ${YELLOW}Found old .docflow.json - migrating settings...${NC}"
+    
+    # Extract teamId and projectId from old config
+    if command -v python3 &> /dev/null; then
+      OLD_TEAM_ID=$(python3 -c "import json; d=json.load(open('.docflow.json')); print(d.get('provider',{}).get('teamId',''))" 2>/dev/null)
+      OLD_PROJECT_ID=$(python3 -c "import json; d=json.load(open('.docflow.json')); print(d.get('provider',{}).get('projectId',''))" 2>/dev/null)
+      
+      if [ -n "$OLD_TEAM_ID" ] && [ "$OLD_TEAM_ID" != "None" ]; then
+        # Update new config with old values
+        python3 -c "
+import json
+with open('.docflow/config.json', 'r') as f:
+    config = json.load(f)
+config['provider']['teamId'] = '$OLD_TEAM_ID'
+config['provider']['projectId'] = '$OLD_PROJECT_ID' if '$OLD_PROJECT_ID' != 'None' else None
+with open('.docflow/config.json', 'w') as f:
+    json.dump(config, f, indent=2)
+"
+        echo -e "   ${GREEN}✓ Migrated Linear settings (teamId, projectId)${NC}"
+      fi
+    else
+      echo "   ⚠️  python3 not found - manually copy teamId/projectId from .docflow.json to .docflow/config.json"
+    fi
+  fi
+
   echo "   ✓ .docflow/ framework installed"
 else
   echo "   [4/7] Creating local specs structure..."
@@ -688,6 +716,43 @@ if [ "$IS_NEW_PROJECT" = true ]; then
   echo ""
   echo "   Initializing git repository..."
   git init -q
+fi
+
+# =====================================================
+# CLEANUP OLD FILES (Cloud mode only)
+# =====================================================
+if [ "$MODE" == "cloud" ]; then
+  OLD_FILES_FOUND=false
+  
+  if [ -f ".docflow.json" ] || [ -f ".cursor/rules/docflow.mdc" ]; then
+    OLD_FILES_FOUND=true
+    echo ""
+    echo -e "${YELLOW}🧹 Cleanup: Old DocFlow files detected${NC}"
+    echo ""
+    
+    if [ -f ".docflow.json" ]; then
+      echo "   • .docflow.json (old config - migrated to .docflow/config.json)"
+    fi
+    if [ -f ".cursor/rules/docflow.mdc" ]; then
+      echo "   • .cursor/rules/docflow.mdc (old rules - replaced by folder structure)"
+    fi
+    
+    echo ""
+    read -p "   Delete these old files? (y/n): " DELETE_OLD
+    
+    if [[ $DELETE_OLD =~ ^[Yy]$ ]]; then
+      if [ -f ".docflow.json" ]; then
+        rm ".docflow.json"
+        echo -e "   ${GREEN}✓ Deleted .docflow.json${NC}"
+      fi
+      if [ -f ".cursor/rules/docflow.mdc" ]; then
+        rm ".cursor/rules/docflow.mdc"
+        echo -e "   ${GREEN}✓ Deleted docflow.mdc${NC}"
+      fi
+    else
+      echo "   ⏭ Kept old files (you can delete them manually later)"
+    fi
+  fi
 fi
 
 # =====================================================
