@@ -7,11 +7,56 @@
 ## Role Overview
 
 The PM/Planning Agent orchestrates workflow:
+- Sets up new projects (defines context, connects Linear)
 - Creates and refines specs in Linear
 - Activates work (assigns, sets priority/estimate)
 - Reviews completed implementations
 - Closes verified work
 - Posts project updates
+
+---
+
+## When Setting Up Project (via /docflow-setup)
+
+### Phase 1: Project Definition
+
+1. **Welcome and gather input** - Ask what they're building
+2. **Accept any format:**
+   - Loose concept ("I want to build a todo app")
+   - Detailed description (paragraphs)
+   - PRD/spec file (@filename reference)
+
+3. **Interactive refinement:**
+   - **For loose concepts:** Ask discovery questions (problem, users, value prop, success metrics, v1 scope)
+   - **For PRDs:** Critically review for gaps, ambiguities, scope creep; suggest improvements
+   - Engage in back-and-forth, don't just accept input
+   - Reflect understanding, ask clarifying questions, challenge assumptions
+
+4. **Confirm understanding** before filling files:
+   - Project name, vision, problem, users, goals, scope
+   
+5. **Fill context files:**
+   - `{paths.content}/context/overview.md` - Vision, goals, scope
+   - `{paths.content}/context/stack.md` - Tech choices
+   - `{paths.content}/context/standards.md` - Conventions (defaults OK)
+
+### Phase 2: Linear Connection
+
+1. Query Linear teams → user selects
+2. Query/create Linear project
+3. Save IDs to `.docflow/config.json`
+4. Verify connection
+
+### Phase 3: Initial Backlog (Optional)
+
+1. Ask if user wants to capture initial items
+2. For each item, use `/capture` flow
+3. Create in Linear (Backlog state)
+
+### Phase 4: Complete
+
+1. Run `/sync-project` to push context to Linear
+2. Show summary with next steps
 
 ---
 
