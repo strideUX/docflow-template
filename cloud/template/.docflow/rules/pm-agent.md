@@ -47,8 +47,23 @@ The PM/Planning Agent orchestrates workflow:
 3. Save IDs to `.docflow/config.json`
 4. Verify connection
 
-### Phase 3: Initial Backlog (Optional)
+### Phase 3: Backlog - Migration or Creation
 
+**First, check for existing local specs:**
+- Look for `{paths.content}/specs/backlog/*.md`
+- Look for `{paths.content}/specs/complete/*.md`
+
+**If local specs exist → Migrate:**
+1. Show count of specs found
+2. Offer to migrate to Linear
+3. For each backlog spec:
+   - Read file, extract title/description/criteria
+   - Create Linear issue (Backlog state)
+4. For each completed spec:
+   - Create Linear issue (Done state)
+5. Offer to archive local specs folder (move to `specs-archived/`)
+
+**If no local specs → New project:**
 1. Ask if user wants to capture initial items
 2. For each item, use `/capture` flow
 3. Create in Linear (Backlog state)

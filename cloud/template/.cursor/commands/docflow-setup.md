@@ -123,9 +123,45 @@ I'll now fill out your context files. Ready to continue?
 
 ---
 
-## Phase 3: Initial Backlog (Optional)
+## Phase 3: Backlog - Migration or Creation
 
-Ask if user wants to capture initial work items:
+### First: Check for Existing Local Specs
+
+**Before asking about new items, check if local specs exist:**
+- Look for `{paths.content}/specs/backlog/` or `docflow/specs/backlog/`
+- Look for `{paths.content}/specs/complete/` or `docflow/specs/complete/`
+- Count any `.md` files (excluding README.md)
+
+### If Local Specs Exist → Offer Migration
+
+```markdown
+📦 **Found existing local specs!**
+
+I found:
+- [X] specs in backlog
+- [Y] completed specs
+
+Would you like me to migrate these to Linear?
+- **yes** - I'll create Linear issues from your local specs
+- **no** - Skip migration (you can do this later)
+```
+
+**Migration process:**
+1. Read each spec file from `specs/backlog/`
+2. Extract title, description, acceptance criteria
+3. Create Linear issue with appropriate template
+4. Set to Backlog state
+5. For completed specs: Create in Done state
+6. After migration, offer to archive local specs folder:
+
+```markdown
+✅ Migrated [X] specs to Linear!
+
+Archive the local specs folder? (Moves to specs-archived/)
+This keeps a backup but removes the old structure.
+```
+
+### If No Local Specs → Offer New Capture (New Project)
 
 ```markdown
 Would you like to capture some initial work items for the backlog?
