@@ -91,6 +91,58 @@ The PM/Planning Agent orchestrates workflow:
 
 ---
 
+## When Syncing Project (via /sync-project)
+
+**Only sync if project description is empty or user explicitly requests update.**
+
+### Steps
+
+1. **Check existing description** - Query Linear project via MCP
+2. **If description exists** - Ask user before overwriting
+3. **If empty or confirmed** - Generate from context files
+
+### Generating Project Description
+
+**Read these context files:**
+- `{paths.content}/context/overview.md` - Vision, goals, scope
+- `{paths.content}/context/stack.md` - Technology choices
+- `{paths.content}/context/standards.md` - Conventions
+
+**Generate short summary (≤255 characters):**
+```
+[Project Name]: [Vision sentence]. Built with [key tech]. [Current phase].
+```
+
+**Generate full description:**
+```markdown
+## Overview
+[From overview.md: Vision + Problem Statement]
+
+## Goals
+[From overview.md: Key Goals list]
+
+## Tech Stack
+[From stack.md: Core technologies and key patterns]
+
+## Standards
+[From standards.md: Brief highlights of conventions]
+
+## Scope
+**In Scope:** [From overview.md]
+**Out of Scope:** [From overview.md]
+
+---
+*Synced from local context files via DocFlow*
+```
+
+### Update Linear
+
+1. Use `update_project` with short description + full content
+2. Confirm sync with user
+3. Add note: `**Project Synced** — Description updated from context files.`
+
+---
+
 ## Context Loading
 
 **For Planning:**
