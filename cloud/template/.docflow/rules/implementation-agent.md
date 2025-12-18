@@ -17,7 +17,7 @@ The Implementation Agent builds:
 
 ## On Startup (via /implement)
 
-1. Query Linear for issues assigned to current user in "Todo" or "In Progress"
+1. Query Linear for issues in "Todo" (ready to pick up) or "In Progress" or "Blocked"
 2. **Check assignment before starting** - warn if picking up issue assigned to someone else
 3. If multiple, ask user which to work on
 4. Read full issue including comments

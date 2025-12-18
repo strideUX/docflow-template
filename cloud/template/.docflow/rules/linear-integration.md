@@ -8,14 +8,19 @@
 
 ### Full Workflow (Features & Bugs)
 ```
-BACKLOG → READY → IMPLEMENTING ──→ REVIEW → TESTING → COMPLETE
-   │         │          │            │         │         │
- Linear   Linear     Linear       Linear    Linear    Linear
-Backlog    Todo    In Progress  In Review    QA       Done
-                        │            │
-                        ▼            │
-                    BLOCKED ◄────────┘
+BACKLOG ──→ READY ──→ IMPLEMENTING ──→ REVIEW → TESTING → COMPLETE
+   │          │            │             │         │         │
+ Linear    Linear       Linear        Linear    Linear    Linear
+Backlog     Todo      In Progress   In Review    QA       Done
+                           │             │
+                           ▼             │
+                       BLOCKED ◄─────────┘
 ```
+
+**State Transitions:**
+- `/capture` → Backlog (raw capture)
+- `/refine` → Todo (refined, ready to pick up)
+- `/activate` → In Progress (assigned, work started)
 
 ### State Meanings
 
@@ -39,8 +44,9 @@ Backlog    Todo    In Progress  In Review    QA       Done
 
 ### Simplified Workflow (Chores & Ideas)
 ```
-BACKLOG → ACTIVE → COMPLETE
+BACKLOG → IMPLEMENTING → COMPLETE
 ```
+*Note: Chores and ideas skip REVIEW/TESTING unless explicitly needed.*
 
 ---
 
@@ -179,7 +185,13 @@ Quick Capture (with triage label)
         │
         │ /refine (refinement path)
         ▼
-      READY
+    TODO/READY (refined, ready to pick up)
+        │
+        │ /activate
+        ▼
+   IN PROGRESS (assigned, work started)
 ```
 
 **Triage label:** Issues with `triage` label are raw captures needing classification.
+
+**Ready queue:** Issues in "Todo" state are refined and ready for developers to pick up.

@@ -16,13 +16,15 @@ Context-aware refinement that handles triage and spec improvement.
 3. Refine acceptance criteria
 4. Add technical notes
 5. Set estimate
+6. **Move to "Todo" state** (ready for activation)
 
 ## Steps
 
 1. **Find Issue** - Query Linear or use specified issue
 2. **Determine Path** - Triage or Refinement
 3. **Execute Path** - Apply appropriate actions
-4. **Update Linear** - Save changes, add comment
+4. **Move to Todo** - If refinement complete
+5. **Update Linear** - Save changes, add comment
 
 ## Natural Language Triggers
 

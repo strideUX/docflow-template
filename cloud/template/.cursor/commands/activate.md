@@ -2,6 +2,8 @@
 
 Ready an issue for implementation by assigning and setting metadata.
 
+**Activates from:** Todo (preferred) or Backlog → In Progress
+
 ## Steps
 
 1. **Get Assignee** - Current user or specified

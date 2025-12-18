@@ -93,4 +93,5 @@ For templated backlog items:
 3. Refine acceptance criteria
 4. Add technical notes
 5. Set estimate if not set
-6. Comment: `**Refined** — Ready for activation.`
+6. **Move to "Todo" state** (ready to pick up)
+7. Comment: `**Refined** — Ready for activation.`

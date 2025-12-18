@@ -349,6 +349,7 @@ if [ "$MODE" == "cloud" ]; then
   mkdir -p .cursor/rules/session-awareness
   mkdir -p .cursor/rules/pm-agent
   mkdir -p .cursor/rules/implementation-agent
+  mkdir -p .cursor/rules/qe-agent
   mkdir -p .cursor/rules/linear-integration
   mkdir -p .cursor/rules/figma-integration
   mkdir -p .cursor/rules/templates
@@ -357,6 +358,7 @@ if [ "$MODE" == "cloud" ]; then
   download_file ".cursor/rules/session-awareness/RULE.md" ".cursor/rules/session-awareness/RULE.md"
   download_file ".cursor/rules/pm-agent/RULE.md" ".cursor/rules/pm-agent/RULE.md"
   download_file ".cursor/rules/implementation-agent/RULE.md" ".cursor/rules/implementation-agent/RULE.md"
+  download_file ".cursor/rules/qe-agent/RULE.md" ".cursor/rules/qe-agent/RULE.md"
   download_file ".cursor/rules/linear-integration/RULE.md" ".cursor/rules/linear-integration/RULE.md"
   download_file ".cursor/rules/figma-integration/RULE.md" ".cursor/rules/figma-integration/RULE.md"
   download_file ".cursor/rules/templates/RULE.md" ".cursor/rules/templates/RULE.md"

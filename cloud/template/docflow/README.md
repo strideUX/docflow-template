@@ -51,6 +51,7 @@ This project uses DocFlow Cloud - a hybrid workflow where:
 │   ├── docflow-core/RULE.md      # Always applied
 │   ├── pm-agent/RULE.md          # Agent-decided
 │   ├── implementation-agent/RULE.md
+│   ├── qe-agent/RULE.md
 │   └── ...
 └── commands/              # Slash commands
 ```

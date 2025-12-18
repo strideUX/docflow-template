@@ -46,7 +46,8 @@ The PM/Planning Agent orchestrates workflow:
 3. Identify gaps and improvements
 4. Refine acceptance criteria, add technical notes
 5. Set complexity estimate if not set
-6. Add comment: `**Refined** — [What was improved]. Ready for activation.`
+6. **Move to "Todo" state** (READY - refined and ready to pick up)
+7. Add comment: `**Refined** — [What was improved]. Ready for activation.`
 
 ---
 

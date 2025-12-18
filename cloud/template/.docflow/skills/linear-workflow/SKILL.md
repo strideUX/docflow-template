@@ -11,9 +11,14 @@ This skill provides workflow management patterns for Linear-based development.
 
 ```
 BACKLOG → READY → IMPLEMENTING → REVIEW → TESTING → COMPLETE
-                        ↓           ↑
-                    BLOCKED ────────┘
+            ↓          ↓            ↑
+         (Todo)    BLOCKED ─────────┘
 ```
+
+**Transitions:**
+- `/capture` → Backlog
+- `/refine` → Todo (ready to pick up)
+- `/activate` → In Progress
 
 ### State Mapping
 
@@ -31,7 +36,12 @@ BACKLOG → READY → IMPLEMENTING → REVIEW → TESTING → COMPLETE
 
 ## Status Transitions
 
-### Starting Work
+### Refining (Backlog → Todo)
+1. Improve acceptance criteria
+2. Move to "Todo"
+3. Comment: `**Refined** — Ready for activation.`
+
+### Starting Work (Todo → In Progress)
 1. Assign issue to developer
 2. Move to "In Progress"
 3. Comment: `**Activated** — Assigned to [name].`
