@@ -20,19 +20,19 @@ Backlog     Todo      In Progress   In Review    QA       Done
 **State Transitions:**
 - `/capture` → Backlog (raw capture)
 - `/refine` → Todo (refined, ready to pick up)
-- `/activate` → In Progress (assigned, work started)
+- `/activate` → In Progress (**MUST be assigned** - no exceptions)
 
 ### State Meanings
 
-| State | Linear | What Happens |
-|-------|--------|--------------|
-| BACKLOG | Backlog | Raw ideas or refined specs awaiting prioritization |
-| READY | Todo | Refined, prioritized, ready to pick up |
-| IMPLEMENTING | In Progress | Code + Tests + Docs being written |
-| BLOCKED | Blocked | Stuck - needs feedback, dependency, or decision |
-| REVIEW | In Review | Implementation complete, awaiting code review |
-| TESTING | QA | Code review passed, manual testing by user |
-| COMPLETE | Done | Verified and shipped |
+| State | Linear | What Happens | Assignment |
+|-------|--------|--------------|------------|
+| BACKLOG | Backlog | Raw ideas or refined specs awaiting prioritization | Optional |
+| READY | Todo | Refined, prioritized, ready to pick up | Optional |
+| IMPLEMENTING | In Progress | Code + Tests + Docs being written | **REQUIRED** |
+| BLOCKED | Blocked | Stuck - needs feedback, dependency, or decision | Required |
+| REVIEW | In Review | Implementation complete, awaiting code review | Required |
+| TESTING | QA | Code review passed, manual testing by user | Required |
+| COMPLETE | Done | Verified and shipped | Required |
 
 ### Terminal States (via `/close`)
 
@@ -74,9 +74,70 @@ Use Linear MCP to:
 |-------|---------|-----------------------------------|
 | 0     | None    | Not yet triaged                   |
 | 1     | Urgent  | Drop everything, fix now          |
-| 2     | High    | Next up, important                |
+| 2     | High    | Next up, important, unblocks others |
 | 3     | Medium  | Normal priority (default)         |
 | 4     | Low     | Nice to have, when time permits   |
+
+**Setting Priority:**
+- During `/refine` - set based on importance and blocking relationships
+- During `/activate` - confirm or adjust priority
+- Higher priority if issue unblocks other work
+
+---
+
+## Dependencies (Blocking Relationships)
+
+Linear supports "blocks" and "blocked by" relationships between issues.
+
+### When to Set Dependencies
+
+- During `/docflow-setup` Phase 4 (initial prioritization)
+- During `/refine` (ask about dependencies)
+- Anytime logical ordering is apparent
+
+### How to Query Dependencies
+
+```typescript
+// Get issue with relations
+get_issue({ id: "PLA-123", includeRelations: true })
+
+// Response includes:
+// - relations.blocks: issues this blocks
+// - relations.blockedBy: issues blocking this
+```
+
+### How to Create Dependencies
+
+```typescript
+// Via GraphQL API (LINEAR_API_KEY required)
+issueRelationCreate({
+  issueId: "blocking-issue-id",
+  relatedIssueId: "blocked-issue-id",
+  type: "blocks"
+})
+```
+
+### Smart Activation Query
+
+When recommending "what's next", filter for ready issues:
+1. In Todo or Backlog state
+2. Not blocked by incomplete issues
+3. Sorted by Priority (Urgent → Low)
+4. Show what each issue unblocks
+
+```markdown
+📋 **Ready to work on:**
+
+**Recommended:** PLA-75 - Auth System
+- Priority: High
+- No blockers ✓
+- Unblocks: PLA-80, PLA-85
+
+**Blocked (can't start yet):**
+- PLA-80 - User Dashboard (waiting on PLA-75)
+```
+
+---
 
 ## Estimate Values (Complexity)
 
@@ -139,12 +200,32 @@ Use consistent format for audit trail:
 
 ## Team Collaboration
 
-### Assignment
+### Assignment (MANDATORY for In Progress)
+
+⚠️ **No issue can be In Progress without an assignee.**
+
+**Finding Current User:**
 ```typescript
-updateIssue(issueId, { assignee: "cory" })      // by name
-updateIssue(issueId, { assignee: "me" })        // self
-updateIssue(issueId, { assignee: "cory@..." })  // by email
+// Get authenticated user
+get_viewer()  // Returns current user info
+
+// Or search by name/email
+list_users({ query: "matt" })
 ```
+
+**Assigning Issues:**
+```typescript
+update_issue({
+  issueId: "xxx",
+  assigneeId: "user-uuid"  // Use UUID, not name
+})
+```
+
+**Assignment Flow:**
+1. Determine user (get_viewer or ask explicitly)
+2. Update issue with assigneeId
+3. Verify assignment succeeded (query issue)
+4. Only then move to In Progress
 
 ### Subscribers (Notifications)
 ```bash
@@ -155,6 +236,7 @@ issueUpdate(id: "...", input: { subscriberIds: ["user-id"] })
 ### Finding Users
 ```typescript
 list_users({ query: "cory" })  // Find user by name/email
+get_viewer()                    // Get current authenticated user
 ```
 
 ---
@@ -193,18 +275,27 @@ Get key from: Linear → Settings → API → Personal API keys
 Quick Capture (with triage label)
         │
         │ /refine (triage path)
+        │ - Classify type, apply template
+        │ - Set initial priority
         ▼
-    BACKLOG (typed, templated)
+    BACKLOG (typed, templated, prioritized)
         │
         │ /refine (refinement path)
+        │ - Refine criteria
+        │ - Set dependencies
+        │ - Confirm priority
         ▼
-    TODO/READY (refined, ready to pick up)
+    TODO/READY (refined, prioritized, dependencies set)
         │
-        │ /activate
+        │ /activate (smart recommend or specific)
+        │ - Check not blocked
+        │ - Assign, start work
         ▼
    IN PROGRESS (assigned, work started)
 ```
 
 **Triage label:** Issues with `triage` label are raw captures needing classification.
 
-**Ready queue:** Issues in "Todo" state are refined and ready for developers to pick up.
+**Ready queue:** Issues in "Todo" state are refined, prioritized, and ready for developers to pick up.
+
+**Smart activation:** When no issue specified, recommend based on priority + unblocked status.

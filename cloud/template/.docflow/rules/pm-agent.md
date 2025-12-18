@@ -65,13 +65,34 @@ The PM/Planning Agent orchestrates workflow:
 
 **If no local specs → New project:**
 1. Ask if user wants to capture initial items
-2. For each item, use `/capture` flow
-3. Create in Linear (Backlog state)
+2. **Create 5-15 high-level items** (features/epics, not implementation tasks)
+3. Focus on **what** not **how** (subtasks come during `/activate`)
+4. Apply type label to each (feature/chore/bug/idea)
+5. Create in Linear (Backlog state)
 
-### Phase 4: Complete
+### Phase 4: Prioritization & Dependencies
+
+After creating backlog items:
+1. **Set priorities:**
+   - Urgent: Blocking launch, critical bugs
+   - High: Core v1 features, foundational work, unblocks others
+   - Medium: Important but not blocking
+   - Low: Nice-to-have, future enhancements
+
+2. **Identify dependencies:**
+   - What blocks what? (e.g., auth before admin panel)
+   - Create "blocks/blocked by" relationships in Linear
+   - External blockers? (APIs, designs, etc.)
+
+3. **Present implementation order:**
+   - Suggest sequence based on priorities + dependencies
+   - Confirm with user before finalizing
+
+### Phase 5: Complete
 
 1. Run `/sync-project` to push context to Linear
-2. Show summary with next steps
+2. Show summary with prioritized backlog
+3. Recommend first issue to activate
 
 ---
 
@@ -95,7 +116,9 @@ The PM/Planning Agent orchestrates workflow:
 3. Suggest type classification (feature/bug/chore/idea)
 4. Apply appropriate template from `.docflow/templates/`
 5. Remove `triage` label, add type label
-6. Add comment: `**Triaged** — Classified as [type], template applied.`
+6. **Set initial priority** based on content/urgency
+7. **Identify dependencies** if apparent
+8. Add comment: `**Triaged** — Classified as [type], template applied. Priority: [P].`
 
 ---
 
@@ -106,20 +129,74 @@ The PM/Planning Agent orchestrates workflow:
 3. Identify gaps and improvements
 4. Refine acceptance criteria, add technical notes
 5. Set complexity estimate if not set
-6. **Move to "Todo" state** (READY - refined and ready to pick up)
-7. Add comment: `**Refined** — [What was improved]. Ready for activation.`
+6. **Set priority if not set:**
+   - Urgent: Blocking launch, critical bug
+   - High: Core feature, foundational, unblocks others
+   - Medium: Important but not blocking
+   - Low: Enhancement, future, nice-to-have
+7. **Set dependencies:**
+   - Ask: "Does this depend on other issues?"
+   - Ask: "Will completing this unblock other work?"
+   - Create "blocks/blocked by" relationships in Linear
+8. **Move to "Todo" state** (READY - refined and ready to pick up)
+9. Add comment: `**Refined** — [What was improved]. Priority: [P]. [Dependency info]. Ready for activation.`
 
 ---
 
 ## When Activating Work (via /activate)
 
-1. Get developer username (git config)
-2. **Check if already assigned** - warn if assigned to someone else
-3. Set priority if not already set (ask or infer)
-4. Set estimate if not already set (ask or infer)
-5. Assign Linear issue to developer
-6. Move to "In Progress" state
-7. Add comment: `**Activated** — Assigned to [name], Priority: [P], Estimate: [E].`
+### If No Issue Specified → Smart Recommendation
+
+1. **Query available issues:**
+   - Get issues in Todo or Backlog state
+   - Include priority, estimate, and blocking relationships
+
+2. **Filter to ready issues:**
+   - Exclude issues blocked by incomplete work
+   - Exclude issues already assigned to others
+
+3. **Rank by:**
+   - Priority (Urgent → High → Medium → Low)
+   - Unblocked status
+   - Estimate (smaller = quicker wins, optional tiebreaker)
+
+4. **Present recommendation:**
+   - Show top recommended issue with reasoning
+   - Show 2-3 alternatives
+   - Show blocked issues (and what's blocking them)
+   - Ask which to activate
+
+### When Activating Specific Issue
+
+#### ⚠️ ASSIGNMENT IS MANDATORY - No In Progress without assignee
+
+1. **Determine assignee (REQUIRED):**
+   - Try: `get_viewer()` to get current Linear user
+   - Try: `list_users()` and match by name/email
+   - If can't determine → **ASK explicitly**: "Who should this be assigned to?"
+   - **NEVER skip assignment**
+
+2. **Check current assignment:**
+   - Unassigned → assign to determined user
+   - Assigned to current user → proceed
+   - Assigned to someone else → **WARN and confirm** before reassigning
+
+3. **Check if blocked** - warn if blocked by incomplete issues
+
+4. Set priority if not already set (ask or infer)
+
+5. Set estimate if not already set (ask or infer)
+
+6. **Assign issue (REQUIRED):**
+   ```typescript
+   update_issue({ issueId: "xxx", assigneeId: "user-id" })
+   ```
+
+7. **Verify assignment succeeded** - query issue, confirm assignee set
+
+8. Move to "In Progress" state (only after assignment confirmed)
+
+9. Add comment: `**Activated** — Assigned to [name], Priority: [P], Estimate: [E].`
 
 ---
 
@@ -225,7 +302,8 @@ The PM/Planning Agent orchestrates workflow:
 | "capture that" / "add to backlog" | /capture |
 | "refine [issue]" / "triage [issue]" | /refine |
 | "what needs triage" | Show triage queue |
-| "activate [issue]" | /activate |
+| "activate [issue]" | /activate (specific) |
+| "what should I work on?" / "what's next?" | /activate (smart recommend) |
 | "review [issue]" / "code review" | /review |
 | "close [issue]" / "mark complete" | /close (Done) |
 | "archive [issue]" / "defer" | /close (Archived) |

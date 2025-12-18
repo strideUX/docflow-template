@@ -7,7 +7,9 @@ Complete project setup: define what you're building, connect to Linear, and crea
 This command guides you through:
 1. **Project Definition** - What are we building?
 2. **Linear Connection** - Connect to your team/project
-3. **Initial Backlog** - Capture first work items
+3. **Initial Backlog** - Capture work items (or migrate existing specs)
+4. **Prioritization** - Set priorities and dependencies
+5. **Sync & Complete** - Push to Linear, recommend first issue
 
 ---
 
@@ -174,14 +176,79 @@ I can help you create:
 Say "yes" to start capturing, or "skip" to finish setup.
 ```
 
+**Backlog Creation Guidelines:**
+- Create **5-15 high-level items** max (features/epics, not implementation tasks)
+- Focus on **what**, not **how** (subtasks come during `/activate`)
+- Apply **type label** to each (feature, chore, bug, idea)
+- Think epics: "User Authentication" not "Implement OAuth callback handler"
+
 For each item:
 1. Use `/capture` flow
 2. Apply appropriate template
 3. Create in Linear (Backlog state)
+4. Set type label (feature/chore/bug/idea)
 
 ---
 
-## Phase 4: Sync & Complete
+## Phase 4: Prioritization & Dependencies
+
+After creating backlog items, guide prioritization:
+
+```markdown
+📊 **Let's prioritize your backlog**
+
+I've created [X] items. Now let's figure out the order:
+
+1. **What's critical for v1 launch?** (These get High/Urgent priority)
+2. **What needs to be built first?** (Dependencies - e.g., auth before admin)
+3. **Any external blockers?** (Waiting on APIs, designs, etc.)
+```
+
+### Set Priorities
+
+| Priority | Use For |
+|----------|---------|
+| **Urgent** | Blocking launch, critical bugs |
+| **High** | Core v1 features, foundational work |
+| **Medium** | Important but not blocking |
+| **Low** | Nice-to-have, future enhancements |
+
+### Identify Dependencies
+
+For each item, ask:
+- Does this depend on another issue being complete first?
+- Will completing this unblock other work?
+
+**Create "blocks/blocked by" relationships in Linear:**
+```markdown
+Example:
+- "F1: Auth" blocks "F2: User Dashboard"
+- "Phase 1: Infrastructure" blocks "F3: Core Features"
+```
+
+### Suggest Implementation Order
+
+After setting priorities and dependencies, present:
+```markdown
+📋 **Recommended Implementation Order:**
+
+1. **Phase 1: Infrastructure** (High, no blockers)
+   └─ Unblocks: F1, F2, F3
+
+2. **F1: Authentication** (High, after Phase 1)
+   └─ Unblocks: F2, F4
+
+3. **F2: Core Feature** (High, after F1)
+   ...
+
+Does this order make sense? Any adjustments?
+```
+
+Update Linear with priorities and dependencies before proceeding.
+
+---
+
+## Phase 5: Sync & Complete
 
 1. Run `/sync-project` to push context to Linear
 2. Show summary:
@@ -192,17 +259,20 @@ For each item:
 **Project:** [Name]
 **Linear Team:** [Team]
 **Linear Project:** [Project]
-**Backlog Items:** [Count] created
+**Backlog Items:** [Count] created (prioritized)
 
 **Context files ready:**
 - `{paths.content}/context/overview.md` ✓
 - `{paths.content}/context/stack.md` ✓
 - `{paths.content}/context/standards.md` ✓
 
+**Recommended first issue:**
+- [Issue title] (Priority: High, no blockers)
+
 **Next steps:**
+- Run `/activate [issue]` to start the recommended issue
 - Run `/start-session` to begin work
 - Run `/capture` to add more items
-- Refine backlog with `/refine`
 ```
 
 ---
