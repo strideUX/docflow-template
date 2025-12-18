@@ -1,13 +1,41 @@
-# Feature Issue Template
+<!-- AGENT INSTRUCTIONS
+When creating or refining a feature issue:
 
-> Copy this template when creating a new feature issue in Linear or other PM tools.
+1. CONTEXT SECTION:
+   - Explain the problem being solved, not just the solution
+   - Include business value or user impact
+   - Reference project goals from {content-folder}/context/overview.md if relevant
 
----
+2. USER STORY:
+   - Must follow "As a... I want... So that..." format
+   - Be specific about the user role (not just "user")
+   - Benefit should be concrete and measurable
+   - Include an example scenario for clarity
+
+3. ACCEPTANCE CRITERIA:
+   - Each criterion must be testable and specific
+   - Use checkboxes for tracking completion
+   - Include error handling scenarios
+   - "Must Have" = required for completion
+   - "Should Have" = nice to have, not blocking
+   - "Won't Have" = explicitly out of scope
+
+4. TECHNICAL NOTES:
+   - Reference patterns from {content-folder}/context/stack.md
+   - List specific components/files to create or modify
+   - Include data model changes if applicable
+   - Note any API changes needed
+
+5. DEPENDENCIES:
+   - List issues that must be completed first
+   - Note what future work this enables
+
+Remove these instructions when creating the final issue.
+-->
 
 ## Context
-<!-- Why does this feature exist? What problem does it solve? -->
 
-[Problem description and business value]
+[Problem description - what user pain or business need does this address?]
 
 **Current Issues:**
 - [Issue or limitation 1]
@@ -28,11 +56,17 @@
 
 ## Acceptance Criteria
 
-### Functionality
+### Must Have
 - [ ] [Specific, measurable criterion 1]
 - [ ] [User can perform X action and see Y result]
 - [ ] [System behaves correctly when Z happens]
 - [ ] [Error handling: System shows helpful message when...]
+
+### Should Have
+- [ ] [Nice-to-have enhancement]
+
+### Won't Have (Out of Scope)
+- [Explicitly excluded functionality]
 
 ### Tests
 - [ ] Tests written for core functionality
@@ -91,27 +125,4 @@
 
 ---
 
-## Workflow Notes
-
-**Status Flow:**
-```
-Backlog → Todo → In Progress → In Review → QA → Done
-```
-
-**Comments should track:**
-- Decision log entries (dated)
-- Implementation progress
-- Documentation updates (with links)
-- Review findings
-- QA results
-
-**Comment Format:**
-```
-**[Status]** — Brief description.
-```
-
-Examples:
-- `**Activated** — Assigned to [name], Priority: High.`
-- `**Progress** — Completed data model, starting on UI.`
-- `**Documentation Updated** — Added ADR for auth strategy.`
-- `**Ready for Review** — All criteria met, PR open.`
+_Created: YYYY-MM-DD_

@@ -1,14 +1,42 @@
-# Bug Issue Template
+<!-- AGENT INSTRUCTIONS
+When creating or refining a bug issue:
 
-> Copy this template when creating a new bug issue in Linear or other PM tools.
+1. CONTEXT SECTION:
+   - Capture when/how the bug was discovered
+   - Assess user impact (how many affected, how severe)
+   - Note frequency (always, sometimes, specific conditions)
 
----
+2. BUG DESCRIPTION:
+   - Expected vs Actual must be crystal clear
+   - Steps to reproduce must be detailed enough for anyone to follow
+   - Include specific data conditions if relevant
+   - Note environment details (browser, OS, user role)
+
+3. ACCEPTANCE CRITERIA:
+   - "Fix Verification" should mirror the reproduction steps
+   - Include regression concerns (what else might break)
+   - Tests section should include regression test requirement
+
+4. TECHNICAL NOTES:
+   - Start with hypothesis if cause unknown
+   - Update "Confirmed Cause" after investigation
+   - Include specific file/function where bug exists
+   - Assess risk of the fix
+
+5. SEVERITY GUIDANCE:
+   - Critical: System unusable, data loss, security issue
+   - High: Major feature broken, no workaround
+   - Medium: Feature impaired but workaround exists
+   - Low: Minor issue, cosmetic, edge case
+
+Remove these instructions when creating the final issue.
+-->
 
 ## Context
 
 **When Discovered:** [Date or event when bug was found]
 **Discovered By:** [User, developer, automated test, etc.]
-**Impact:** [How this affects users or the system]
+**Impact:** [How this affects users - be specific about scope]
 **Frequency:** [Always | Sometimes | Rarely | Under specific conditions]
 
 [Additional context about the bug]
@@ -98,27 +126,4 @@
 
 ---
 
-## Workflow Notes
-
-**Status Flow:**
-```
-Backlog → Todo → In Progress → In Review → QA → Done
-```
-
-**Comments should track:**
-- Investigation findings
-- Root cause confirmation
-- Fix approach decisions
-- Documentation updates (with links)
-- Review findings
-- QA results
-
-**Comment Format:**
-```
-**[Status]** — Brief description.
-```
-
-Examples:
-- `**Investigating** — Reproduced locally, checking auth flow.`
-- `**Root Cause Found** — Race condition in useEffect cleanup.`
-- `**Ready for Review** — Fix implemented, regression test added.`
+_Reported: YYYY-MM-DD_

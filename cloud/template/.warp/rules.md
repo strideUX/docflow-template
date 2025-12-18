@@ -16,15 +16,23 @@ This file contains the complete DocFlow system. **You MUST read it** to understa
 - Knowledge base usage
 
 **Also read:**
+- `.docflow/config.json` - Configuration (paths, provider settings)
 - `WARP.md` - Warp-specific workflow guide
 - `AGENTS.md` - Universal agent instructions
-- `.docflow.json` - Linear configuration
 
 ---
 
 ## Quick Start
 
-### 1. Understand Your Role
+### 1. Read Configuration First
+```bash
+cat .docflow/config.json
+```
+This tells you:
+- `paths.content` - Where context/knowledge folders are (default: "docflow")
+- `provider` - Linear team and project IDs
+
+### 2. Understand Your Role
 DocFlow uses a **three-agent model**:
 - **PM/Planning Agent** - Plans, refines, activates, closes work (in Linear)
 - **Implementation Agent** - Builds features, fixes bugs
@@ -32,22 +40,24 @@ DocFlow uses a **three-agent model**:
 
 See `AGENTS.md` for the visual model.
 
-### 2. Check Current State
+### 3. Check Current State
 On every interaction:
 ```
+✓ Read .docflow/config.json for paths
 ✓ Query Linear for "In Progress" issues
-✓ Read docflow/context/ for project understanding
+✓ Read {paths.content}/context/ for project understanding
 ```
 
-### 3. Load Context Situationally
+### 4. Load Context Situationally
 **Don't load everything!** Load based on task:
 - **Planning:** overview.md, Linear backlog
 - **Implementing:** Linear issue, stack.md, standards.md
+- **Creating/Refining issues:** Templates from `.docflow/templates/`
 - **Reviewing:** Linear issue + comments, standards.md
 
 See `.cursor/rules/docflow.mdc` for complete context loading rules.
 
-### 4. Use Commands or Natural Language
+### 5. Use Commands or Natural Language
 **Commands:** `/start-session`, `/implement`, `/validate`, etc.  
 **Natural language:** "let's start", "build this", "test it"
 
@@ -58,16 +68,21 @@ Both work the same way.
 ## Key Cloud Differences
 
 ### Specs Live in Linear
-- ❌ NO local spec files in `docflow/specs/`
+- ❌ NO local spec files in `{paths.content}/specs/`
 - ❌ NO `INDEX.md` or `ACTIVE.md` files
 - ✅ All specs are **Linear issues**
 - ✅ Status tracked by **Linear workflow states**
 - ✅ Progress notes in **Linear comments**
 
 ### Local Context Stays
-- ✅ `docflow/context/` - Project understanding
-- ✅ `docflow/knowledge/` - ADRs, features, notes
+- ✅ `{paths.content}/context/` - Project understanding
+- ✅ `{paths.content}/knowledge/` - ADRs, features, notes
 - ✅ Rules and commands in `.cursor/`
+
+### Framework in .docflow/
+- ✅ `.docflow/config.json` - Configuration
+- ✅ `.docflow/templates/` - Issue templates with agent instructions
+- ✅ `.docflow/version` - For upgrade detection
 
 ---
 
@@ -83,9 +98,10 @@ Warp is excellent for:
 ### Using Warp AI
 When working with Warp's AI:
 1. Reference this file: "Read .warp/rules.md for project workflow"
-2. Point to Linear: "Check Linear for issue LIN-XXX"
-3. Follow DocFlow patterns described in AGENTS.md
-4. Reference command specs in `.cursor/commands/` for detailed behavior
+2. Check config: "Read .docflow/config.json for paths"
+3. Point to Linear: "Check Linear for issue LIN-XXX"
+4. Follow DocFlow patterns described in AGENTS.md
+5. Reference command specs in `.cursor/commands/` for detailed behavior
 
 ### Long Conversations
 Warp works well for:
@@ -100,7 +116,7 @@ For extended planning or QE sessions with Linear, consider Cursor or Claude.
 
 See `.cursor/commands/` for detailed command files.
 
-**PM Agent:** start-session, wrap-session, capture, review, activate, close, project-update, sync-project  
+**PM Agent:** start-session, wrap-session, capture, refine, activate, close, project-update, sync-project  
 **Implementation Agent:** implement, block, attach  
 **QE Agent:** validate  
 **All Agents:** status  
@@ -146,20 +162,20 @@ Read `.cursor/rules/docflow.mdc` for complete rules. Key ones:
 3. ✅ Status changes → Linear state updates
 4. ✅ Progress notes → Linear comments
 5. ✅ Context/knowledge stays local
-6. ✅ Load context situationally
-7. ✅ Wait for user approval before closing
+6. ✅ Templates in `.docflow/templates/`
+7. ✅ Load context situationally
+8. ✅ Wait for user approval before closing
 
 ---
 
 ## For Complete System Documentation
 
-1. **`.cursor/rules/docflow.mdc`** - Complete rules ⭐ READ THIS
-2. **`WARP.md`** - Warp workflow guide
-3. **`AGENTS.md`** - Universal instructions
-4. **`.cursor/commands/`** - Command details
-5. **`.docflow.json`** - Linear configuration
+1. **`.docflow/config.json`** - Configuration
+2. **`.cursor/rules/docflow.mdc`** - Complete rules ⭐ READ THIS
+3. **`WARP.md`** - Warp workflow guide
+4. **`AGENTS.md`** - Universal instructions
+5. **`.cursor/commands/`** - Command details
 
 ---
 
 **Warp works great with DocFlow Cloud!** Use it for focused implementation and terminal-based workflows.
-

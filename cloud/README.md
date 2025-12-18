@@ -116,41 +116,42 @@ DocFlow Cloud still works without MCPs installed. The agent will fall back to di
 
 ```
 template/
-├── .cursor/
-│   ├── rules/docflow.mdc    # Workflow rules
-│   └── commands/            # Slash commands
+├── .docflow/                    # FRAMEWORK (updatable)
+│   ├── config.json              # Provider settings, paths, version
+│   ├── version                  # For upgrade detection
+│   └── templates/               # Issue templates with agent instructions
+│       ├── feature.md
+│       ├── bug.md
+│       ├── chore.md
+│       ├── idea.md
+│       └── quick-capture.md     # Also used as Linear default
 │
-├── docflow/
-│   ├── context/             # Project understanding
-│   │   ├── overview.md      # Vision, goals, links
-│   │   ├── stack.md         # Tech stack
-│   │   └── standards.md     # Code conventions
+├── .cursor/
+│   ├── rules/docflow.mdc       # Workflow rules
+│   └── commands/               # Slash commands
+│
+├── {content-folder}/           # PROJECT CONTENT (default: "docflow")
+│   ├── context/                # Project understanding
+│   │   ├── overview.md         # Vision, goals, links
+│   │   ├── stack.md            # Tech stack
+│   │   └── standards.md        # Code conventions
 │   │
-│   ├── knowledge/           # Project knowledge
-│   │   ├── INDEX.md         # Knowledge inventory
-│   │   ├── decisions/       # ADRs
-│   │   ├── features/        # Feature docs
-│   │   ├── notes/           # Learnings
-│   │   └── product/         # Personas, flows
+│   ├── knowledge/              # Project knowledge
+│   │   ├── INDEX.md            # Knowledge inventory
+│   │   ├── decisions/          # ADRs
+│   │   ├── features/           # Feature docs
+│   │   ├── notes/              # Learnings
+│   │   └── product/            # Personas, flows
 │   │
 │   └── README.md
 │
-├── .env.example             # Environment template (copy to .env)
-├── .env                     # Your credentials (never commit!)
-├── .docflow.json            # Workflow configuration
-├── .gitignore               # Ignores .env
-└── AGENTS.md                # AI agent instructions
-
-templates/                   # Issue & project templates
-├── issues/
-│   ├── quick-capture.md     # Fast capture (default in Linear)
-│   ├── feature.md           # Full feature template
-│   ├── bug.md               # Bug report template
-│   ├── chore.md             # Maintenance template
-│   └── idea.md              # Idea exploration template
-└── projects/
-    └── project.md           # Project description format
+├── .env.example                # Environment template (copy to .env)
+├── .env                        # Your credentials (never commit!)
+├── .gitignore                  # Ignores .env
+└── AGENTS.md                   # AI agent instructions
 ```
+
+**Note:** The content folder name is configurable during install (default: "docflow"). Set in `.docflow/config.json` as `paths.content`.
 
 ---
 
@@ -161,10 +162,9 @@ templates/                   # Issue & project templates
 | Content | Location | Why |
 |---------|----------|-----|
 | **Specs** | Linear | Collaboration, visibility, workflow |
-| **Context** | Local | Fast access, version-controlled |
-| **Knowledge** | Local | Persists with code |
-| **Rules** | Local (synced) | No external dependency |
-| **Templates** | Local | Reference for Linear setup |
+| **Config & Templates** | `.docflow/` | Framework files (updatable) |
+| **Context & Knowledge** | `{content-folder}/` | Project-specific (yours) |
+| **Rules & Commands** | `.cursor/` (synced) | No external dependency |
 
 ### Workflow
 
@@ -285,9 +285,9 @@ Terminal States (via /close):
 
 ### Issue Templates
 
-Set **Quick Capture** as the default template in Linear. Copy from `templates/issues/quick-capture.md`.
+Set **Quick Capture** as the default template in Linear. Copy from `.docflow/templates/quick-capture.md`.
 
-Full templates for each type are in `templates/issues/`.
+Full templates (feature, bug, chore, idea) are in `.docflow/templates/` with agent instructions. Agents use these when creating/refining issues via `/capture` and `/refine`.
 
 See **[LINEAR-SETUP-GUIDE.md](./LINEAR-SETUP-GUIDE.md)** for complete setup instructions.
 
@@ -375,7 +375,7 @@ Quick steps:
 
 - **[DOCFLOW-CLOUD-SPEC.md](./DOCFLOW-CLOUD-SPEC.md)** - Full specification
 - **[LINEAR-SETUP-GUIDE.md](./LINEAR-SETUP-GUIDE.md)** - Linear structure guide
-- **[templates/](./templates/)** - Issue and project templates
+- **[template/.docflow/templates/](./template/.docflow/templates/)** - Issue templates with agent instructions
 - **[template/AGENTS.md](./template/AGENTS.md)** - AI agent instructions
 - **[template/.cursor/rules/docflow.mdc](./template/.cursor/rules/docflow.mdc)** - Complete workflow rules
 

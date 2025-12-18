@@ -1,10 +1,10 @@
-# Quick Capture Template
-
-> Use this for fast idea/bug/thought capture in Linear. This will be triaged and refined later.
-> 
-> **After creating:** Add the `triage` label so it gets picked up for refinement.
-
----
+<!-- 
+LINEAR DEFAULT TEMPLATE
+========================
+Copy this to Linear as the default issue template.
+This is the ONLY template humans need in Linear.
+Agents apply full templates via /refine.
+-->
 
 ## What
 
@@ -28,4 +28,4 @@
 
 ---
 
-_This issue has the `triage` label and will be classified and templated via `/refine`._
+_Add `triage` label. Agent will classify and structure via `/refine`._

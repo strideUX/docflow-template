@@ -1,8 +1,33 @@
-# Chore Issue Template
+<!-- AGENT INSTRUCTIONS
+When creating or refining a chore issue:
 
-> Copy this template when creating a maintenance, cleanup, or improvement issue in Linear or other PM tools.
+1. CONTEXT SECTION:
+   - Explain the value (cleaner code, better UX, faster performance)
+   - Be specific about scope to prevent scope creep
+   - Mark as "Ongoing" if this is iterative work
 
----
+2. TASK LIST:
+   - Be specific and actionable
+   - Add tasks as you discover them during work
+   - Move tasks to "Out of Scope" if they're too big
+   - Tasks should be completable in one session
+
+3. ACCEPTANCE CRITERIA:
+   - Focus on completion and quality
+   - Mark documentation as N/A if no new patterns
+   - Mark tests as N/A if no behavior changes
+
+4. COMPLETION CRITERIA:
+   - "Done when" should be clear stopping point
+   - If scope keeps growing, suggest splitting into multiple chores
+
+5. WORKFLOW:
+   - Chores often skip formal review/QA
+   - Use simplified flow: Backlog → In Progress → Done
+   - Use full flow only for significant refactors
+
+Remove these instructions when creating the final issue.
+-->
 
 ## Context
 
@@ -69,7 +94,7 @@
 **This chore is done when:**
 - [ ] [Completion criterion 1]
 - [ ] [Completion criterion 2]
-- [ ] No obvious improvements remaining
+- [ ] No obvious improvements remaining in scope
 
 **Signs this needs to be split:**
 - Work has been ongoing for 3+ weeks
@@ -78,28 +103,4 @@
 
 ---
 
-## Workflow Notes
-
-**Status Flow (simplified):**
-```
-Backlog → In Progress → Done
-```
-
-Or full flow if significant:
-```
-Backlog → Todo → In Progress → In Review → QA → Done
-```
-
-**Comments should track:**
-- Progress updates
-- Tasks discovered during work
-- Completion recommendation
-
-**Comment Format:**
-```
-**[Status]** — Brief description.
-```
-
-Examples:
-- `**Progress** — Completed 3/5 tasks, found 2 more to add.`
-- `**Ready to Close** — All tasks done, code cleaner.`
+_Created: YYYY-MM-DD_

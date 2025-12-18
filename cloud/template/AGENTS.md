@@ -8,18 +8,23 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 
 ### You MUST Read These Files First:
 
-1. **`.cursor/rules/docflow.mdc`** - Complete workflow rules (SOURCE OF TRUTH)
+1. **`.docflow/config.json`** - Configuration (READ FIRST)
+   - `paths.content` - Where context/knowledge folders live
+   - `provider` - Linear team and project IDs
+   - `statusMapping` - Workflow state mappings
+
+2. **`.cursor/rules/docflow.mdc`** - Complete workflow rules (SOURCE OF TRUTH)
    - Three-agent orchestration model
    - Command system and natural language triggers
    - Context loading strategy
    - Linear integration patterns
 
-2. **`docflow/context/`** - Project understanding
+3. **`{paths.content}/context/`** - Project understanding
    - `overview.md` - Project vision and goals
    - `stack.md` - Tech stack and architecture
    - `standards.md` - Code conventions
 
-3. **Linear** - Current work state
+4. **Linear** - Current work state
    - Check "In Progress" view for active work
    - Check "Backlog" for prioritized work
    - Issues contain full spec details
@@ -60,9 +65,10 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 **Don't auto-load everything!** See `.cursor/rules/docflow.mdc` for when to load:
 - Planning: overview.md, Linear backlog
 - Implementing: Linear spec, stack.md, standards.md
+- Creating/Refining issues: Templates from `.docflow/templates/`
 - Searching: Use codebase_search, then load what you find
 
-**Knowledge base:** Scan `docflow/knowledge/INDEX.md` first, then load selectively.
+**Knowledge base:** Scan `{paths.content}/knowledge/INDEX.md` first, then load selectively.
 
 ---
 
@@ -70,28 +76,39 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 
 ```
 project/
+├── .docflow/                    # FRAMEWORK (updatable)
+│   ├── config.json              # Provider settings, paths, version
+│   ├── version                  # DocFlow version for upgrades
+│   └── templates/               # Issue templates with agent instructions
+│       ├── feature.md
+│       ├── bug.md
+│       ├── chore.md
+│       ├── idea.md
+│       └── quick-capture.md     # Also used as Linear default
+│
 ├── .cursor/
-│   ├── rules/docflow.mdc    # Workflow rules (synced from source)
-│   └── commands/            # Slash commands (synced from source)
+│   ├── rules/docflow.mdc       # Workflow rules (synced from source)
+│   └── commands/               # Slash commands (synced from source)
 │
-├── docflow/
-│   ├── context/             # Project understanding (LOCAL)
-│   │   ├── overview.md      # Vision and goals
-│   │   ├── stack.md         # Tech stack and patterns
-│   │   └── standards.md     # Code conventions
+├── {paths.content}/            # PROJECT CONTENT (default: "docflow")
+│   ├── context/                # Project understanding (LOCAL)
+│   │   ├── overview.md         # Vision and goals
+│   │   ├── stack.md            # Tech stack and patterns
+│   │   └── standards.md        # Code conventions
 │   │
-│   ├── knowledge/           # Project knowledge (LOCAL)
-│   │   ├── INDEX.md         # Knowledge inventory
-│   │   ├── decisions/       # Architecture decisions (ADRs)
-│   │   ├── features/        # Complex feature docs
-│   │   ├── notes/           # Technical discoveries
-│   │   └── product/         # Personas, user flows
+│   ├── knowledge/              # Project knowledge (LOCAL)
+│   │   ├── INDEX.md            # Knowledge inventory
+│   │   ├── decisions/          # Architecture decisions (ADRs)
+│   │   ├── features/           # Complex feature docs
+│   │   ├── notes/              # Technical discoveries
+│   │   └── product/            # Personas, user flows
 │   │
-│   └── README.md            # DocFlow usage guide
+│   └── README.md               # DocFlow usage guide
 │
-├── .docflow.json            # Config (version + Linear IDs)
-└── AGENTS.md                # This file
+└── AGENTS.md                   # This file
 ```
+
+**Note:** `{paths.content}` is configurable in `.docflow/config.json`. Default is "docflow".
 
 ### What's NOT Local (Lives in Linear)
 
@@ -240,14 +257,19 @@ When a Linear issue has a Figma attachment:
 ## ⚠️ Critical Rules
 
 ### Never Create Local Spec Files
-- ❌ NO specs in docflow/specs/ (doesn't exist anymore)
+- ❌ NO specs in {paths.content}/specs/ (doesn't exist in cloud)
 - ❌ NO INDEX.md or ACTIVE.md files
 - ✅ ALL specs live in Linear
 
 ### Context Stays Local
-- ✅ docflow/context/ stays in git
-- ✅ docflow/knowledge/ stays in git
+- ✅ `{paths.content}/context/` stays in git
+- ✅ `{paths.content}/knowledge/` stays in git
 - These are version-controlled with code
+
+### Framework Stays in .docflow/
+- ✅ `.docflow/config.json` for configuration
+- ✅ `.docflow/templates/` for issue templates
+- These are updatable via `/docflow-update`
 
 ### Update Linear, Not Files
 - Status changes → Update Linear issue state
@@ -258,7 +280,7 @@ When a Linear issue has a Figma attachment:
 
 ### Document Decisions
 - Spec-specific: In Linear issue comments (dated)
-- Architectural: In docflow/knowledge/decisions/
+- Architectural: In `{paths.content}/knowledge/decisions/`
 
 ---
 
@@ -299,9 +321,10 @@ See the cloud README for setup instructions.
 
 ## 📚 Additional Resources
 
-- **docflow/README.md** - DocFlow usage in this project
-- **docflow/knowledge/README.md** - Knowledge base guide
-- **.cursor/rules/docflow.mdc** - Complete workflow rules
+- **`.docflow/templates/`** - Issue templates with agent instructions
+- **`{paths.content}/README.md`** - DocFlow usage in this project
+- **`{paths.content}/knowledge/README.md`** - Knowledge base guide
+- **`.cursor/rules/docflow.mdc`** - Complete workflow rules
 
 ---
 

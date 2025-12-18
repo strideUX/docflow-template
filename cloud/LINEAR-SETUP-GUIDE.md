@@ -64,7 +64,7 @@ Configure your team's workflow states to match DocFlow:
 
 ### Default Template: Quick Capture
 
-Set this as the default template in Linear for fast idea/bug capture:
+Set this as the **only** template in Linear for fast idea/bug capture:
 
 ```markdown
 ## What
@@ -84,281 +84,34 @@ Set this as the default template in Linear for fast idea/bug capture:
 [Links, screenshots, related issues]
 
 ---
-_Add `triage` label. Will be classified via /refine._
+_Add `triage` label. Agent will classify and structure via /refine._
 ```
 
 **After creating:** Add the `triage` label so it gets picked up for refinement.
 
----
+### Full Templates (Agent-Applied)
 
-### Feature Template
+Full templates for feature, bug, chore, and idea issues live in `.docflow/templates/` in your project. Agents read these templates and apply them when:
 
-```markdown
-## Context
-<!-- Why does this feature exist? What problem does it solve? -->
+- Creating issues via `/capture`
+- Refining issues via `/refine`
+- Triaging quick captures with `triage` label
 
-[Problem description and business value]
-
-**Current Issues:**
-- [Issue or limitation 1]
-- [Issue or limitation 2]
-
----
-
-## User Story
-
-**As a** [specific user role]
-**I want to** [specific goal or action]
-**So that** [concrete benefit or outcome]
-
-**Example Scenario:**
-[Real-world scenario where this feature would be used]
-
----
-
-## Acceptance Criteria
-
-### Functionality
-- [ ] [Specific, measurable criterion 1]
-- [ ] [User can perform X action and see Y result]
-- [ ] [Error handling: System shows helpful message when...]
-
-### Tests
-- [ ] Tests written for core functionality
-- [ ] Edge cases and error scenarios covered
-- [ ] All tests passing
-
-### Documentation
-- [ ] Code documented (comments on complex logic)
-- [ ] Knowledge base updated (if significant decisions/patterns)
-- [ ] Context files updated (if architecture changes)
-- [ ] N/A - No significant documentation needed
-
----
-
-## Technical Notes
-
-### Implementation Approach
-[High-level description of how this will be built]
-
-### Components Needed
-- `ComponentName` - [What it does]
-
-### Files to Create/Modify
-- `path/to/file.tsx` - [What changes]
-
----
-
-## Design Reference
-<!-- Add Figma links as attachments -->
-
----
-
-## Dependencies
-
-**Required Before Starting:**
-- [Feature or system that must exist first]
-- OR: No dependencies
-
----
-
-<!-- Decision log and implementation notes tracked via comments -->
-```
-
----
-
-### Bug Template
-
-```markdown
-## Context
-
-**When Discovered:** [Date]
-**Impact:** [How this affects users]
-**Frequency:** [Always | Sometimes | Specific conditions]
-
----
-
-## Bug Description
-
-### Expected Behavior
-[What SHOULD happen]
-
-### Actual Behavior
-[What ACTUALLY happens]
-
-### Steps to Reproduce
-1. [Step 1]
-2. [Step 2]
-3. [Observe bug]
-
-### Environment
-- **Browser/Platform:** [Chrome, Safari, etc.]
-- **User Role:** [Which user type]
-
----
-
-## Acceptance Criteria
-
-### Fix Verification
-- [ ] Bug no longer reproducible
-- [ ] Expected behavior works correctly
-- [ ] No regressions introduced
-
-### Tests
-- [ ] Regression test added
-- [ ] Edge cases tested
-- [ ] All tests passing
-
-### Documentation
-- [ ] Root cause documented (if significant)
-- [ ] Prevention notes added (if applicable)
-- [ ] N/A - No documentation needed
-
----
-
-## Technical Notes
-
-### Root Cause Analysis
-**Hypothesis:** [What's causing it]
-**Confirmed Cause:** [After investigation]
-
-### Fix Approach
-[How to fix it]
-
-**Files to Modify:**
-- `path/to/file.tsx` - [What changes]
-
----
-
-<!-- Investigation and fix progress tracked via comments -->
-```
-
----
-
-### Chore Template
-
-```markdown
-## Context
-
-**Why This Matters:**
-[Value - cleaner code, better UX, faster performance, etc.]
-
-**Scope:**
-[What areas/features does this touch?]
-
-**Type:** Ongoing | One-time
-
----
-
-## Task List
-
-### Initial Tasks
-- [ ] [Task 1]
-- [ ] [Task 2]
-- [ ] [Task 3]
-
-### Added During Work
-<!-- Add new tasks discovered while working -->
-
----
-
-## Acceptance Criteria
-
-### Completion
-- [ ] All tasks completed
-- [ ] No regressions introduced
-
-### Tests
-- [ ] Tests updated if behavior changed
-- [ ] N/A - No behavior changes
-
-### Documentation
-- [ ] Patterns documented (if new approach)
-- [ ] N/A - No documentation needed
-
----
-
-## Technical Notes
-
-### Approach
-[How you'll tackle this]
-
-### Files to Touch
-- `path/to/file.tsx` - [What changes]
-
----
-
-<!-- Progress tracked via comments -->
-```
-
----
-
-### Idea Template
-
-```markdown
-## Sketch
-
-**What:** [One sentence - what is this?]
-**Why:** [Why might this be valuable?]
-**How:** [Rough idea of how it might work]
-
-**Details:**
-[Additional thoughts, context, inspiration]
-
----
-
-## Potential Value
-
-**For Users:**
-- [Benefit 1]
-
-**Estimated Impact:** 🔥 High | 📊 Medium | 💡 Low | ❓ Unknown
-
----
-
-## Questions to Answer
-
-- [ ] What needs research?
-- [ ] What's the technical feasibility?
-- [ ] What's the rough effort?
-
----
-
-## Rough Complexity
-
-**Complexity:** XS | S | M | L | XL | ❓ Unknown
-
----
-
-## Next Steps
-
-**To Validate:**
-1. [Research step]
-2. [User validation]
-
-**To Turn Into Feature:**
-1. [ ] Answer questions above
-2. [ ] Define acceptance criteria
-3. [ ] Create feature issue
-
----
-
-## Status
-
-- [ ] Captured
-- [ ] Researched
-- [ ] Validated
-- [ ] Refined → Feature issue
-- [ ] Declined
-
----
-
-<!-- Discussion tracked via comments -->
-```
+This keeps Linear simple (one template) while giving agents the structure they need.
 
 ---
 
 ## Project Setup
+
+### Project Description Placeholder
+
+Set this as your Linear project description initially:
+
+```
+📁 Run /docflow-setup to sync project details from codebase.
+```
+
+The `/docflow-setup` command will populate the project description from your context files.
 
 ### Project Description Format
 
@@ -466,29 +219,37 @@ Issue: "Add user authentication"
 
 ## Configuration
 
-### .docflow.json
+### .docflow/config.json
 
 ```json
 {
-  "docflow": {
-    "version": "3.0.0",
-    "sourceRepo": "github.com/strideUX/docflow-template"
+  "version": "3.0.0",
+  "sourceRepo": "github.com/strideUX/docflow-template",
+  "paths": {
+    "content": "docflow"
   },
   "provider": {
     "type": "linear",
     "teamId": "your-team-id",
-    "projectId": "your-project-id"
+    "projectId": "your-project-id",
+    "defaultMilestoneId": null
   },
   "statusMapping": {
     "BACKLOG": "Backlog",
     "READY": "Todo",
     "IMPLEMENTING": "In Progress",
+    "BLOCKED": "Blocked",
     "REVIEW": "In Review",
     "TESTING": "QA",
-    "COMPLETE": "Done"
+    "COMPLETE": "Done",
+    "ARCHIVED": "Archived",
+    "CANCELED": "Canceled",
+    "DUPLICATE": "Duplicate"
   }
 }
 ```
+
+**`paths.content`** - Name of folder containing context/knowledge (default: "docflow", can be "docs" etc.)
 
 ### Getting IDs from Linear
 
@@ -584,21 +345,21 @@ Use consistent comment format for audit trail:
 
 ## Templates Location
 
-All templates are available in the DocFlow repo:
+Templates are in your project's `.docflow/templates/` folder:
 
 ```
-cloud/templates/
-├── issues/
-│   ├── quick-capture.md   ← Default for Linear
-│   ├── feature.md
-│   ├── bug.md
-│   ├── chore.md
-│   └── idea.md
-└── projects/
-    └── project.md
+.docflow/
+├── config.json            # Configuration
+├── version                # For upgrades
+└── templates/
+    ├── quick-capture.md   ← Copy to Linear as default template
+    ├── feature.md         ← Agent uses for /capture and /refine
+    ├── bug.md
+    ├── chore.md
+    └── idea.md
 ```
 
-Copy these into Linear's issue templates feature.
+**Only `quick-capture.md` goes in Linear.** Full templates are applied by agents automatically.
 
 ---
 

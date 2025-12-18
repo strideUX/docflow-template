@@ -177,7 +177,11 @@ if [ "$INSTALL_MODE" == "existing" ]; then
     fi
   fi
   
-  if [ -f "$TARGET_PATH/.docflow.json" ]; then
+  # Check for new .docflow/ folder or old .docflow.json
+  if [ -f "$TARGET_PATH/.docflow/config.json" ]; then
+    HAS_CLOUD_CONFIG=true
+    CURRENT_MODE="cloud"
+  elif [ -f "$TARGET_PATH/.docflow.json" ]; then
     HAS_CLOUD_CONFIG=true
     CURRENT_MODE="cloud"
   fi
@@ -237,6 +241,28 @@ else
   echo -e "${BLUE}✓ Cloud (Linear) installation selected${NC}"
 fi
 
+# =====================================================
+# CONTENT FOLDER NAME (Cloud only)
+# =====================================================
+CONTENT_FOLDER="docflow"
+
+if [ "$MODE" == "cloud" ]; then
+  echo ""
+  echo -e "${YELLOW}📁 Content Folder Name${NC}"
+  echo ""
+  echo "   DocFlow stores project context and knowledge in a folder."
+  echo "   Default is 'docflow', but you can use 'docs' or another name."
+  echo ""
+  read -p "Content folder name [docflow]: " CUSTOM_CONTENT_FOLDER
+  
+  if [ -n "$CUSTOM_CONTENT_FOLDER" ]; then
+    CONTENT_FOLDER="$CUSTOM_CONTENT_FOLDER"
+  fi
+  
+  echo ""
+  echo -e "   Using: ${CYAN}${CONTENT_FOLDER}/${NC}"
+fi
+
 # Detect migration scenario
 IS_MIGRATION=false
 if [ "$HAS_LOCAL_SPECS" = true ] && [ "$MODE" == "cloud" ]; then
@@ -261,6 +287,9 @@ else
 fi
 echo "   Location: $TARGET_PATH"
 echo "   Type:     $MODE"
+if [ "$MODE" == "cloud" ]; then
+  echo "   Content:  $CONTENT_FOLDER/"
+fi
 if [ "$IS_MIGRATION" = true ]; then
   echo "   Migration: $BACKLOG_COUNT backlog + $COMPLETE_COUNT completed specs → Linear"
 fi
@@ -312,7 +341,7 @@ echo ""
 # =====================================================
 # INSTALL SYSTEM FILES
 # =====================================================
-echo "   [1/5] Installing rules and commands..."
+echo "   [1/6] Installing rules and commands..."
 mkdir -p .cursor/rules .cursor/commands
 
 download_file ".cursor/rules/docflow.mdc" ".cursor/rules/docflow.mdc"
@@ -330,7 +359,7 @@ if [ "$MODE" == "cloud" ]; then
 fi
 
 # Platform adapters
-echo "   [2/5] Installing platform adapters..."
+echo "   [2/6] Installing platform adapters..."
 mkdir -p .claude/commands .warp .github
 
 download_file ".claude/rules.md" ".claude/rules.md"
@@ -352,41 +381,69 @@ if [ "$MODE" == "cloud" ]; then
 fi
 cd ../..
 
-# DocFlow structure
-echo "   [3/5] Creating/updating DocFlow directory structure..."
-mkdir -p docflow/context
-mkdir -p docflow/knowledge/{decisions,features,notes,product}
-
-# Local-specific directories (only if new or not migrating)
-if [ "$MODE" == "local" ]; then
+# =====================================================
+# INSTALL .docflow/ FRAMEWORK (Cloud) or docflow/specs (Local)
+# =====================================================
+if [ "$MODE" == "cloud" ]; then
+  echo "   [3/6] Installing .docflow/ framework..."
+  mkdir -p .docflow/templates
+  
+  # Download config, version, and templates
+  download_file ".docflow/config.json" ".docflow/config.json"
+  download_file ".docflow/version" ".docflow/version"
+  download_file ".docflow/templates/README.md" ".docflow/templates/README.md"
+  download_file ".docflow/templates/feature.md" ".docflow/templates/feature.md"
+  download_file ".docflow/templates/bug.md" ".docflow/templates/bug.md"
+  download_file ".docflow/templates/chore.md" ".docflow/templates/chore.md"
+  download_file ".docflow/templates/idea.md" ".docflow/templates/idea.md"
+  download_file ".docflow/templates/quick-capture.md" ".docflow/templates/quick-capture.md"
+  
+  # Update content path in config if customized
+  if [ "$CONTENT_FOLDER" != "docflow" ]; then
+    if command -v sed &> /dev/null; then
+      sed -i.bak "s/\"content\": \"docflow\"/\"content\": \"${CONTENT_FOLDER}\"/" .docflow/config.json
+      rm -f .docflow/config.json.bak
+    fi
+  fi
+  
+  echo "   ✓ .docflow/ framework installed"
+else
+  echo "   [3/6] Creating local specs structure..."
   mkdir -p docflow/specs/{templates,active,backlog,complete,assets}
 fi
 
+# =====================================================
+# INSTALL CONTENT FOLDER
+# =====================================================
+echo "   [4/6] Creating content directory structure..."
+mkdir -p "${CONTENT_FOLDER}/context"
+mkdir -p "${CONTENT_FOLDER}/knowledge/{decisions,features,notes,product}"
+
 # Context templates - only install if they don't exist or are empty
-echo "   [4/5] Installing context templates..."
+echo "   [5/6] Installing context templates..."
 for ctx in overview stack standards; do
-  if [ ! -f "docflow/context/${ctx}.md" ] || [ ! -s "docflow/context/${ctx}.md" ]; then
-    download_file "docflow/context/${ctx}.md" "docflow/context/${ctx}.md"
+  if [ ! -f "${CONTENT_FOLDER}/context/${ctx}.md" ] || [ ! -s "${CONTENT_FOLDER}/context/${ctx}.md" ]; then
+    download_file "docflow/context/${ctx}.md" "${CONTENT_FOLDER}/context/${ctx}.md"
   else
     echo "      ⏭ Preserving existing ${ctx}.md"
   fi
 done
 
 # Knowledge base files - only install if they don't exist
-echo "   [5/5] Installing documentation..."
-if [ ! -f "docflow/knowledge/INDEX.md" ]; then
-  download_file "docflow/knowledge/INDEX.md" "docflow/knowledge/INDEX.md"
+echo "   [6/6] Installing documentation..."
+if [ ! -f "${CONTENT_FOLDER}/knowledge/INDEX.md" ]; then
+  download_file "docflow/knowledge/INDEX.md" "${CONTENT_FOLDER}/knowledge/INDEX.md"
 fi
-if [ ! -f "docflow/knowledge/README.md" ]; then
-  download_file "docflow/knowledge/README.md" "docflow/knowledge/README.md"
+if [ ! -f "${CONTENT_FOLDER}/knowledge/README.md" ]; then
+  download_file "docflow/knowledge/README.md" "${CONTENT_FOLDER}/knowledge/README.md"
 fi
-if [ ! -f "docflow/knowledge/product/personas.md" ]; then
-  download_file "docflow/knowledge/product/personas.md" "docflow/knowledge/product/personas.md"
+if [ ! -f "${CONTENT_FOLDER}/knowledge/product/personas.md" ]; then
+  download_file "docflow/knowledge/product/personas.md" "${CONTENT_FOLDER}/knowledge/product/personas.md"
 fi
-if [ ! -f "docflow/knowledge/product/user-flows.md" ]; then
-  download_file "docflow/knowledge/product/user-flows.md" "docflow/knowledge/product/user-flows.md"
+if [ ! -f "${CONTENT_FOLDER}/knowledge/product/user-flows.md" ]; then
+  download_file "docflow/knowledge/product/user-flows.md" "${CONTENT_FOLDER}/knowledge/product/user-flows.md"
 fi
-download_file "docflow/README.md" "docflow/README.md"
+download_file "docflow/README.md" "${CONTENT_FOLDER}/README.md"
 
 # Local-specific files
 if [ "$MODE" == "local" ]; then
@@ -403,49 +460,11 @@ if [ "$MODE" == "local" ]; then
   done
 fi
 
-# Cloud-specific: Create configuration files
+# Cloud-specific: Create environment files
 if [ "$MODE" == "cloud" ]; then
   echo ""
-  echo "   Creating configuration files..."
+  echo "   Creating environment files..."
   
-  # Determine project name
-  if [ -z "$PROJECT_NAME" ]; then
-    PROJECT_NAME=$(basename "$TARGET_PATH")
-  fi
-  
-  # Create .docflow.json (only if doesn't exist or updating)
-  cat > .docflow.json << EOF
-{
-  "docflow": {
-    "version": "${DOCFLOW_VERSION}",
-    "sourceRepo": "github.com/strideUX/docflow-template"
-  },
-  "project": {
-    "name": "${PROJECT_NAME}",
-    "created": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-  },
-  "provider": {
-    "type": "linear",
-    "teamId": null,
-    "projectId": null,
-    "defaultMilestoneId": null
-  },
-  "statusMapping": {
-    "BACKLOG": "Backlog",
-    "READY": "Todo",
-    "IMPLEMENTING": "In Progress",
-    "BLOCKED": "Blocked",
-    "REVIEW": "In Review",
-    "TESTING": "QA",
-    "COMPLETE": "Done",
-    "ARCHIVED": "Archived",
-    "CANCELED": "Canceled",
-    "DUPLICATE": "Duplicate"
-  }
-}
-EOF
-  echo "   ✓ .docflow.json created"
-
   # Create .env.example
   cat > .env.example << 'EOF'
 # DocFlow Cloud - Environment Configuration
@@ -499,7 +518,8 @@ if [ "$MODE" == "cloud" ]; then
       GITIGNORE_ADDITIONS="${GITIGNORE_ADDITIONS}
 
 # DocFlow archived specs (safe to delete after migration)
-docflow/specs-archived*"
+docflow/specs-archived*
+${CONTENT_FOLDER}/specs-archived*"
     fi
     
     if [ -n "$GITIGNORE_ADDITIONS" ]; then
@@ -510,7 +530,7 @@ docflow/specs-archived*"
     fi
   else
     # Create new .gitignore
-    cat > .gitignore << 'EOF'
+    cat > .gitignore << EOF
 # Dependencies
 node_modules/
 .pnp
@@ -542,6 +562,7 @@ coverage/
 
 # DocFlow archived specs (safe to delete after migration)
 docflow/specs-archived*
+${CONTENT_FOLDER}/specs-archived*
 EOF
     echo "   ✓ .gitignore created"
   fi
@@ -600,6 +621,9 @@ echo -e "${YELLOW}📁 Project Location:${NC}"
 echo "   $TARGET_PATH"
 echo ""
 echo -e "${YELLOW}📦 DocFlow ${DOCFLOW_VERSION} (${MODE}) installed${NC}"
+if [ "$MODE" == "cloud" ]; then
+  echo -e "   Content folder: ${CYAN}${CONTENT_FOLDER}/${NC}"
+fi
 echo ""
 
 # =====================================================

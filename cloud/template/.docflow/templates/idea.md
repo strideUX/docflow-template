@@ -1,8 +1,36 @@
-# Idea Issue Template
+<!-- AGENT INSTRUCTIONS
+When creating or refining an idea issue:
 
-> Copy this template when capturing a rough idea for future consideration in Linear or other PM tools.
+1. SKETCH SECTION:
+   - Keep it light - this is brainstorming
+   - What/Why/How should each be one sentence
+   - Details can be rough notes
 
----
+2. POTENTIAL VALUE:
+   - Think about user benefit first
+   - Business value second
+   - Be honest about impact uncertainty
+
+3. QUESTIONS TO ANSWER:
+   - Capture what you don't know
+   - These become research tasks before refinement
+   - Include feasibility, effort, and value questions
+
+4. COMPLEXITY:
+   - If XL or larger, note how to break it down
+   - Ideas often seem smaller until investigated
+
+5. STATUS TRACKING:
+   - Ideas follow: Captured → Researched → Validated → Refined or Declined
+   - "Refined" means it became a full feature issue
+   - "Declined" with reason is valuable documentation
+
+6. CONVERSION:
+   - When idea is validated, create feature issue
+   - Link the feature issue in "Refined" status
+
+Remove these instructions when creating the final issue.
+-->
 
 ## Sketch
 
@@ -51,7 +79,7 @@
 
 **Complexity:** XS | S | M | L | XL | ❓ Unknown
 
-**If XL or larger:** 
+**If XL or larger:**
 [How could this be broken into smaller features?]
 
 ---
@@ -87,19 +115,4 @@
 
 ---
 
-## Workflow Notes
-
-**Ideas typically:**
-1. Start in Backlog with `idea` label
-2. Get refined through `/review` command
-3. Either become a feature issue or get declined
-
-**Comment Format:**
-```
-**[Status]** — Brief description.
-```
-
-Examples:
-- `**Research** — Looked into competitors, found X approach.`
-- `**Validated** — User feedback positive, worth building.`
-- `**Refined** — Created feature issue PROJ-123.`
+_Captured: YYYY-MM-DD_

@@ -4,14 +4,20 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 
 ---
 
-## Primary Rules Location
+## Primary Configuration
+
+**`.docflow/config.json`** - Read this first!
+
+This tells you:
+- `paths.content` - Where context/knowledge folders live (default: "docflow")
+- `provider` - Linear team and project IDs
 
 **`.cursor/rules/docflow.mdc`** - Complete workflow system
 
 **Read this file to understand:**
 - Three-agent orchestration model (PM, Implementation, QE)
 - Linear integration patterns
-- Command system (12 commands)
+- Command system (12+ commands)
 - Context loading strategy
 - Natural language triggers
 
@@ -19,12 +25,15 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 
 ## Quick Integration Guide
 
-### 1. Check Current Work
+### 1. Check Configuration
+Read `.docflow/config.json` to get paths and provider settings.
+
+### 2. Check Current Work
 **Query Linear** for "In Progress" issues
 
 Or ask: "What issues are currently active in Linear?"
 
-### 2. Follow Active Issues
+### 3. Follow Active Issues
 **Location:** Linear (not local files)
 
 When implementing:
@@ -33,8 +42,8 @@ When implementing:
 - Update progress via Linear comments
 - Check off items as you complete
 
-### 3. Follow Coding Standards
-**Read:** `docflow/context/standards.md`
+### 4. Follow Coding Standards
+**Read:** `{paths.content}/context/standards.md`
 
 Apply these rules to all code suggestions:
 - TypeScript strict mode
@@ -42,8 +51,8 @@ Apply these rules to all code suggestions:
 - Follow project conventions
 - Proper error handling
 
-### 4. Respect Tech Stack
-**Read:** `docflow/context/stack.md`
+### 5. Respect Tech Stack
+**Read:** `{paths.content}/context/stack.md`
 
 Use the documented:
 - Framework patterns
@@ -51,10 +60,10 @@ Use the documented:
 - Component structure
 - API patterns
 
-### 5. Search Before Creating
+### 6. Search Before Creating
 **Before suggesting new code:**
 - Search codebase for existing implementations
-- Check `docflow/knowledge/` for documented patterns
+- Check `{paths.content}/knowledge/` for documented patterns
 - Avoid creating duplicate functionality
 
 ---
@@ -69,9 +78,13 @@ Use the documented:
 - ✅ Progress notes in **Linear comments**
 
 ### Local Context Stays
-- ✅ `docflow/context/` - Project understanding
-- ✅ `docflow/knowledge/` - ADRs, features, notes
+- ✅ `{paths.content}/context/` - Project understanding
+- ✅ `{paths.content}/knowledge/` - ADRs, features, notes
 - ✅ Rules in `.cursor/`
+
+### Framework in .docflow/
+- ✅ `.docflow/config.json` - Configuration
+- ✅ `.docflow/templates/` - Issue templates with agent instructions
 
 ---
 
@@ -108,28 +121,37 @@ Help maintain:
 
 ```
 project/
+├── .docflow/                    # Framework (updatable)
+│   ├── config.json              # Configuration
+│   ├── version                  # Version for upgrades
+│   └── templates/               # Issue templates
+│       ├── feature.md
+│       ├── bug.md
+│       ├── chore.md
+│       └── idea.md
+│
 ├── .cursor/
-│   ├── rules/docflow.mdc    # Complete workflow rules
-│   ├── commands/            # Slash commands
-│   └── mcp.json             # Linear + Figma MCPs
-├── docflow/
-│   ├── context/             # Project rules (LOCAL)
+│   ├── rules/docflow.mdc       # Complete workflow rules
+│   └── commands/               # Slash commands
+│
+├── {paths.content}/            # Project content (default: "docflow")
+│   ├── context/                # Project rules (LOCAL)
 │   │   ├── overview.md
-│   │   ├── stack.md         # Tech patterns
-│   │   └── standards.md     # Code quality
-│   └── knowledge/           # Project knowledge (LOCAL)
+│   │   ├── stack.md            # Tech patterns
+│   │   └── standards.md        # Code quality
+│   └── knowledge/              # Project knowledge (LOCAL)
 │       ├── INDEX.md
-│       ├── decisions/       # ADRs
-│       ├── features/        # Feature docs
-│       └── notes/           # Technical notes
-├── .docflow.json            # Linear configuration
-└── AGENTS.md                # Agent instructions
+│       ├── decisions/          # ADRs
+│       ├── features/           # Feature docs
+│       └── notes/              # Technical notes
+│
+└── AGENTS.md                   # Agent instructions
 
 LINEAR (Cloud):
-├── Issues                   # All specs
-├── Workflow States          # BACKLOG → DONE
-├── Comments                 # Progress, decisions
-└── Attachments              # Figma, screenshots
+├── Issues                      # All specs
+├── Workflow States             # BACKLOG → DONE
+├── Comments                    # Progress, decisions
+└── Attachments                 # Figma, screenshots
 ```
 
 ---
@@ -146,13 +168,14 @@ LINEAR (Cloud):
 
 ### When Helping with Specs
 1. Create issues in Linear (not local files)
-2. Include clear acceptance criteria
-3. Add context and user story
-4. Document decisions in comments
+2. Use templates from `.docflow/templates/`
+3. Include clear acceptance criteria
+4. Add context and user story
+5. Document decisions in comments
 
 ### When Discovering Patterns
 If you find reusable patterns while coding:
-- Suggest documenting in `docflow/knowledge/features/`
+- Suggest documenting in `{paths.content}/knowledge/features/`
 - Add to Linear issue comments if it's a decision
 - Keep knowledge base current
 
@@ -215,6 +238,8 @@ Examples: `**Activated** — ...`, `**Progress** — ...`, `**Complete** — ...
 
 Quick reference:
 - `/start-session` - Check Linear status (PM agent)
+- `/capture` - Create new issue (PM agent)
+- `/refine [issue]` - Triage or refine issue (PM agent)
 - `/implement [issue]` - Build it (Implementation agent)
 - `/attach [file] [issue]` - Attach files to issue (Implementation agent)
 - `/validate [issue]` - Test it (QE agent)
@@ -235,13 +260,13 @@ Quick reference:
 ## Critical Rules
 
 ⚠️ **Never create local spec files:**
-- ❌ NO specs in docflow/specs/
+- ❌ NO specs in {paths.content}/specs/
 - ❌ NO INDEX.md or ACTIVE.md
 - ✅ All specs → Linear issues
 
 ⚠️ **Always search before creating:**
 - Check for existing implementations
-- Reference docflow/knowledge/ for patterns
+- Reference {paths.content}/knowledge/ for patterns
 - Avoid duplication
 
 ⚠️ **Update Linear, not local files:**
@@ -258,13 +283,12 @@ Quick reference:
 
 ## For More Information
 
-1. **`.cursor/rules/docflow.mdc`** - Complete rules (read this!)
-2. **`WARP.md`** - Workflow guide
-3. **`AGENTS.md`** - Universal agent instructions
-4. **`docflow/knowledge/README.md`** - Knowledge base guide
-5. **`.docflow.json`** - Linear configuration
+1. **`.docflow/config.json`** - Configuration (read first!)
+2. **`.cursor/rules/docflow.mdc`** - Complete rules (read this!)
+3. **`WARP.md`** - Workflow guide
+4. **`AGENTS.md`** - Universal agent instructions
+5. **`{paths.content}/knowledge/README.md`** - Knowledge base guide
 
 ---
 
 **DocFlow Cloud is designed for AI-first development with team collaboration. Follow the rules, and Linear handles the workflow.**
-

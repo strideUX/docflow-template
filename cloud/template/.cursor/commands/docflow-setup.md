@@ -157,10 +157,10 @@ Found teams: [Team A, Team B, ...]
 
 ### 4. **Select Team**
 
-Check `.docflow.json` for existing team ID:
+Check `.docflow/config.json` for existing team ID:
 
 ```bash
-cat .docflow.json | grep teamId
+cat .docflow/config.json | grep teamId
 ```
 
 **If teamId is null:**
@@ -197,7 +197,7 @@ Which team should this project use?
 **When user selects:**
 - Get the team ID from the selection
 
-**Save to .docflow.json:**
+**Save to .docflow/config.json:**
 ```json
 {
   "provider": {
@@ -218,10 +218,10 @@ Which team should this project use?
 
 ### 5. **Select Project**
 
-Check `.docflow.json` for existing project ID:
+Check `.docflow/config.json` for existing project ID:
 
 ```bash
-cat .docflow.json | grep projectId
+cat .docflow/config.json | grep projectId
 ```
 
 **If projectId is null:**
@@ -268,7 +268,7 @@ source .env && curl -s -X POST https://api.linear.app/graphql \
   -d '{"query": "mutation { projectCreate(input: { name: \"Project Name\", teamIds: [\"TEAM_ID\"] }) { success project { id name } } }"}' | jq .
 ```
 
-**Save to .docflow.json:**
+**Save to .docflow/config.json:**
 ```json
 {
   "provider": {
@@ -282,7 +282,7 @@ source .env && curl -s -X POST https://api.linear.app/graphql \
 ```markdown
 ✅ Project configured: **[Project Name]**
 
-I've saved both team and project IDs to `.docflow.json` - this file can be committed.
+I've saved both team and project IDs to `.docflow/config.json` - this file can be committed.
 ```
 
 ---
@@ -292,8 +292,8 @@ I've saved both team and project IDs to `.docflow.json` - this file can be commi
 Query Linear for team's workflow states and verify mapping:
 
 ```bash
-# Read current mapping from .docflow.json
-cat .docflow.json | grep -A 10 "statusMapping"
+# Read current mapping from .docflow/config.json
+cat .docflow/config.json | grep -A 10 "statusMapping"
 ```
 
 **Present mapping to user:**
@@ -315,7 +315,7 @@ Does this match your Linear workflow?
 ```
 
 **If user needs to adjust:**
-- Update `statusMapping` in `.docflow.json` to match their actual state names
+- Update `statusMapping` in `.docflow/config.json` to match their actual state names
 
 ---
 
@@ -402,7 +402,7 @@ No milestones found in this project. You can:
 Milestones are optional but useful for organizing work by release or quarter.
 ```
 
-**Update `.docflow.json` with milestone config:**
+**Update `.docflow/config.json` with milestone config:**
 ```json
 {
   "provider": {
@@ -594,7 +594,7 @@ Should I create these as Linear issues?
 - ✓ Project: [Project Name]
 
 **Configuration:**
-- ✓ Team & project IDs saved to .docflow.json
+- ✓ Team & project IDs saved to .docflow/config.json
 - ✓ Workflow states mapped
 - ✓ Labels verified
 
@@ -1197,8 +1197,8 @@ You're now running DocFlow Cloud! 🚀
 
 ## Context to Load
 - `.env` (environment configuration)
-- `.docflow.json` (workflow configuration)
-- `docflow/context/*` (current content, if any)
+- `.docflow/config.json` (workflow configuration)
+- `{paths.content}/context/*` (current content, if any)
 - Linear MCP (for API calls)
 - Project files (package.json, etc.)
 
@@ -1219,8 +1219,8 @@ User might say:
 
 ## Outputs
 - `.env` validated
-- `.docflow.json` status mapping verified with team/project IDs
-- `docflow/context/*` files preserved or populated
+- `.docflow/config.json` verified with team/project IDs
+- `{paths.content}/context/*` files preserved or populated
 - Linear project created/configured
 - Project description synced to Linear
 

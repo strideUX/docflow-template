@@ -153,7 +153,7 @@ Ask or infer based on context:
 
 ### 5. **Create Linear Issue**
 
-Check `.docflow.json` for project configuration including default milestone.
+Check `.docflow/config.json` for project configuration including default milestone.
 
 Use Linear MCP to create issue:
 
@@ -242,7 +242,8 @@ If user is in flow and mentions something quickly:
 ---
 
 ## Context to Load
-- `.docflow.json` (for Linear config)
+- `.docflow/config.json` (for Linear config and paths)
+- `.docflow/templates/{type}.md` (for issue structure)
 - Minimal - keep it fast
 
 ---

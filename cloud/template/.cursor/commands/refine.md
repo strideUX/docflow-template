@@ -72,7 +72,9 @@ Is this classification correct? (yes / change to [type])
 
 Once type is confirmed:
 
-1. **Get the appropriate template** (feature/bug/chore/idea)
+1. **Read the appropriate template from `.docflow/templates/`** (feature.md, bug.md, chore.md, idea.md)
+   - Follow agent instructions in the template comments
+   - Remove agent instruction comments from final issue
 2. **Extract content from raw capture:**
    - "What" → Context / Problem description
    - "Why" → User story / Value
@@ -307,14 +309,16 @@ Would you like to refine the incomplete ones?
 
 ## Context to Load
 
+**First, read `.docflow/config.json` to get `paths.content`.**
+
 **For Triage:**
 - Linear issue (raw content)
-- Issue templates (to apply structure)
+- `.docflow/templates/{type}.md` (to apply structure)
 
 **For Refinement:**
 - Linear issue (full details)
-- `docflow/context/overview.md`
-- `docflow/knowledge/INDEX.md`
+- `{paths.content}/context/overview.md`
+- `{paths.content}/knowledge/INDEX.md`
 - Related features/decisions if relevant
 
 ---

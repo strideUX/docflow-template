@@ -14,13 +14,15 @@ Check for and apply updates to DocFlow rules and commands from the GitHub source
 
 ### 1. **Read Current Version**
 
-Read `.docflow.json` and extract current version:
+Read `.docflow/config.json` or `.docflow/version` and extract current version:
 
 ```bash
-cat .docflow.json | grep '"version"' | head -1
+cat .docflow/version
+# or
+cat .docflow/config.json | grep '"version"' | head -1
 ```
 
-Expected: `"version": "3.0.0"`
+Expected: `"version": "3.0.0"` or just `3.0.0`
 
 ### 2. **Check Latest Release from GitHub**
 
@@ -52,8 +54,11 @@ Compare current version to latest:
 [Changelog from release notes, or list of changes]
 
 ### Files That Will Update:
+- `.docflow/config.json` (version only, preserves settings)
+- `.docflow/version`
+- `.docflow/templates/*.md` (5 template files)
 - `.cursor/rules/docflow.mdc`
-- `.cursor/commands/*.md` (12 files)
+- `.cursor/commands/*.md` (15+ command files)
 - `AGENTS.md`
 - `WARP.md`
 - `.warp/rules.md`
@@ -103,18 +108,22 @@ curl -sSL "${BASE_URL}/.github/copilot-instructions.md" -o ".github/copilot-inst
 
 ### 5. **Update Configuration**
 
-After downloading files, update `.docflow.json`:
+After downloading files, update `.docflow/version` and `.docflow/config.json`:
 
+```bash
+# Update version file
+echo "3.1.0" > .docflow/version
+```
+
+Update `.docflow/config.json` version field:
 ```json
 {
-  "docflow": {
-    "version": "3.1.0",
-    "lastUpdated": "2025-12-04T12:00:00Z"
-  }
+  "version": "3.1.0",
+  ...
 }
 ```
 
-Use search_replace to update the version and lastUpdated fields.
+Use search_replace to update the version field (preserve other settings).
 
 ### 6. **Recreate Claude Command Symlinks**
 
@@ -133,14 +142,16 @@ cd ../..
 ✅ DocFlow Updated to 3.1.0!
 
 **Updated Files:**
+- `.docflow/version` ✓
+- `.docflow/templates/*.md` (5 files) ✓
 - `.cursor/rules/docflow.mdc` ✓
-- `.cursor/commands/*.md` (12 files) ✓
+- `.cursor/commands/*.md` (15+ files) ✓
 - `AGENTS.md` ✓
 - `WARP.md` ✓
 - Platform adapters ✓
 
 **Configuration:**
-- `.docflow.json` version updated ✓
+- `.docflow/config.json` version updated ✓
 
 The new rules are now active. No restart needed.
 
@@ -168,14 +179,12 @@ No updates available.
 
 ## Version Pinning
 
-Check if `.docflow.json` has a pinned version:
+Check if `.docflow/config.json` has a pinned version:
 
 ```json
 {
-  "docflow": {
-    "version": "3.0.0",      // Specific version - respect unless --force
-    "allowUpdates": true     // If false, warn user
-  }
+  "version": "3.0.0",        // Specific version - respect unless --force
+  "allowUpdates": true       // If false, warn user
 }
 ```
 
@@ -220,16 +229,19 @@ If automated update fails, provide manual instructions:
 1. Visit: https://github.com/strideUX/docflow-template/releases
 2. Download the latest release
 3. Copy these folders to your project:
+   - `cloud/template/.docflow/templates/` → `.docflow/templates/`
+   - `cloud/template/.docflow/version` → `.docflow/version`
    - `cloud/template/.cursor/` → `.cursor/`
    - `cloud/template/AGENTS.md` → `AGENTS.md`
    - `cloud/template/WARP.md` → `WARP.md`
-4. Update `.docflow.json` version number
+4. Update `.docflow/config.json` version number
 ```
 
 ---
 
 ## Context to Load
-- `.docflow.json` (current version)
+- `.docflow/config.json` (current version and settings)
+- `.docflow/version` (version file)
 - Network access for GitHub API/raw files
 
 ---
@@ -267,13 +279,19 @@ BASE_URL="https://raw.githubusercontent.com/strideUX/docflow-template/${VERSION}
 echo "Updating DocFlow from ${VERSION}..."
 
 # Create directories if needed
-mkdir -p .cursor/rules .cursor/commands .claude/commands .warp .github
+mkdir -p .docflow/templates .cursor/rules .cursor/commands .claude/commands .warp .github
+
+# Download .docflow/ framework files
+curl -sSL "${BASE_URL}/.docflow/version" -o ".docflow/version"
+for template in README feature bug chore idea quick-capture; do
+  curl -sSL "${BASE_URL}/.docflow/templates/${template}.md" -o ".docflow/templates/${template}.md"
+done
 
 # Download rules
 curl -sSL "${BASE_URL}/.cursor/rules/docflow.mdc" -o ".cursor/rules/docflow.mdc"
 
 # Download commands
-for cmd in start-session wrap-session capture review activate implement validate close block status docflow-setup docflow-update; do
+for cmd in start-session wrap-session capture refine review activate implement validate close block status docflow-setup docflow-update sync-project project-update attach; do
   curl -sSL "${BASE_URL}/.cursor/commands/${cmd}.md" -o ".cursor/commands/${cmd}.md"
 done
 
@@ -286,7 +304,7 @@ curl -sSL "${BASE_URL}/.github/copilot-instructions.md" -o ".github/copilot-inst
 
 # Recreate Claude symlinks
 cd .claude/commands
-for cmd in start-session wrap-session capture review activate implement validate close block status docflow-setup docflow-update; do
+for cmd in start-session wrap-session capture refine review activate implement validate close block status docflow-setup docflow-update sync-project project-update attach; do
   ln -sf "../../.cursor/commands/${cmd}.md" "${cmd}.md" 2>/dev/null || true
 done
 cd ../..
@@ -299,12 +317,13 @@ The agent can run this script with the terminal tool, or execute the commands in
 ---
 
 ## Checklist
-- [ ] Read current version from .docflow.json
+- [ ] Read current version from .docflow/config.json or .docflow/version
 - [ ] Checked GitHub for latest version
 - [ ] Compared versions
 - [ ] Showed changelog/what's new
 - [ ] Got user approval (if update available)
-- [ ] Downloaded all files via curl
-- [ ] Updated .docflow.json version
+- [ ] Downloaded all files via curl (including .docflow/templates/)
+- [ ] Updated .docflow/version file
+- [ ] Updated .docflow/config.json version field
 - [ ] Recreated Claude symlinks
 - [ ] Confirmed completion

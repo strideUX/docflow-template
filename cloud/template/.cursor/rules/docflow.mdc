@@ -8,29 +8,61 @@
 DocFlow Cloud is a hybrid spec-driven workflow:
 - **Workflow state (specs)** → Lives in Linear
 - **Understanding (context/knowledge)** → Lives locally in git
+- **System config & templates** → `.docflow/` folder (framework)
 - **System rules (this file)** → Local, synced from central repo
+
+---
+
+## Configuration
+
+### .docflow/ Folder Structure
+```
+.docflow/
+├── config.json           # Provider settings, paths, version
+├── version               # Current DocFlow version
+└── templates/            # Issue templates with agent instructions
+    ├── feature.md
+    ├── bug.md
+    ├── chore.md
+    ├── idea.md
+    └── quick-capture.md  # Also used as Linear default
+```
+
+### Reading Configuration
+**Always read `.docflow/config.json` first to get:**
+- `paths.content` - Where context/knowledge lives (default: "docflow")
+- `provider.teamId` - Linear team ID
+- `provider.projectId` - Linear project ID
+- `statusMapping` - Maps DocFlow states to Linear states
+
+**Dynamic paths based on config:**
+```
+{paths.content}/context/     → e.g., docflow/context/ or docs/context/
+{paths.content}/knowledge/   → e.g., docflow/knowledge/ or docs/knowledge/
+```
 
 ---
 
 ## Context Loading Strategy
 
 ### On Every Interaction
-1. **Check Linear** for "In Progress" issues (know current state)
-2. **Scan Linear** for "Blocked" issues (may need attention)
-3. **Scan Linear** for issues needing review (status=REVIEW)
-4. **Scan Linear** for issues ready for QE (status=QA)
+1. **Read `.docflow/config.json`** to get paths and provider config
+2. **Check Linear** for "In Progress" issues (know current state)
+3. **Scan Linear** for "Blocked" issues (may need attention)
+4. **Scan Linear** for issues needing review (status=REVIEW)
+5. **Scan Linear** for issues ready for QE (status=QA)
 
 ### When Starting/Planning New Work
 **Load these to understand scope:**
-- `docflow/context/overview.md` (project vision)
+- `{paths.content}/context/overview.md` (project vision)
 - Query Linear for backlog issues
 - Load active issue being planned
 
 ### When Implementing
 **Load these for execution context:**
 - Current Linear issue (full description + comments)
-- `docflow/context/stack.md` (technical patterns)
-- `docflow/context/standards.md` (code conventions)
+- `{paths.content}/context/stack.md` (technical patterns)
+- `{paths.content}/context/standards.md` (code conventions)
 - If issue has Figma attachment → call Figma MCP for design context
 
 **Remember: Implementation = Code + Tests + Docs**
@@ -41,18 +73,25 @@ DocFlow Cloud is a hybrid spec-driven workflow:
 ### When Reviewing (status=REVIEW)
 **Load these for quality assessment:**
 - Linear issue being reviewed
-- `docflow/context/standards.md` (code checklist)
+- `{paths.content}/context/standards.md` (code checklist)
 - Implementation comments from Linear
 
 ### When Searching for Existing Code
 - Use `codebase_search` to find patterns
 - Use `grep` to find exact code
-- Check `docflow/knowledge/` if search reveals relevant docs
+- Check `{paths.content}/knowledge/` if search reveals relevant docs
 
-### Knowledge Base (`docflow/knowledge/`)
+### Knowledge Base (`{paths.content}/knowledge/`)
 - Scan `INDEX.md` first (provides overview)
 - Load selectively based on task
 - Never auto-load everything
+
+### When Creating/Refining Issues
+**Load templates from `.docflow/templates/`:**
+- Read the appropriate template (feature.md, bug.md, chore.md, idea.md)
+- Follow the agent instructions in the template comments
+- Apply template structure to the issue
+- Remove agent instruction comments from final issue
 
 ---
 
@@ -351,12 +390,12 @@ When issue has Figma attachment:
 
 ### Configuration
 ```
-Read .docflow.json for:
-- teamId (required)
-- projectId (required for project-scoped work)
-- defaultMilestoneId (optional - auto-assign new issues to this milestone)
-- label IDs for spec types
-- state IDs for status mapping
+Read .docflow/config.json for:
+- paths.content (where context/knowledge folders live)
+- provider.teamId (required)
+- provider.projectId (required for project-scoped work)
+- provider.defaultMilestoneId (optional - auto-assign new issues to this milestone)
+- statusMapping (maps DocFlow states to Linear states)
 ```
 
 ### Milestones (Optional)
@@ -556,14 +595,20 @@ Load with: source .env
 ## Critical Rules
 
 ### Never Create Local Spec Files
-- ❌ NO files in docflow/specs/ (directory doesn't exist)
+- ❌ NO files in {paths.content}/specs/ (directory doesn't exist in cloud)
 - ❌ NO INDEX.md or ACTIVE.md files
 - ✅ ALL specs live in Linear as issues
 
 ### Context Stays Local
-- ✅ docflow/context/ always in git
-- ✅ docflow/knowledge/ always in git
+- ✅ `{paths.content}/context/` always in git
+- ✅ `{paths.content}/knowledge/` always in git
 - These are version-controlled with code
+
+### Framework Stays in .docflow/
+- ✅ `.docflow/config.json` for configuration
+- ✅ `.docflow/templates/` for issue templates
+- ✅ `.docflow/version` for upgrade detection
+- These are updatable via `/docflow-update`
 
 ### Update Linear, Not Local Files
 - Status changes → Update Linear issue state
@@ -599,7 +644,7 @@ Format for implementation notes:
 
 Documentation is required when changes are **significant**. Mark documentation criteria as N/A if no significant documentation is needed.
 
-**Document in `docflow/knowledge/` when:**
+**Document in `{paths.content}/knowledge/` when:**
 - **decisions/** - Architectural or significant technical decisions
   - Choosing between approaches (e.g., "Why we use X over Y")
   - Trade-offs made and rationale
@@ -610,15 +655,15 @@ Documentation is required when changes are **significant**. Mark documentation c
   - Multi-component features that need overview
   - Non-obvious data flows or interactions
 
-**Update `docflow/context/` when:**
+**Update `{paths.content}/context/` when:**
 - `stack.md` - Adding new technology, changing patterns
 - `standards.md` - New conventions, updated guidelines
 - `overview.md` - Scope changes, new links
 
 ### Auto-Update Knowledge INDEX
 
-When adding new documentation to `docflow/knowledge/`:
-1. Add entry to `docflow/knowledge/INDEX.md`
+When adding new documentation to `{paths.content}/knowledge/`:
+1. Add entry to `{paths.content}/knowledge/INDEX.md`
 2. Include: file path, title, brief description, date added
 
 **INDEX.md entry format:**
@@ -632,8 +677,8 @@ When documentation is added during implementation, add a Linear comment:
 
 ```markdown
 **Documentation Updated** —
-- Added: `docflow/knowledge/decisions/adr-[name].md` - [Brief description]
-- Updated: `docflow/context/stack.md` - [What changed]
+- Added: `{paths.content}/knowledge/decisions/adr-[name].md` - [Brief description]
+- Updated: `{paths.content}/context/stack.md` - [What changed]
 
 [Links available in repo after merge]
 ```
@@ -661,14 +706,14 @@ When the user shares or mentions a useful link during conversation:
 I noticed you shared [link]. Would you like me to save this to your project's Related Links?
 
 This will:
-1. Add it to docflow/context/overview.md
+1. Add it to {paths.content}/context/overview.md
 2. Sync to your Linear project description (via /sync-project)
 
 Save this link? (yes/no)
 ```
 
 **If yes:**
-1. Add to the Links section in `docflow/context/overview.md`
+1. Add to the Links section in `{paths.content}/context/overview.md`
 2. Use format: `- [Link name](URL) - Brief description`
 3. Ask for a brief description if not obvious
 4. Offer to run `/sync-project` to update Linear
@@ -697,7 +742,7 @@ This workflow is designed to work with multiple PM tools. Linear is the first pr
 - Local file structure
 
 ### Switching Providers
-1. Update `.docflow.json` with new provider config
+1. Update `.docflow/config.json` with new provider config
 2. Update `.cursor/mcp.json` with new provider MCP
 3. Workflow commands stay the same
 

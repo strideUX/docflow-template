@@ -1,7 +1,8 @@
 {
-  "docflow": {
-    "version": "3.0.0",
-    "sourceRepo": "github.com/strideUX/docflow-template"
+  "version": "3.0.0",
+  "sourceRepo": "github.com/strideUX/docflow-template",
+  "paths": {
+    "content": "docflow"
   },
   "provider": {
     "type": "linear",
