@@ -100,11 +100,24 @@ Issue descriptions contain acceptance criteria as markdown checkboxes:
 - [x] Completed criterion
 ```
 
+**IMPORTANT: Checkboxes live in the DESCRIPTION, not comments.**
+
 **During implementation:**
-1. Read current description to see checkbox state
-2. As each criterion is completed, update description with `[x]`
-3. Use `update_issue` with full updated description
-4. Add comment noting progress
+1. Read current issue description via Linear MCP
+2. Find the checkbox for the completed criterion
+3. Change `- [ ]` to `- [x]` in the description text
+4. Save the ENTIRE updated description via `update_issue`
+5. Optionally add a brief progress comment
+
+**Example update_issue call:**
+```typescript
+update_issue({
+  issueId: "xxx",
+  description: "...full description with updated checkboxes..."
+})
+```
+
+**DO NOT** put completion checkboxes in comments - always update the description.
 
 ---
 

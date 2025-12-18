@@ -94,10 +94,16 @@ Examples:
 
 ## Checkbox Updates
 
-Acceptance criteria live as checkboxes in issue description:
+**Acceptance criteria live in the DESCRIPTION, not comments.**
+
 ```markdown
 - [ ] Pending criterion
 - [x] Completed criterion
 ```
 
-Update in-place as work progresses.
+**To update:**
+1. Read issue description
+2. Change `[ ]` to `[x]` for completed items
+3. Save full description via `update_issue`
+
+**Never add checkboxes as comments** - always update the description in-place.

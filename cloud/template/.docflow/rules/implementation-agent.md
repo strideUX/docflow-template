@@ -62,9 +62,28 @@ When complete, I'll move to REVIEW and add a summary.
 5. If Figma attached: call Figma MCP for design specs
 6. Document significant patterns/decisions to knowledge base
 
-### Updating Checkboxes
+### Updating Checkboxes (IMPORTANT)
 
-Read current description, update checkbox from `[ ]` to `[x]`, save with `update_issue`, add progress comment.
+**Checkboxes live in the DESCRIPTION, not comments.**
+
+When completing an acceptance criterion:
+
+1. **Read** the current issue description via Linear MCP
+2. **Find** the specific checkbox in the description: `- [ ] Criterion text`
+3. **Update** it to checked: `- [x] Criterion text`
+4. **Save** the ENTIRE updated description back via `update_issue`
+5. **Add a brief comment** noting progress (optional)
+
+**Example Linear MCP call:**
+```typescript
+update_issue({
+  issueId: "ISSUE-ID",
+  description: "## Acceptance Criteria\n- [x] First criterion (done)\n- [x] Second criterion (done)\n- [ ] Third criterion (pending)"
+})
+```
+
+**DO NOT:** Add checkboxes as comments - they belong in the description.
+**DO:** Update the description in-place as you complete each criterion.
 
 ---
 
