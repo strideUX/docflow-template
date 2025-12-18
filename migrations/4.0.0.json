@@ -1,0 +1,62 @@
+{
+  "version": "4.0.0",
+  "date": "2024-12-17",
+  "type": "baseline",
+  "description": "DocFlow Cloud v4.0 - Initial restructured release with folder-based rules",
+  
+  "notes": [
+    "Complete restructure from monolithic docflow.mdc to folder-based rules",
+    "Introduced .docflow/ config folder with rules, scripts, skills, templates",
+    "Moved from .docflow.json to .docflow/config.json",
+    "Added three-agent model: PM, Implementation, QE",
+    "Added Linear MCP integration",
+    "Added session awareness and triage workflow"
+  ],
+  
+  "breaking_changes": [
+    "Removed .cursor/rules/docflow.mdc (replaced by folder structure)",
+    "Removed .docflow.json (replaced by .docflow/config.json)"
+  ],
+  
+  "files_removed_from_previous": [
+    ".cursor/rules/docflow.mdc",
+    ".docflow.json"
+  ],
+  
+  "files_added": [
+    ".docflow/config.json",
+    ".docflow/version",
+    ".docflow/rules/core.md",
+    ".docflow/rules/pm-agent.md",
+    ".docflow/rules/implementation-agent.md",
+    ".docflow/rules/qe-agent.md",
+    ".docflow/rules/linear-integration.md",
+    ".docflow/rules/figma-integration.md",
+    ".docflow/rules/session-awareness.md",
+    ".docflow/scripts/status-summary.sh",
+    ".docflow/scripts/session-context.sh",
+    ".docflow/scripts/stale-check.sh",
+    ".docflow/skills/linear-workflow/SKILL.md",
+    ".docflow/skills/spec-templates/SKILL.md",
+    ".docflow/skills/docflow-commands/SKILL.md",
+    ".docflow/templates/feature.md",
+    ".docflow/templates/bug.md",
+    ".docflow/templates/chore.md",
+    ".docflow/templates/idea.md",
+    ".docflow/templates/quick-capture.md",
+    ".docflow/templates/README.md",
+    ".cursor/rules/docflow-core/RULE.md",
+    ".cursor/rules/pm-agent/RULE.md",
+    ".cursor/rules/implementation-agent/RULE.md",
+    ".cursor/rules/qe-agent/RULE.md",
+    ".cursor/rules/linear-integration/RULE.md",
+    ".cursor/rules/figma-integration/RULE.md",
+    ".cursor/rules/session-awareness/RULE.md",
+    ".cursor/rules/templates/RULE.md",
+    ".cursor/commands/refine.md",
+    ".cursor/commands/attach.md",
+    ".cursor/commands/sync-project.md",
+    ".cursor/commands/project-update.md",
+    ".cursor/commands/docflow-update.md"
+  ]
+}

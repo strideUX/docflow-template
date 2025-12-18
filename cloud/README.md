@@ -1,6 +1,6 @@
 # DocFlow Cloud
 
-> Version 3.0.0 - Linear Integration
+> Version 4.1.0 - Linear Integration with Manifest-Based Updates
 
 DocFlow Cloud is a hybrid spec-driven development workflow where work items live in Linear and project understanding stays local.
 
@@ -15,51 +15,33 @@ DocFlow Cloud is a hybrid spec-driven development workflow where work items live
 - **Recommended:** Linear MCP installed in Cursor (see [MCP Setup](#mcp-setup))
 - (Optional) Figma account + MCP for design integration
 
-### 2. Install with Unified Installer
+### 2. Install
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash
 ```
 
-Select "Cloud" when prompted. This creates your project with all files including `.env.example`.
+Select "Cloud" when prompted.
 
-### 3. Configure Environment
-
-Open the `.env` file created in your project and add your API key:
+### 3. Update Existing Project
 
 ```bash
-# .env (secrets only - never commit!)
-LINEAR_API_KEY=lin_api_your_key_here    # Required (only value you need!)
-FIGMA_ACCESS_TOKEN=figd_xxx              # Optional
+# Update current directory
+curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash -s -- --update
+
+# Update specific project
+curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash -s -- --update --path /path/to/project
 ```
 
-Get your API key from: **Linear → Settings → API → Personal API Keys**
+### 4. Configure Environment
 
-Note: Team ID and Project ID are discovered automatically during setup and saved to `.docflow/config.json`.
+Add your API key to `.env`:
 
-### 4. Load Environment Variables
-
-Choose one approach:
-
-**Option A: direnv (Recommended)**
 ```bash
-brew install direnv
-echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
-source ~/.zshrc
-echo "dotenv" > .envrc
-direnv allow
+LINEAR_API_KEY=lin_api_your_key_here
 ```
 
-**Option B: Shell Profile**
-```bash
-echo 'export LINEAR_API_KEY="lin_api_xxx"' >> ~/.zshrc
-source ~/.zshrc
-```
-
-**Option C: Manual**
-```bash
-source .env && cursor .
-```
+Get from: **Linear → Settings → API → Personal API Keys**
 
 ### 5. Run Setup
 
@@ -68,136 +50,161 @@ cursor /path/to/your/project
 # Then run: /docflow-setup
 ```
 
-The setup command will:
-- Validate your `.env` configuration
-- Test the Linear connection
-- Help you select team and project
-- Gather project links (repo, Figma, docs)
-- Help you fill project context
-- Sync project description to Linear
-- Create initial Linear issues
-
 ---
 
 ## MCP Setup
 
-DocFlow Cloud works best with MCP (Model Context Protocol) servers installed in Cursor. MCPs provide cleaner API interactions and better handling of rich content.
+DocFlow Cloud works best with MCP servers installed in Cursor.
 
-### Installing Linear MCP (Recommended)
+### Linear MCP (Recommended)
 
-1. Open Cursor Settings → Features → MCP
-2. Add the Linear MCP:
+1. Cursor Settings → Features → MCP
+2. Add:
    - **Name:** `linear`
    - **Command:** `npx`
    - **Args:** `-y mcp-remote https://mcp.linear.app/mcp`
-3. The MCP will use `LINEAR_API_KEY` from your environment
 
-### Installing Figma MCP (Optional)
+### Figma MCP (Optional)
 
-1. Open Cursor Settings → Features → MCP
-2. Add the Figma MCP:
-   - **Name:** `figma`
-   - **Command:** `npx`
-   - **Args:** `-y @anthropic/mcp-figma`
-3. Set `FIGMA_ACCESS_TOKEN` in your environment
-
-### Without MCPs
-
-DocFlow Cloud still works without MCPs installed. The agent will fall back to direct API calls using curl and GraphQL. This is fully functional but:
-- Slightly messier for complex markdown content
-- Manual URL handling for attachments
-- No design context extraction from Figma
-
-**We recommend installing MCPs for the best experience.**
+- **Name:** `figma`
+- **Command:** `npx`
+- **Args:** `-y @anthropic/mcp-figma`
 
 ---
 
-## What's Included
+## File Structure
 
 ```
-template/
-├── .docflow/                    # FRAMEWORK (updatable)
-│   ├── config.json              # Provider settings, paths, version
-│   ├── version                  # For upgrade detection
-│   └── templates/               # Issue templates with agent instructions
+your-project/
+├── .docflow/                    ← DOCFLOW FRAMEWORK (updated via --update)
+│   ├── config.json              ← Provider settings (YOUR Linear IDs preserved)
+│   ├── version                  ← Current version (4.1.0)
+│   ├── rules/                   ← Canonical rule content
+│   │   ├── core.md
+│   │   ├── pm-agent.md
+│   │   ├── implementation-agent.md
+│   │   ├── qe-agent.md
+│   │   ├── linear-integration.md
+│   │   ├── figma-integration.md
+│   │   └── session-awareness.md
+│   ├── scripts/                 ← Shell scripts for efficiency
+│   │   ├── status-summary.sh
+│   │   ├── session-context.sh
+│   │   └── stale-check.sh
+│   ├── skills/                  ← Portable agent skills
+│   │   ├── linear-workflow/SKILL.md
+│   │   ├── spec-templates/SKILL.md
+│   │   └── docflow-commands/SKILL.md
+│   └── templates/               ← Issue templates
 │       ├── feature.md
 │       ├── bug.md
 │       ├── chore.md
 │       ├── idea.md
-│       └── quick-capture.md     # Also used as Linear default
+│       └── quick-capture.md
 │
 ├── .cursor/
-│   ├── rules/docflow.mdc       # Workflow rules
-│   └── commands/               # Slash commands
+│   ├── commands/                ← 16 slash commands
+│   └── rules/                   ← Cursor rule folders (pointers to .docflow/rules/)
+│       ├── docflow-core/RULE.md
+│       ├── pm-agent/RULE.md
+│       └── ...
 │
-├── {content-folder}/           # PROJECT CONTENT (default: "docflow")
-│   ├── context/                # Project understanding
-│   │   ├── overview.md         # Vision, goals, links
-│   │   ├── stack.md            # Tech stack
-│   │   └── standards.md        # Code conventions
-│   │
-│   ├── knowledge/              # Project knowledge
-│   │   ├── INDEX.md            # Knowledge inventory
-│   │   ├── decisions/          # ADRs
-│   │   ├── features/           # Feature docs
-│   │   ├── notes/              # Learnings
-│   │   └── product/            # Personas, flows
-│   │
-│   └── README.md
+├── docflow/                     ← PROJECT CONTENT (preserved on update)
+│   ├── context/
+│   │   ├── overview.md          ← Project vision, goals
+│   │   ├── stack.md             ← Technology choices
+│   │   └── standards.md         ← Coding conventions
+│   └── knowledge/               ← Decisions, notes, learnings
 │
-├── .env.example                # Environment template (copy to .env)
-├── .env                        # Your credentials (never commit!)
-├── .gitignore                  # Ignores .env
-└── AGENTS.md                   # AI agent instructions
+├── .claude/rules.md             ← Claude adapter
+├── .warp/rules.md               ← Warp adapter
+├── .github/copilot-instructions.md
+├── AGENTS.md                    ← Universal agent instructions
+└── .env                         ← Secrets (never commit)
 ```
-
-**Note:** The content folder name is configurable during install (default: "docflow"). Set in `.docflow/config.json` as `paths.content`.
 
 ---
 
-## Key Concepts
+## Update System
 
-### What Lives Where
+DocFlow uses a **manifest-based update system** that knows exactly which files it owns.
 
-| Content | Location | Why |
-|---------|----------|-----|
-| **Specs** | Linear | Collaboration, visibility, workflow |
-| **Config & Templates** | `.docflow/` | Framework files (updatable) |
-| **Context & Knowledge** | `{content-folder}/` | Project-specific (yours) |
-| **Rules & Commands** | `.cursor/` (synced) | No external dependency |
+### Manifest File
 
-### Workflow
+The `manifest.json` defines file ownership:
+
+```json
+{
+  "version": "4.1.0",
+  "ownership": {
+    "owned_directories": [".docflow/rules", ".docflow/scripts", ...],
+    "owned_files": [".cursor/commands/activate.md", "AGENTS.md", ...],
+    "preserved_files": ["docflow/context/*", "docflow/knowledge/*", ".env"],
+    "merged_files": {
+      ".docflow/config.json": {
+        "preserve_keys": ["provider.teamId", "provider.projectId"]
+      }
+    }
+  }
+}
+```
+
+### What Happens on Update
+
+| File Type | Action |
+|-----------|--------|
+| **Owned directories** | Replaced entirely |
+| **Owned files** | Overwritten |
+| **Preserved files** | Never touched |
+| **Merged files** | Updated but preserves specified keys |
+
+### Your Custom Files Are Safe
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                            INTAKE                                    │
-├─────────────────────────────────────────────────────────────────────┤
-│  Quick Capture (with `triage` label) ──► /refine ──► BACKLOG       │
-│  /capture (from IDE) ─────────────────────────────► BACKLOG        │
-└─────────────────────────────────────────────────────────────────────┘
-                                │
-                                │ /refine (spec refinement)
-                                ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  BACKLOG → READY → IMPLEMENTING ──→ REVIEW → QA → COMPLETE         │
-│     │        │          │              │      │        │            │
-│  Linear   Linear     Linear         Linear  Linear  Linear          │
-│  Backlog   Todo    In Progress     In Review  QA     Done           │
-│                         │              │      │                     │
-│                         ▼              │      │                     │
-│                     BLOCKED ◄──────────┘      │                     │
-│                         │                     │                     │
-│                      Linear                   │                     │
-│                     Blocked                   │                     │
-│                         │                     │                     │
-│                         └──► (resume when unblocked)                │
-└─────────────────────────────────────────────────────────────────────┘
+.cursor/rules/
+  ├── docflow-core/       ← DocFlow (updated)
+  ├── pm-agent/           ← DocFlow (updated)
+  ├── my-custom-rule/     ← YOURS (preserved)
+  └── project-specific/   ← YOURS (preserved)
+```
 
-Terminal States (via /close):
-- Done      → Verified and shipped
-- Archived  → Deferred to future  
-- Canceled  → Won't do
-- Duplicate → Already exists elsewhere
+### Migration Files
+
+Version changes are tracked in `migrations/`:
+
+```
+migrations/
+  ├── 4.0.0.json          ← Restructure from v3
+  └── 4.1.0.json          ← Priority/dependency workflow
+```
+
+These tell the installer what deprecated files to clean up.
+
+---
+
+## Workflow
+
+```
+INTAKE
+  ├── Quick Capture (Linear UI) + triage label
+  │         │
+  │         │ /refine (triage path)
+  │         ▼
+  └── BACKLOG (templated, prioritized)
+              │
+              │ /refine (refinement path)
+              ▼
+          TODO (refined, dependencies set)
+              │
+              │ /activate (smart recommend or specific)
+              ▼
+        IN PROGRESS (assigned - REQUIRED)
+              │
+              │ /implement → /review → /validate
+              ▼
+           DONE
+
+Terminal States: Archived, Canceled, Duplicate
 ```
 
 ### Three-Agent Model
@@ -206,53 +213,79 @@ Terminal States (via /close):
 2. **Implementation Agent**: Builds features (code + tests + docs)
 3. **QE Agent**: Validates with user
 
-### Team Collaboration Features
-
-**Race Condition Prevention:**
-- Before activating or implementing, agent checks if issue is assigned to someone else
-- Warns before taking over work someone may already be doing
-
-**Stale Work Detection:**
-- Dashboard shows issues sitting too long in active states
-- In Progress > 7 days, Review/QA > 3 days triggers warning
-
-**Dependency Tracking:**
-- Block command can link to blocking issues
-- Dashboards surface issues with unresolved dependencies
-- "Blocked by LIN-XXX (In Progress @sarah)"
-
 ---
 
 ## Commands
 
-### Planning Commands
-```
-/start-session   - Begin work session, see queues + stale + dependencies
-/capture         - Create new Linear issue (with template)
-/refine          - Triage raw captures OR refine specs
-/activate        - Assign and move to Ready (with race condition check)
-/close           - Close work (Done/Archived/Canceled/Duplicate)
-```
+### Planning
+| Command | Description |
+|---------|-------------|
+| `/capture` | Create new Linear issue |
+| `/refine` | Triage raw captures OR refine specs, set priority/dependencies |
+| `/activate` | Smart "what's next" recommendation, assign and start |
+| `/close` | Complete (Done/Archived/Canceled/Duplicate) |
 
-### Implementation Commands
-```
-/implement       - Pick up and build (with assignment check)
-/block           - Move to Blocked state + link dependencies
-/attach          - Add files to issue
-```
+### Implementation
+| Command | Description |
+|---------|-------------|
+| `/implement` | Build the feature (code + tests + docs) |
+| `/block` | Move to Blocked state |
+| `/attach` | Add files to issue |
 
-### Review & QE Commands
-```
-/review          - Code review (post-implementation)
-/validate        - Manual QE testing
-```
+### Review & QE
+| Command | Description |
+|---------|-------------|
+| `/review` | Code review |
+| `/validate` | Manual QE testing |
 
-### System Commands
-```
-/status          - Check state + queues + stale items + dependencies
-/sync-project    - Sync context to Linear project
-/docflow-update  - Sync rules from source repo
-```
+### Session
+| Command | Description |
+|---------|-------------|
+| `/start-session` | Begin work, load context |
+| `/wrap-session` | End session, POST project update to Linear |
+| `/status` | Show current state |
+
+### System
+| Command | Description |
+|---------|-------------|
+| `/docflow-setup` | Initial project setup |
+| `/sync-project` | Push context to Linear project description |
+| `/project-update` | Post project health update |
+
+---
+
+## Key Features (v4.1)
+
+### Priority & Dependency Workflow
+
+During `/docflow-setup` and `/refine`:
+- Set priorities (Urgent → High → Medium → Low)
+- Create blocking relationships between issues
+- Suggested implementation order
+
+### Smart Activation
+
+When you run `/activate` without specifying an issue:
+- Queries all Todo/Backlog issues
+- Filters out blocked items
+- Ranks by priority
+- Recommends what to work on next
+
+### Mandatory Assignment
+
+Issues **must** be assigned before moving to In Progress. The agent:
+1. Gets current Linear user via `get_viewer()`
+2. Assigns the issue
+3. Verifies assignment succeeded
+4. Only then moves to In Progress
+
+### Project Updates on Wrap
+
+`/wrap-session` now **requires** posting a project update to Linear:
+- Summarizes what was completed
+- Notes what's in progress
+- Lists blockers
+- Sets health status (onTrack/atRisk/offTrack)
 
 ---
 
@@ -260,114 +293,34 @@ Terminal States (via /close):
 
 ### Required Labels
 
-| Label | Color | Purpose |
-|-------|-------|---------|
-| `triage` | Orange | Raw captures needing classification |
-| `feature` | Green | New functionality |
-| `bug` | Red | Defect reports |
-| `chore` | Gray | Maintenance work |
-| `idea` | Purple | Future exploration |
+| Label | Purpose |
+|-------|---------|
+| `triage` | Raw captures needing classification |
+| `feature` | New functionality |
+| `bug` | Defect reports |
+| `chore` | Maintenance work |
+| `idea` | Future exploration |
 
-### Required Workflow States
+### Workflow States
 
-| Linear State | DocFlow Status | Description |
-|--------------|----------------|-------------|
-| Backlog | BACKLOG | Ideas, raw captures |
-| Todo | READY | Refined, ready to implement |
-| In Progress | IMPLEMENTING | Being built |
-| Blocked | BLOCKED | Waiting on feedback, dependency, or decision |
-| In Review | REVIEW | Awaiting code review |
-| QA | TESTING | Manual testing |
-| Done | COMPLETE | Shipped |
-| Archived | ARCHIVED | Deferred to future (not canceled) |
-| Canceled | CANCELED | Decision made not to pursue |
-| Duplicate | DUPLICATE | Already exists elsewhere |
+| Linear State | DocFlow Status |
+|--------------|----------------|
+| Backlog | BACKLOG |
+| Todo | READY |
+| In Progress | IMPLEMENTING |
+| Blocked | BLOCKED |
+| In Review | REVIEW |
+| QA | TESTING |
+| Done | COMPLETE |
+| Archived | ARCHIVED |
+| Canceled | CANCELED |
+| Duplicate | DUPLICATE |
 
-### Issue Templates
+### Quick Capture Template
 
-Set **Quick Capture** as the default template in Linear. Copy from `.docflow/templates/quick-capture.md`.
+Set as default template in Linear. Copy from `.docflow/templates/quick-capture.md`.
 
-Full templates (feature, bug, chore, idea) are in `.docflow/templates/` with agent instructions. Agents use these when creating/refining issues via `/capture` and `/refine`.
-
-See **[LINEAR-SETUP-GUIDE.md](./LINEAR-SETUP-GUIDE.md)** for complete setup instructions.
-
----
-
-## Acceptance Criteria Structure
-
-All issues use a three-part acceptance criteria structure:
-
-```markdown
-## Acceptance Criteria
-
-### Functionality
-- [ ] [What the feature/fix must do]
-
-### Tests
-- [ ] Tests written for core functionality
-- [ ] Edge cases covered
-- [ ] N/A - No tests needed
-
-### Documentation
-- [ ] Code documented
-- [ ] Knowledge base updated (if significant)
-- [ ] Context files updated (if architecture changes)
-- [ ] N/A - No documentation needed
-```
-
-This ensures implementation includes **code + tests + documentation**.
-
----
-
-## Figma Integration
-
-When Linear issues have Figma attachments:
-
-1. Agent reads issue → sees Figma URL
-2. Agent calls Figma MCP → gets design context
-3. Agent implements with actual specs (colors, spacing, etc.)
-
-This enables design-accurate implementations without manual spec copying.
-
-**Requires:** Figma MCP installed in Cursor + `FIGMA_ACCESS_TOKEN` in environment.
-
----
-
-## Link Capture
-
-During development, when you share useful links (GitHub, Figma, docs), the agent will ask:
-
-> "Would you like me to save this to your project's Related Links?"
-
-If yes:
-1. Link is added to `{content-folder}/context/overview.md`
-2. You can run `/sync-project` to update Linear
-
----
-
-## Updating DocFlow
-
-Rules and commands are synced from a central source repo:
-
-```
-/docflow-update
-
-# Checks for updates, shows changelog, syncs if approved
-```
-
-This solves the "template distribution" problem - update once, sync everywhere.
-
----
-
-## Migration from Local DocFlow
-
-See [DOCFLOW-CLOUD-SPEC.md](./DOCFLOW-CLOUD-SPEC.md) for detailed migration guide.
-
-Quick steps:
-1. Set up Linear with matching structure
-2. Configure `.docflow/config.json`
-3. Migrate existing specs to Linear issues
-4. Remove local `docflow/specs/`, `INDEX.md`, `ACTIVE.md`
+Auto-apply `triage` label to new issues created in Linear UI.
 
 ---
 
@@ -375,29 +328,20 @@ Quick steps:
 
 - **[DOCFLOW-CLOUD-SPEC.md](./DOCFLOW-CLOUD-SPEC.md)** - Full specification
 - **[LINEAR-SETUP-GUIDE.md](./LINEAR-SETUP-GUIDE.md)** - Linear structure guide
-- **[template/.docflow/templates/](./template/.docflow/templates/)** - Issue templates with agent instructions
-- **[template/AGENTS.md](./template/AGENTS.md)** - AI agent instructions
-- **[template/.cursor/rules/docflow.mdc](./template/.cursor/rules/docflow.mdc)** - Complete workflow rules
+- **[manifest.json](./manifest.json)** - File ownership manifest
+- **[../migrations/](../migrations/)** - Version migration files
 
 ---
 
-## Future Providers
+## What's New in v4.1
 
-DocFlow Cloud is designed for provider abstraction:
-
-| Provider | Status | Notes |
-|----------|--------|-------|
-| **Linear** | ✅ Active | First provider |
-| **GitHub Issues** | 🔜 Planned | Good for OSS |
-| **Jira** | 🔜 Planned | Enterprise demand |
-| **Asana** | 📋 Backlog | If requested |
+- **Priority/Dependency Workflow** — Set during setup and refine
+- **Smart Activation** — Recommends what to work on based on priority + blockers
+- **Mandatory Assignment** — Can't be In Progress without assignee
+- **Project Updates on Wrap** — Required on `/wrap-session`
+- **Manifest-Based Updates** — Smart updates preserve your customizations
+- **Migration Files** — Track version changes, cleanup deprecated files
 
 ---
 
-## Contributing
-
-This is part of the DocFlow project. See the main README for contribution guidelines.
-
----
-
-*DocFlow Cloud v3.0.0*
+*DocFlow Cloud v4.1.0*

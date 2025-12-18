@@ -1,0 +1,159 @@
+{
+  "version": "4.1.0",
+  "description": "DocFlow Cloud - Manifest of all managed files",
+  "repository": "github.com/strideUX/docflow-template",
+  
+  "ownership": {
+    "description": "Defines what DocFlow owns vs what users can customize",
+    
+    "owned_directories": {
+      "description": "Entire directories owned by DocFlow - contents replaced on update",
+      "paths": [
+        ".docflow/rules",
+        ".docflow/scripts",
+        ".docflow/skills",
+        ".docflow/templates",
+        ".cursor/rules/docflow-core",
+        ".cursor/rules/pm-agent",
+        ".cursor/rules/implementation-agent",
+        ".cursor/rules/qe-agent",
+        ".cursor/rules/linear-integration",
+        ".cursor/rules/figma-integration",
+        ".cursor/rules/session-awareness",
+        ".cursor/rules/templates"
+      ]
+    },
+    
+    "owned_files": {
+      "description": "Individual files owned by DocFlow - overwritten on update",
+      "paths": [
+        ".cursor/commands/activate.md",
+        ".cursor/commands/attach.md",
+        ".cursor/commands/block.md",
+        ".cursor/commands/capture.md",
+        ".cursor/commands/close.md",
+        ".cursor/commands/docflow-setup.md",
+        ".cursor/commands/docflow-update.md",
+        ".cursor/commands/implement.md",
+        ".cursor/commands/project-update.md",
+        ".cursor/commands/refine.md",
+        ".cursor/commands/review.md",
+        ".cursor/commands/start-session.md",
+        ".cursor/commands/status.md",
+        ".cursor/commands/sync-project.md",
+        ".cursor/commands/validate.md",
+        ".cursor/commands/wrap-session.md",
+        ".docflow/version",
+        ".claude/rules.md",
+        ".warp/rules.md",
+        ".github/copilot-instructions.md",
+        "AGENTS.md",
+        "WARP.md"
+      ]
+    },
+    
+    "preserved_files": {
+      "description": "Files that are NEVER overwritten - user's project-specific content",
+      "paths": [
+        ".env",
+        ".env.local",
+        "docflow/context/overview.md",
+        "docflow/context/stack.md",
+        "docflow/context/standards.md",
+        "docflow/knowledge/**"
+      ]
+    },
+    
+    "merged_files": {
+      "description": "Files where specific keys are preserved during update",
+      "files": {
+        ".docflow/config.json": {
+          "preserve_keys": ["provider.teamId", "provider.projectId", "provider.defaultMilestoneId", "paths.content"]
+        }
+      }
+    },
+    
+    "template_files": {
+      "description": "Files created only if they don't exist (initial setup)",
+      "paths": [
+        ".env.example",
+        "docflow/context/overview.md",
+        "docflow/context/stack.md", 
+        "docflow/context/standards.md",
+        "docflow/knowledge/INDEX.md",
+        "docflow/knowledge/README.md",
+        "docflow/knowledge/product/personas.md",
+        "docflow/knowledge/product/user-flows.md",
+        "docflow/README.md"
+      ]
+    }
+  },
+  
+  "files": {
+    "description": "Complete file tree with checksums for integrity verification",
+    "tree": {
+      ".cursor/commands": [
+        "activate.md",
+        "attach.md",
+        "block.md",
+        "capture.md",
+        "close.md",
+        "docflow-setup.md",
+        "docflow-update.md",
+        "implement.md",
+        "project-update.md",
+        "refine.md",
+        "review.md",
+        "start-session.md",
+        "status.md",
+        "sync-project.md",
+        "validate.md",
+        "wrap-session.md"
+      ],
+      ".cursor/rules": {
+        "docflow-core": ["RULE.md"],
+        "pm-agent": ["RULE.md"],
+        "implementation-agent": ["RULE.md"],
+        "qe-agent": ["RULE.md"],
+        "linear-integration": ["RULE.md"],
+        "figma-integration": ["RULE.md"],
+        "session-awareness": ["RULE.md"],
+        "templates": ["RULE.md"]
+      },
+      ".docflow": {
+        "rules": [
+          "core.md",
+          "figma-integration.md",
+          "implementation-agent.md",
+          "linear-integration.md",
+          "pm-agent.md",
+          "qe-agent.md",
+          "session-awareness.md"
+        ],
+        "scripts": [
+          "session-context.sh",
+          "stale-check.sh",
+          "status-summary.sh"
+        ],
+        "skills": {
+          "docflow-commands": ["SKILL.md"],
+          "linear-workflow": ["SKILL.md"],
+          "spec-templates": ["SKILL.md"]
+        },
+        "templates": [
+          "bug.md",
+          "chore.md",
+          "feature.md",
+          "idea.md",
+          "quick-capture.md",
+          "README.md"
+        ],
+        "root": ["config.json", "version"]
+      },
+      ".claude": ["rules.md"],
+      ".warp": ["rules.md"],
+      ".github": ["copilot-instructions.md"],
+      "root": ["AGENTS.md", "WARP.md"]
+    }
+  }
+}

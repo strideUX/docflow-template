@@ -1,0 +1,46 @@
+{
+  "version": "4.1.0",
+  "date": "2024-12-18",
+  "from": "4.0.0",
+  "type": "minor",
+  "description": "Priority/dependency workflow, mandatory assignment, project updates on wrap-session",
+  
+  "notes": [
+    "Added prioritization step to /docflow-setup (Phase 4)",
+    "Added smart 'what's next' recommendations to /activate",
+    "Added priority and dependency questions to /refine",
+    "Made assignment mandatory for In Progress state",
+    "Made project updates required on /wrap-session",
+    "Added Linear API calls for project updates (MCP doesn't support)",
+    "Enhanced backlog creation guidelines (5-15 high-level items)",
+    "Added spec migration detection in /docflow-setup",
+    "Added triage workflow documentation"
+  ],
+  
+  "files_modified": [
+    ".cursor/commands/docflow-setup.md",
+    ".cursor/commands/activate.md",
+    ".cursor/commands/refine.md",
+    ".cursor/commands/wrap-session.md",
+    ".docflow/rules/pm-agent.md",
+    ".docflow/rules/linear-integration.md"
+  ],
+  
+  "files_added": [],
+  
+  "files_removed": [],
+  
+  "files_renamed": {},
+  
+  "config_changes": {
+    ".docflow/version": {
+      "old": "4.0.0",
+      "new": "4.1.0"
+    }
+  },
+  
+  "upgrade_instructions": [
+    "Run the install script with --update flag",
+    "Or manually copy the 6 modified files listed above"
+  ]
+}

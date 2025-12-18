@@ -1,28 +1,30 @@
 #!/bin/bash
 # DocFlow Unified Installer
-# Version: 4.0
+# Version: 4.1
 # 
 # Handles ALL DocFlow installation scenarios:
 #   - New project creation
 #   - Install into existing project
-#   - Update existing DocFlow
+#   - Update existing DocFlow (smart update with manifest)
 #   - Migrate from local to cloud
 #
 # Usage: 
-#   # Create new project (interactive)
+#   # Interactive mode
 #   curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash
 #
-#   # Install/update in current directory
-#   curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash -s -- --here
+#   # Update current project
+#   curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash -s -- --update
 #
-#   # Install/update in specific directory
-#   curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash -s -- --path /path/to/project
+#   # Update specific project
+#   curl -sSL https://raw.githubusercontent.com/strideUX/docflow-template/main/docflow-install.sh | bash -s -- --update --path /path/to/project
 
 set -e
 
-DOCFLOW_VERSION="4.0"
+DOCFLOW_VERSION="4.1.0"
 RAW_BASE_LOCAL="https://raw.githubusercontent.com/strideUX/docflow-template/main/local/template"
 RAW_BASE_CLOUD="https://raw.githubusercontent.com/strideUX/docflow-template/main/cloud/template"
+RAW_BASE_ROOT="https://raw.githubusercontent.com/strideUX/docflow-template/main"
+MANIFEST_URL="https://raw.githubusercontent.com/strideUX/docflow-template/main/cloud/manifest.json"
 
 # Color codes
 RED='\033[0;31m'
@@ -35,9 +37,14 @@ NC='\033[0m' # No Color
 # Parse arguments
 INSTALL_MODE=""
 TARGET_PATH=""
+UPDATE_MODE=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
+    --update)
+      UPDATE_MODE=true
+      shift
+      ;;
     --here)
       INSTALL_MODE="existing"
       TARGET_PATH="$(pwd)"
@@ -56,12 +63,320 @@ done
 
 echo ""
 echo -e "${CYAN}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║${NC}              ${GREEN}DocFlow ${DOCFLOW_VERSION} Installer${NC}                       ${CYAN}║${NC}"
+echo -e "${CYAN}║${NC}              ${GREEN}DocFlow ${DOCFLOW_VERSION} Installer${NC}                      ${CYAN}║${NC}"
 echo -e "${CYAN}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
 # =====================================================
-# DETECT SCENARIO
+# HELPER FUNCTIONS
+# =====================================================
+
+download_file() {
+  local url="$1"
+  local dest="$2"
+  mkdir -p "$(dirname "$dest")"
+  
+  if command -v curl &> /dev/null; then
+    curl -sSL "$url" -o "$dest" 2>/dev/null || {
+      echo -e "${RED}❌ Failed to download: $url${NC}"
+      return 1
+    }
+  elif command -v wget &> /dev/null; then
+    wget -q "$url" -O "$dest" 2>/dev/null || {
+      echo -e "${RED}❌ Failed to download: $url${NC}"
+      return 1
+    }
+  else
+    echo -e "${RED}❌ Error: curl or wget required${NC}"
+    exit 1
+  fi
+}
+
+get_json_value() {
+  local file="$1"
+  local key="$2"
+  if command -v python3 &> /dev/null; then
+    python3 -c "import json; print(json.load(open('$file'))$key)" 2>/dev/null
+  elif command -v jq &> /dev/null; then
+    jq -r "$key" "$file" 2>/dev/null
+  else
+    echo ""
+  fi
+}
+
+compare_versions() {
+  local v1="$1"
+  local v2="$2"
+  if [ "$v1" = "$v2" ]; then
+    echo "equal"
+  elif [ "$(printf '%s\n' "$v1" "$v2" | sort -V | head -n1)" = "$v1" ]; then
+    echo "older"
+  else
+    echo "newer"
+  fi
+}
+
+# =====================================================
+# UPDATE MODE
+# =====================================================
+
+if [ "$UPDATE_MODE" = true ]; then
+  echo -e "${YELLOW}🔄 DocFlow Update Mode${NC}"
+  echo ""
+  
+  # If no path specified, show project picker
+  if [ -z "$TARGET_PATH" ]; then
+    echo "Which project would you like to update?"
+    echo ""
+    echo -e "   ${GREEN}1)${NC} Current directory ($(pwd))"
+    echo -e "   ${BLUE}2)${NC} Enter a path"
+    echo ""
+    read -p "Select (1 or 2): " UPDATE_CHOICE
+    
+    if [ "$UPDATE_CHOICE" == "1" ]; then
+      TARGET_PATH="$(pwd)"
+    elif [ "$UPDATE_CHOICE" == "2" ]; then
+      echo ""
+      read -p "Enter project path: " TARGET_PATH
+      TARGET_PATH="${TARGET_PATH/#\~/$HOME}"
+    else
+      echo -e "${RED}Invalid selection. Exiting.${NC}"
+      exit 1
+    fi
+  fi
+  
+  # Validate path
+  if [ ! -d "$TARGET_PATH" ]; then
+    echo -e "${RED}Directory does not exist: $TARGET_PATH${NC}"
+    exit 1
+  fi
+  
+  TARGET_PATH="$(cd "$TARGET_PATH" && pwd)"
+  cd "$TARGET_PATH"
+  
+  # Check if this is a DocFlow project
+  if [ ! -f ".docflow/version" ] && [ ! -f ".docflow/config.json" ]; then
+    echo -e "${RED}Not a DocFlow Cloud project: $TARGET_PATH${NC}"
+    echo "   Missing .docflow/version or .docflow/config.json"
+    echo ""
+    echo "   Run without --update to install DocFlow in this project."
+    exit 1
+  fi
+  
+  # Get current version
+  CURRENT_VERSION="4.0.0"
+  if [ -f ".docflow/version" ]; then
+    CURRENT_VERSION=$(cat .docflow/version | tr -d '[:space:]')
+  fi
+  
+  echo -e "   Project: ${CYAN}$TARGET_PATH${NC}"
+  echo -e "   Current: ${YELLOW}v$CURRENT_VERSION${NC}"
+  echo -e "   Latest:  ${GREEN}v$DOCFLOW_VERSION${NC}"
+  echo ""
+  
+  # Compare versions
+  VERSION_STATUS=$(compare_versions "$CURRENT_VERSION" "$DOCFLOW_VERSION")
+  
+  if [ "$VERSION_STATUS" = "equal" ]; then
+    echo -e "${GREEN}✓ Already up to date!${NC}"
+    echo ""
+    exit 0
+  elif [ "$VERSION_STATUS" = "newer" ]; then
+    echo -e "${YELLOW}⚠️  Project version ($CURRENT_VERSION) is newer than installer ($DOCFLOW_VERSION)${NC}"
+    read -p "Continue anyway? (y/n): " FORCE_UPDATE
+    if [[ ! $FORCE_UPDATE =~ ^[Yy]$ ]]; then
+      exit 0
+    fi
+  fi
+  
+  # Download manifest
+  echo "   Fetching manifest..."
+  TEMP_MANIFEST=$(mktemp)
+  download_file "$MANIFEST_URL" "$TEMP_MANIFEST"
+  
+  # Read content folder from config
+  CONTENT_FOLDER="docflow"
+  if [ -f ".docflow/config.json" ]; then
+    CONTENT_FOLDER=$(get_json_value ".docflow/config.json" "['paths']['content']" || echo "docflow")
+  fi
+  
+  # Preserve project-specific config values
+  echo "   Preserving project configuration..."
+  TEAM_ID=""
+  PROJECT_ID=""
+  MILESTONE_ID=""
+  if [ -f ".docflow/config.json" ]; then
+    if command -v python3 &> /dev/null; then
+      TEAM_ID=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('provider',{}).get('teamId',''))" 2>/dev/null || echo "")
+      PROJECT_ID=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('provider',{}).get('projectId',''))" 2>/dev/null || echo "")
+      MILESTONE_ID=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('provider',{}).get('defaultMilestoneId',''))" 2>/dev/null || echo "")
+    elif command -v jq &> /dev/null; then
+      TEAM_ID=$(jq -r '.provider.teamId // empty' .docflow/config.json)
+      PROJECT_ID=$(jq -r '.provider.projectId // empty' .docflow/config.json)
+      MILESTONE_ID=$(jq -r '.provider.defaultMilestoneId // empty' .docflow/config.json)
+    fi
+  fi
+  
+  echo ""
+  echo -e "${YELLOW}📦 Updating DocFlow files...${NC}"
+  echo ""
+  
+  # Set base URL
+  RAW_BASE="$RAW_BASE_CLOUD"
+  
+  # =====================================================
+  # UPDATE OWNED DIRECTORIES (replace entirely)
+  # =====================================================
+  echo "   [1/5] Updating .docflow/rules..."
+  rm -rf .docflow/rules
+  mkdir -p .docflow/rules
+  for rule in core pm-agent implementation-agent qe-agent linear-integration figma-integration session-awareness; do
+    download_file "${RAW_BASE}/.docflow/rules/${rule}.md" ".docflow/rules/${rule}.md"
+  done
+  
+  echo "   [2/5] Updating .docflow/scripts..."
+  rm -rf .docflow/scripts
+  mkdir -p .docflow/scripts
+  for script in status-summary session-context stale-check; do
+    download_file "${RAW_BASE}/.docflow/scripts/${script}.sh" ".docflow/scripts/${script}.sh"
+  done
+  chmod +x .docflow/scripts/*.sh
+  
+  echo "   [3/5] Updating .docflow/skills..."
+  rm -rf .docflow/skills
+  mkdir -p .docflow/skills/linear-workflow .docflow/skills/spec-templates .docflow/skills/docflow-commands
+  download_file "${RAW_BASE}/.docflow/skills/linear-workflow/SKILL.md" ".docflow/skills/linear-workflow/SKILL.md"
+  download_file "${RAW_BASE}/.docflow/skills/spec-templates/SKILL.md" ".docflow/skills/spec-templates/SKILL.md"
+  download_file "${RAW_BASE}/.docflow/skills/docflow-commands/SKILL.md" ".docflow/skills/docflow-commands/SKILL.md"
+  
+  echo "   [4/5] Updating .docflow/templates..."
+  rm -rf .docflow/templates
+  mkdir -p .docflow/templates
+  for template in feature bug chore idea quick-capture README; do
+    download_file "${RAW_BASE}/.docflow/templates/${template}.md" ".docflow/templates/${template}.md"
+  done
+  
+  echo "   [5/5] Updating Cursor rules..."
+  for rule_dir in docflow-core pm-agent implementation-agent qe-agent linear-integration figma-integration session-awareness templates; do
+    rm -rf ".cursor/rules/${rule_dir}"
+    mkdir -p ".cursor/rules/${rule_dir}"
+    download_file "${RAW_BASE}/.cursor/rules/${rule_dir}/RULE.md" ".cursor/rules/${rule_dir}/RULE.md"
+  done
+  
+  # =====================================================
+  # UPDATE OWNED FILES
+  # =====================================================
+  echo ""
+  echo "   Updating commands..."
+  mkdir -p .cursor/commands
+  for cmd in activate attach block capture close docflow-setup docflow-update implement project-update refine review start-session status sync-project validate wrap-session; do
+    download_file "${RAW_BASE}/.cursor/commands/${cmd}.md" ".cursor/commands/${cmd}.md"
+  done
+  
+  echo "   Updating adapters..."
+  mkdir -p .claude .warp .github
+  download_file "${RAW_BASE}/.claude/rules.md" ".claude/rules.md"
+  download_file "${RAW_BASE}/.warp/rules.md" ".warp/rules.md"
+  download_file "${RAW_BASE}/.github/copilot-instructions.md" ".github/copilot-instructions.md"
+  download_file "${RAW_BASE}/AGENTS.md" "AGENTS.md"
+  download_file "${RAW_BASE}/WARP.md" "WARP.md"
+  
+  # =====================================================
+  # UPDATE CONFIG (preserve project values)
+  # =====================================================
+  echo "   Updating config (preserving project settings)..."
+  download_file "${RAW_BASE}/.docflow/config.json" ".docflow/config.json.new"
+  
+  if command -v python3 &> /dev/null; then
+    python3 << EOF
+import json
+
+# Load new config
+with open('.docflow/config.json.new', 'r') as f:
+    config = json.load(f)
+
+# Restore preserved values
+config['provider']['teamId'] = '$TEAM_ID' if '$TEAM_ID' and '$TEAM_ID' != 'None' else None
+config['provider']['projectId'] = '$PROJECT_ID' if '$PROJECT_ID' and '$PROJECT_ID' != 'None' else None
+config['provider']['defaultMilestoneId'] = '$MILESTONE_ID' if '$MILESTONE_ID' and '$MILESTONE_ID' != 'None' else None
+config['paths']['content'] = '$CONTENT_FOLDER'
+
+with open('.docflow/config.json', 'w') as f:
+    json.dump(config, f, indent=2)
+    f.write('\n')
+EOF
+    rm .docflow/config.json.new
+  else
+    mv .docflow/config.json.new .docflow/config.json
+    echo "   ⚠️  python3 not found - manually verify .docflow/config.json settings"
+  fi
+  
+  # Update version
+  echo "$DOCFLOW_VERSION" > .docflow/version
+  
+  # =====================================================
+  # CLEANUP OLD FILES (from migrations)
+  # =====================================================
+  echo ""
+  echo "   Checking for deprecated files..."
+  
+  OLD_FILES_FOUND=false
+  FILES_TO_DELETE=()
+  
+  # Check for files removed in 4.0.0
+  if [ -f ".docflow.json" ]; then
+    OLD_FILES_FOUND=true
+    FILES_TO_DELETE+=(".docflow.json")
+  fi
+  if [ -f ".cursor/rules/docflow.mdc" ]; then
+    OLD_FILES_FOUND=true
+    FILES_TO_DELETE+=(".cursor/rules/docflow.mdc")
+  fi
+  
+  if [ "$OLD_FILES_FOUND" = true ]; then
+    echo ""
+    echo -e "${YELLOW}🧹 Found deprecated files:${NC}"
+    for f in "${FILES_TO_DELETE[@]}"; do
+      echo "   • $f"
+    done
+    echo ""
+    read -p "   Delete these old files? (y/n): " DELETE_OLD
+    
+    if [[ $DELETE_OLD =~ ^[Yy]$ ]]; then
+      for f in "${FILES_TO_DELETE[@]}"; do
+        rm -f "$f"
+        echo -e "   ${GREEN}✓ Deleted $f${NC}"
+      done
+    else
+      echo "   ⏭ Kept old files"
+    fi
+  else
+    echo "   ✓ No deprecated files found"
+  fi
+  
+  # =====================================================
+  # UPDATE COMPLETE
+  # =====================================================
+  echo ""
+  echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
+  echo -e "${GREEN}║${NC}              ${CYAN}✅ UPDATE COMPLETE!${NC}                            ${GREEN}║${NC}"
+  echo -e "${GREEN}╚════════════════════════════════════════════════════════════╝${NC}"
+  echo ""
+  echo -e "   Project: ${CYAN}$TARGET_PATH${NC}"
+  echo -e "   Version: ${YELLOW}$CURRENT_VERSION${NC} → ${GREEN}$DOCFLOW_VERSION${NC}"
+  echo ""
+  echo -e "${YELLOW}What's new in $DOCFLOW_VERSION:${NC}"
+  echo "   • Priority/dependency workflow in setup and refine"
+  echo "   • Smart 'what's next' recommendations in /activate"
+  echo "   • Mandatory assignment for In Progress state"
+  echo "   • Project updates required on /wrap-session"
+  echo ""
+  
+  exit 0
+fi
+
+# =====================================================
+# DETECT SCENARIO (Non-update mode)
 # =====================================================
 
 # If no install mode set, ask what user wants to do
@@ -155,6 +470,20 @@ if [ "$INSTALL_MODE" == "existing" ]; then
   echo ""
   echo -e "${YELLOW}📂 Analyzing project: ${CYAN}$TARGET_PATH${NC}"
   echo ""
+  
+  # Check if already has DocFlow Cloud - suggest update mode
+  if [ -f "$TARGET_PATH/.docflow/version" ]; then
+    CURRENT_VERSION=$(cat "$TARGET_PATH/.docflow/version" | tr -d '[:space:]')
+    echo -e "   ${BLUE}Found: DocFlow Cloud v$CURRENT_VERSION${NC}"
+    echo ""
+    echo -e "   ${YELLOW}💡 TIP: Use --update flag for smarter updates:${NC}"
+    echo "      curl -sSL [URL] | bash -s -- --update --path $TARGET_PATH"
+    echo ""
+    read -p "   Continue with full reinstall anyway? (y/n): " CONTINUE_INSTALL
+    if [[ ! $CONTINUE_INSTALL =~ ^[Yy]$ ]]; then
+      exit 0
+    fi
+  fi
   
   # Detect current state
   HAS_DOCFLOW=false
@@ -311,27 +640,13 @@ fi
 cd "$TARGET_PATH"
 
 # =====================================================
-# DOWNLOAD FUNCTION
+# DOWNLOAD FUNCTION (using RAW_BASE)
 # =====================================================
-download_file() {
+download_template_file() {
   local source="$1"
   local dest="$2"
   mkdir -p "$(dirname "$dest")"
-  
-  if command -v curl &> /dev/null; then
-    curl -sSL "${RAW_BASE}/${source}" -o "$dest" 2>/dev/null || {
-      echo -e "${RED}❌ Failed to download: $source${NC}"
-      return 1
-    }
-  elif command -v wget &> /dev/null; then
-    wget -q "${RAW_BASE}/${source}" -O "$dest" 2>/dev/null || {
-      echo -e "${RED}❌ Failed to download: $source${NC}"
-      return 1
-    }
-  else
-    echo -e "${RED}❌ Error: curl or wget required${NC}"
-    exit 1
-  fi
+  download_file "${RAW_BASE}/${source}" "$dest"
 }
 
 echo ""
@@ -345,27 +660,14 @@ echo "   [1/7] Installing Cursor rules..."
 
 if [ "$MODE" == "cloud" ]; then
   # New folder-based rules structure
-  mkdir -p .cursor/rules/docflow-core
-  mkdir -p .cursor/rules/session-awareness
-  mkdir -p .cursor/rules/pm-agent
-  mkdir -p .cursor/rules/implementation-agent
-  mkdir -p .cursor/rules/qe-agent
-  mkdir -p .cursor/rules/linear-integration
-  mkdir -p .cursor/rules/figma-integration
-  mkdir -p .cursor/rules/templates
-  
-  download_file ".cursor/rules/docflow-core/RULE.md" ".cursor/rules/docflow-core/RULE.md"
-  download_file ".cursor/rules/session-awareness/RULE.md" ".cursor/rules/session-awareness/RULE.md"
-  download_file ".cursor/rules/pm-agent/RULE.md" ".cursor/rules/pm-agent/RULE.md"
-  download_file ".cursor/rules/implementation-agent/RULE.md" ".cursor/rules/implementation-agent/RULE.md"
-  download_file ".cursor/rules/qe-agent/RULE.md" ".cursor/rules/qe-agent/RULE.md"
-  download_file ".cursor/rules/linear-integration/RULE.md" ".cursor/rules/linear-integration/RULE.md"
-  download_file ".cursor/rules/figma-integration/RULE.md" ".cursor/rules/figma-integration/RULE.md"
-  download_file ".cursor/rules/templates/RULE.md" ".cursor/rules/templates/RULE.md"
+  for rule_dir in docflow-core session-awareness pm-agent implementation-agent qe-agent linear-integration figma-integration templates; do
+    mkdir -p ".cursor/rules/${rule_dir}"
+    download_template_file ".cursor/rules/${rule_dir}/RULE.md" ".cursor/rules/${rule_dir}/RULE.md"
+  done
 else
   # Local mode uses single rule file (for now)
   mkdir -p .cursor/rules
-  download_file ".cursor/rules/docflow.mdc" ".cursor/rules/docflow.mdc"
+  download_template_file ".cursor/rules/docflow.mdc" ".cursor/rules/docflow.mdc"
 fi
 
 echo "   [2/7] Installing commands..."
@@ -373,13 +675,13 @@ mkdir -p .cursor/commands
 
 # Commands - common to both modes
 for cmd in start-session wrap-session capture review activate implement validate close block status docflow-setup; do
-  download_file ".cursor/commands/${cmd}.md" ".cursor/commands/${cmd}.md"
+  download_template_file ".cursor/commands/${cmd}.md" ".cursor/commands/${cmd}.md"
 done
 
 # Cloud-specific commands
 if [ "$MODE" == "cloud" ]; then
   for cmd in docflow-update sync-project project-update attach refine; do
-    download_file ".cursor/commands/${cmd}.md" ".cursor/commands/${cmd}.md"
+    download_template_file ".cursor/commands/${cmd}.md" ".cursor/commands/${cmd}.md"
   done
 fi
 
@@ -387,11 +689,11 @@ fi
 echo "   [3/7] Installing platform adapters..."
 mkdir -p .claude/commands .warp .github
 
-download_file ".claude/rules.md" ".claude/rules.md"
-download_file ".warp/rules.md" ".warp/rules.md"
-download_file ".github/copilot-instructions.md" ".github/copilot-instructions.md"
-download_file "AGENTS.md" "AGENTS.md"
-download_file "WARP.md" "WARP.md"
+download_template_file ".claude/rules.md" ".claude/rules.md"
+download_template_file ".warp/rules.md" ".warp/rules.md"
+download_template_file ".github/copilot-instructions.md" ".github/copilot-instructions.md"
+download_template_file "AGENTS.md" "AGENTS.md"
+download_template_file "WARP.md" "WARP.md"
 
 # Create Claude command symlinks
 echo "   Creating Claude command symlinks..."
@@ -411,44 +713,33 @@ cd ../..
 # =====================================================
 if [ "$MODE" == "cloud" ]; then
   echo "   [4/7] Installing .docflow/ framework..."
-  mkdir -p .docflow/templates
-  mkdir -p .docflow/rules
-  mkdir -p .docflow/scripts
-  mkdir -p .docflow/skills/linear-workflow
-  mkdir -p .docflow/skills/spec-templates
-  mkdir -p .docflow/skills/docflow-commands
+  mkdir -p .docflow/templates .docflow/rules .docflow/scripts
+  mkdir -p .docflow/skills/linear-workflow .docflow/skills/spec-templates .docflow/skills/docflow-commands
   
   # Download config, version
-  download_file ".docflow/config.json" ".docflow/config.json"
-  download_file ".docflow/version" ".docflow/version"
+  download_template_file ".docflow/config.json" ".docflow/config.json"
+  download_template_file ".docflow/version" ".docflow/version"
   
   # Download templates
-  download_file ".docflow/templates/README.md" ".docflow/templates/README.md"
-  download_file ".docflow/templates/feature.md" ".docflow/templates/feature.md"
-  download_file ".docflow/templates/bug.md" ".docflow/templates/bug.md"
-  download_file ".docflow/templates/chore.md" ".docflow/templates/chore.md"
-  download_file ".docflow/templates/idea.md" ".docflow/templates/idea.md"
-  download_file ".docflow/templates/quick-capture.md" ".docflow/templates/quick-capture.md"
+  for template in README feature bug chore idea quick-capture; do
+    download_template_file ".docflow/templates/${template}.md" ".docflow/templates/${template}.md"
+  done
   
   # Download rules
-  download_file ".docflow/rules/core.md" ".docflow/rules/core.md"
-  download_file ".docflow/rules/linear-integration.md" ".docflow/rules/linear-integration.md"
-  download_file ".docflow/rules/pm-agent.md" ".docflow/rules/pm-agent.md"
-  download_file ".docflow/rules/implementation-agent.md" ".docflow/rules/implementation-agent.md"
-  download_file ".docflow/rules/qe-agent.md" ".docflow/rules/qe-agent.md"
-  download_file ".docflow/rules/figma-integration.md" ".docflow/rules/figma-integration.md"
-  download_file ".docflow/rules/session-awareness.md" ".docflow/rules/session-awareness.md"
+  for rule in core linear-integration pm-agent implementation-agent qe-agent figma-integration session-awareness; do
+    download_template_file ".docflow/rules/${rule}.md" ".docflow/rules/${rule}.md"
+  done
   
   # Download scripts
-  download_file ".docflow/scripts/status-summary.sh" ".docflow/scripts/status-summary.sh"
-  download_file ".docflow/scripts/session-context.sh" ".docflow/scripts/session-context.sh"
-  download_file ".docflow/scripts/stale-check.sh" ".docflow/scripts/stale-check.sh"
+  for script in status-summary session-context stale-check; do
+    download_template_file ".docflow/scripts/${script}.sh" ".docflow/scripts/${script}.sh"
+  done
   chmod +x .docflow/scripts/*.sh
   
   # Download skills
-  download_file ".docflow/skills/linear-workflow/SKILL.md" ".docflow/skills/linear-workflow/SKILL.md"
-  download_file ".docflow/skills/spec-templates/SKILL.md" ".docflow/skills/spec-templates/SKILL.md"
-  download_file ".docflow/skills/docflow-commands/SKILL.md" ".docflow/skills/docflow-commands/SKILL.md"
+  download_template_file ".docflow/skills/linear-workflow/SKILL.md" ".docflow/skills/linear-workflow/SKILL.md"
+  download_template_file ".docflow/skills/spec-templates/SKILL.md" ".docflow/skills/spec-templates/SKILL.md"
+  download_template_file ".docflow/skills/docflow-commands/SKILL.md" ".docflow/skills/docflow-commands/SKILL.md"
   
   # Update content path in config if customized
   if [ "$CONTENT_FOLDER" != "docflow" ]; then
@@ -463,13 +754,11 @@ if [ "$MODE" == "cloud" ]; then
     echo ""
     echo -e "   ${YELLOW}Found old .docflow.json - migrating settings...${NC}"
     
-    # Extract teamId and projectId from old config
     if command -v python3 &> /dev/null; then
       OLD_TEAM_ID=$(python3 -c "import json; d=json.load(open('.docflow.json')); print(d.get('provider',{}).get('teamId',''))" 2>/dev/null)
       OLD_PROJECT_ID=$(python3 -c "import json; d=json.load(open('.docflow.json')); print(d.get('provider',{}).get('projectId',''))" 2>/dev/null)
       
       if [ -n "$OLD_TEAM_ID" ] && [ "$OLD_TEAM_ID" != "None" ]; then
-        # Update new config with old values
         python3 -c "
 import json
 with open('.docflow/config.json', 'r') as f:
@@ -503,7 +792,7 @@ mkdir -p "${CONTENT_FOLDER}/knowledge/{decisions,features,notes,product}"
 echo "   [6/7] Installing context templates..."
 for ctx in overview stack standards; do
   if [ ! -f "${CONTENT_FOLDER}/context/${ctx}.md" ] || [ ! -s "${CONTENT_FOLDER}/context/${ctx}.md" ]; then
-    download_file "docflow/context/${ctx}.md" "${CONTENT_FOLDER}/context/${ctx}.md"
+    download_template_file "docflow/context/${ctx}.md" "${CONTENT_FOLDER}/context/${ctx}.md"
   else
     echo "      ⏭ Preserving existing ${ctx}.md"
   fi
@@ -512,31 +801,31 @@ done
 # Knowledge base files - only install if they don't exist
 echo "   [7/7] Installing documentation..."
 if [ ! -f "${CONTENT_FOLDER}/knowledge/INDEX.md" ]; then
-  download_file "docflow/knowledge/INDEX.md" "${CONTENT_FOLDER}/knowledge/INDEX.md"
+  download_template_file "docflow/knowledge/INDEX.md" "${CONTENT_FOLDER}/knowledge/INDEX.md"
 fi
 if [ ! -f "${CONTENT_FOLDER}/knowledge/README.md" ]; then
-  download_file "docflow/knowledge/README.md" "${CONTENT_FOLDER}/knowledge/README.md"
+  download_template_file "docflow/knowledge/README.md" "${CONTENT_FOLDER}/knowledge/README.md"
 fi
 if [ ! -f "${CONTENT_FOLDER}/knowledge/product/personas.md" ]; then
-  download_file "docflow/knowledge/product/personas.md" "${CONTENT_FOLDER}/knowledge/product/personas.md"
+  download_template_file "docflow/knowledge/product/personas.md" "${CONTENT_FOLDER}/knowledge/product/personas.md"
 fi
 if [ ! -f "${CONTENT_FOLDER}/knowledge/product/user-flows.md" ]; then
-  download_file "docflow/knowledge/product/user-flows.md" "${CONTENT_FOLDER}/knowledge/product/user-flows.md"
+  download_template_file "docflow/knowledge/product/user-flows.md" "${CONTENT_FOLDER}/knowledge/product/user-flows.md"
 fi
-download_file "docflow/README.md" "${CONTENT_FOLDER}/README.md"
+download_template_file "docflow/README.md" "${CONTENT_FOLDER}/README.md"
 
 # Local-specific files
 if [ "$MODE" == "local" ]; then
   if [ ! -f "docflow/ACTIVE.md" ]; then
-    download_file "docflow/ACTIVE.md" "docflow/ACTIVE.md"
+    download_template_file "docflow/ACTIVE.md" "docflow/ACTIVE.md"
   fi
   if [ ! -f "docflow/INDEX.md" ]; then
-    download_file "docflow/INDEX.md" "docflow/INDEX.md"
+    download_template_file "docflow/INDEX.md" "docflow/INDEX.md"
   fi
   
   # Spec templates
   for template in feature bug chore idea README; do
-    download_file "docflow/specs/templates/${template}.md" "docflow/specs/templates/${template}.md"
+    download_template_file "docflow/specs/templates/${template}.md" "docflow/specs/templates/${template}.md"
   done
 fi
 
@@ -588,7 +877,6 @@ EOF
       echo ""
       
       if [ -n "$LINEAR_KEY" ]; then
-        # Update the .env file with the key
         if [[ "$OSTYPE" == "darwin"* ]]; then
           sed -i '' "s/^LINEAR_API_KEY=.*/LINEAR_API_KEY=${LINEAR_KEY}/" .env
         else
@@ -610,11 +898,9 @@ fi
 echo ""
 echo "   Updating .gitignore..."
 
-# Entries to add
 GITIGNORE_ADDITIONS=""
 
 if [ "$MODE" == "cloud" ]; then
-  # Check if entries exist
   if [ -f ".gitignore" ]; then
     if ! grep -q "^\.env$" ".gitignore" 2>/dev/null; then
       GITIGNORE_ADDITIONS="${GITIGNORE_ADDITIONS}
@@ -638,7 +924,6 @@ ${CONTENT_FOLDER}/specs-archived*"
       echo "   ⏭ .gitignore already configured"
     fi
   else
-    # Create new .gitignore
     cat > .gitignore << EOF
 # Dependencies
 node_modules/
@@ -676,7 +961,6 @@ EOF
     echo "   ✓ .gitignore created"
   fi
 else
-  # Local mode - simpler .gitignore
   if [ ! -f ".gitignore" ]; then
     cat > .gitignore << 'EOF'
 # Dependencies
@@ -810,6 +1094,9 @@ if [ "$MODE" == "cloud" ]; then
     echo "   • Help fill out project context"
     echo "   • Create initial issues in Linear"
   fi
+  echo ""
+  echo -e "   ${YELLOW}💡 Future updates:${NC}"
+  echo "      curl -sSL [URL] | bash -s -- --update --path $TARGET_PATH"
   echo ""
   echo -e "   ${YELLOW}💡 TIP:${NC} Install Linear MCP in Cursor for best experience:"
   echo "      Cursor Settings → Features → MCP → Add:"
