@@ -40,3 +40,4 @@ Update these templates as your workflow evolves:
 - Improve agent instructions based on what works
 
 Changes here apply to all future issues.
+
