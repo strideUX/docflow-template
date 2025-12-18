@@ -1,227 +1,56 @@
 # DocFlow Cloud for Warp
 
-This project uses **DocFlow Cloud**, a spec-driven development workflow with Linear integration.
+This project uses **DocFlow Cloud** with Linear integration.
 
-**For complete rules:** Read `.cursor/rules/docflow.mdc`  
-**For configuration:** Read `.docflow/config.json`  
-**For Warp adapter:** Read `.warp/rules.md`
-
----
-
-## 🚀 Quick Start for Warp Users
-
-### 1. Check Configuration
-```bash
-# Get paths and provider settings
-cat .docflow/config.json
-```
-
-The `paths.content` value tells you where context/knowledge folders are (default: "docflow").
-
-### 2. Check Current State
-```bash
-# Quick context check (adjust path if paths.content differs)
-cat docflow/context/overview.md | head -20
-
-# Check Linear status (via CLI if installed)
-# Or ask Warp AI: "What's the current status in Linear?"
-```
-
-### 3. Understand the Three-Agent Model
-
-| Agent | Role | Best Tool |
-|-------|------|-----------|
-| **PM/Planning** | Orchestration, planning, closing | Cursor, Claude |
-| **Implementation** | Building features, fixing bugs | Warp, Cursor |
-| **QE/Validation** | Testing with user | Cursor, Claude |
-
-**Warp excels at Implementation Agent work** - direct terminal access, fast builds, efficient operations.
-
-### 4. Work with Warp AI
-
-When using Warp's AI assistant:
-- Say: "Read .warp/rules.md for project workflow"
-- Check: "Read .docflow/config.json for configuration"
-- Reference: "Check Linear for current issues"
-- For commands: "Follow .cursor/commands/implement.md"
+**For complete rules:** See `.docflow/rules/`  
+**For configuration:** See `.docflow/config.json`  
+**For Warp adapter:** See `.warp/rules.md`
 
 ---
 
-## 📋 Available Commands
-
-DocFlow uses slash commands. In Warp, describe the command behavior to the AI or reference the command file.
-
-### PM/Planning Agent
-| Command | Purpose | Warp Usage |
-|---------|---------|------------|
-| `/start-session` | Begin session, check Linear | "Run start-session workflow" |
-| `/capture` | Create Linear issue | "Capture this as a feature/bug/chore" |
-| `/refine` | Triage or refine issue | "Refine LIN-XXX" |
-| `/activate` | Ready for implementation | "Activate LIN-XXX" |
-| `/close` | Archive completed work | "Close LIN-XXX" |
-| `/wrap-session` | End session, save state | "Wrap up the session" |
-
-### Implementation Agent
-| Command | Purpose | Warp Usage |
-|---------|---------|------------|
-| `/implement` | Pick up and build | "Implement LIN-XXX" |
-| `/block` | Document blocker | "I'm blocked on this" |
-
-### QE/Validation Agent
-| Command | Purpose | Warp Usage |
-|---------|---------|------------|
-| `/validate` | Test and validate | "Validate LIN-XXX" |
-
-### All Agents
-| Command | Purpose | Warp Usage |
-|---------|---------|------------|
-| `/status` | Check Linear state | "What's the current status?" |
-| `/docflow-update` | Sync rules | "Update docflow" |
-
----
-
-## 📁 Directory Structure
-
-```
-project/
-├── .docflow/                    # Framework (updatable)
-│   ├── config.json              # Configuration
-│   ├── version                  # Version for upgrades
-│   └── templates/               # Issue templates
-│
-├── .cursor/
-│   ├── rules/docflow.mdc       # Workflow rules
-│   └── commands/               # Slash commands
-│
-├── {paths.content}/            # Project content (default: "docflow")
-│   ├── context/                # Project understanding (LOCAL)
-│   │   ├── overview.md
-│   │   ├── stack.md
-│   │   └── standards.md
-│   └── knowledge/              # Project knowledge (LOCAL)
-│       ├── INDEX.md
-│       ├── decisions/
-│       ├── features/
-│       └── notes/
-│
-└── AGENTS.md                   # Agent instructions
-
-LINEAR (Cloud):
-├── Issues                      # All specs live here
-├── Workflow States             # BACKLOG → DONE
-├── Comments                    # Decision log, impl notes
-└── Attachments                 # Figma, screenshots
-```
-
----
-
-## ⚡ Workflow States (in Linear)
-
-**Features & Bugs (Full Workflow):**
-```
-Backlog → Todo → In Progress → In Review → QA → Done
-```
-
-**Chores & Ideas (Simplified):**
-```
-Backlog → In Progress → Done
-```
-
----
-
-## ⚠️ Key Differences from Local DocFlow
-
-| Local Version | Cloud Version |
-|---------------|---------------|
-| Specs in `{paths.content}/specs/` | Specs in **Linear** |
-| `INDEX.md` for inventory | **Linear issue list** |
-| `ACTIVE.md` for status | **Linear "In Progress"** |
-| File moves for workflow | **Linear state changes** |
-| Local markdown | **Linear comments** |
-
-**What stays local:**
-- `{paths.content}/context/` - Project understanding
-- `{paths.content}/knowledge/` - ADRs, feature docs, notes
-- `.docflow/` - Configuration and templates
-- Rules and commands
-
----
-
-## 🛠️ Suggested Shell Aliases
-
-Add these to your `.zshrc` or `.bashrc`:
+## Quick Start
 
 ```bash
-# DocFlow Navigation (adjust path if paths.content differs)
-alias df-config='cat .docflow/config.json'
-alias df-context='cat docflow/context/overview.md'
-alias df-stack='cat docflow/context/stack.md'
-alias df-standards='cat docflow/context/standards.md'
-alias df-knowledge='cat docflow/knowledge/INDEX.md'
-
-# Quick context check
-df-status() {
-  echo "=== Configuration ==="
-  cat .docflow/config.json | head -10
-  echo "\n=== Project Overview ==="
-  head -20 docflow/context/overview.md
-  echo "\n=== Check Linear for current work ==="
-}
-
-# Open Linear (macOS)
-alias df-linear='open "https://linear.app"'
-```
-
----
-
-## 💡 Tips for Warp with Linear
-
-### Terminal Workflow
-```bash
-# View configuration
+# Check configuration
 cat .docflow/config.json
 
-# View local context (adjust path if needed)
-cat docflow/context/stack.md
-
-# Search knowledge
-grep -r "authentication" docflow/knowledge/
-
-# View issue templates
-ls .docflow/templates/
+# View context (adjust path per config)
+cat docflow/context/overview.md
 ```
 
-### Working with Warp AI
-- Keep conversations focused (fresh threads for each issue)
-- Reference Linear issue IDs: "Working on LIN-123"
-- Ask AI to query Linear: "What issues are in progress?"
+---
 
-### Best For
-- ✅ Implementation work (builds, tests, git)
-- ✅ Reading local context
-- ✅ File operations
-- ✅ Terminal-heavy workflows
+## Warp Excels At
 
-### Consider Cursor/Claude For
-- Extended planning sessions
-- Iterative QE testing with user
-- Figma design integration
-- Complex Linear operations
+- **Implementation work** - Direct terminal access
+- **Fast builds and tests** - Efficient operations
+- **File operations** - Quick context reading
 
 ---
 
-## 🔗 Related Files
+## Commands
 
-| File | Purpose |
-|------|---------|
-| `.docflow/config.json` | Configuration (paths, provider) |
-| `.docflow/templates/` | Issue templates |
-| `.cursor/rules/docflow.mdc` | Complete rules (source of truth) |
-| `.warp/rules.md` | Warp adapter rules |
-| `.claude/rules.md` | Claude adapter rules |
-| `AGENTS.md` | Universal AI instructions |
-| `.cursor/commands/` | Detailed command specs |
+| Command | Purpose |
+|---------|---------|
+| `/start-session` | Begin session |
+| `/implement [issue]` | Build feature |
+| `/status` | Quick status check |
+| `/block` | Document blocker |
+
+See `.cursor/commands/` for full specs.
 
 ---
 
-**DocFlow Cloud works great in Warp!** 🎉
+## Directory Structure
+
+```
+.docflow/           # Framework (rules, templates, skills)
+{paths.content}/    # Project content (context, knowledge)
+.cursor/            # Cursor integration (rules, commands)
+```
+
+**Specs live in Linear, not local files.**
+
+---
+
+*DocFlow Cloud works great in Warp!*

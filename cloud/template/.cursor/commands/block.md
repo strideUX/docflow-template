@@ -1,190 +1,32 @@
 # Block (Implementation Agent)
 
-## Overview
-Move an issue to Blocked status when implementation cannot proceed due to a dependency, needed feedback, or decision.
-
-**Agent Role:** Implementation Agent (builder)  
-**Frequency:** When implementation cannot proceed
-
----
+Move an issue to Blocked status when implementation cannot proceed.
 
 ## Steps
 
-### 1. **Identify Current Issue**
+1. **Identify Issue** - Current in-progress work
+2. **Gather Details** - What's blocking, what's needed
+3. **Move to Blocked** - Update Linear state
+4. **Link Dependency** - If blocked by another issue
+5. **Add Comment** - `**Blocked** — [What's blocking]. Needs: [what's needed].`
+6. **Notify** - Tag relevant people
 
-Check what's currently being worked on:
-- Query Linear for issues assigned to current user in "In Progress" or "In Review" state
-- Or use issue from recent context
-
-### 2. **Gather Blocker Details**
-
-Ask user (or infer from context):
-- What specifically is blocking progress?
-- What's needed to unblock?
-- Who needs to help? (PM decision, external dependency, etc.)
-
-### 3. **Move to Blocked State**
-
-Update issue status to Blocked:
-
-```typescript
-updateIssue(issueId, {
-  stateId: config.linear.states.BLOCKED
-})
-```
-
-### 4. **Document Blocker in Linear**
-
-Add blocker comment:
-
-```typescript
-addComment(issueId, {
-  body: '**Blocked** — [What is blocking]. Needs: [what is needed to unblock].'
-})
-```
-
-For complex blockers, can expand:
-```markdown
-**Blocked** — [Brief description of blocker].
-
-**Needs to unblock:**
-- [What's needed 1]
-- [What's needed 2]
-
-**Who can help:** @[person]
-```
-
-### 4b. **Link Dependencies (If Blocked by Another Issue)**
-
-If blocked by another Linear issue, create a formal dependency:
-
-```typescript
-// Via Linear MCP or GraphQL
-updateIssue(issueId, {
-  blockedByIssueIds: ["blocking-issue-id"]  // LIN-XXX
-})
-```
-
-**The blocker comment should reference the blocking issue:**
-```markdown
-**Blocked** — Waiting on API endpoint implementation.
-
-**Blocked by:** LIN-250 (API: User preferences endpoint)
-**Status of blocker:** In Progress (@cory)
-
-Will resume once LIN-250 is complete.
-```
-
-**This creates a trackable dependency that shows in dashboards.**
-
-### 5. **Notify Relevant People (Optional)**
-
-If someone specific needs to help, add them as a subscriber so they get notified:
-
-```bash
-# Via GraphQL API (LINEAR_API_KEY required)
-source .env && curl -s -X POST https://api.linear.app/graphql \
-  -H "Authorization: $LINEAR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "mutation { issueUpdate(id: \"ISSUE_ID\", input: { subscriberIds: [\"USER_ID\"] }) { success } }"
-  }'
-```
-
-**This ensures they get notifications for all updates on the issue.**
-
-To find user IDs:
-```typescript
-// Via MCP
-list_users({ query: "cory" })  // Returns user ID
-```
-
-### 6. **Confirmation**
+## Comment Format
 
 ```markdown
-🚫 Issue blocked: LIN-XXX
-
-**Issue:** [Title]
-**Blocker:** [Brief description]
-**Status:** Blocked
+**Blocked** — [Brief description].
 **Needs:** [What's needed to unblock]
-
-I've moved this to Blocked status and tagged relevant people in Linear.
-
-**What you can do:**
-1. Work on a different issue: `/status`
-2. Wait for help on this blocker
-3. When unblocked: `/implement LIN-XXX` to resume
+**Blocked by:** LIN-XXX (if applicable)
 ```
 
----
+## Resuming
 
-## Common Blocker Types
-
-**Technical Blocker:**
-- Missing API/dependency → **Link the blocking issue if it exists**
-- Architecture decision needed
-- Performance issue
-
-**Requirements Blocker:**
-- Unclear acceptance criteria
-- Conflicting requirements
-- Missing design → **Link to design task if it exists**
-
-**External Blocker:**
-- Waiting on third party
-- Access/permissions needed
-- Environment issue
-
-**Dependency Blocker:**
-- Another issue must complete first → **Always link the blocking issue**
-- Creates trackable relationship in Linear
-- Shows in dependency views and `/status` dashboards
-
----
-
-## Resuming from Blocked
-
-When the blocker is resolved, use `/implement LIN-XXX` to:
-1. Move issue back to "In Progress"
-2. Add unblock comment: `**Unblocked** — [What resolved the blocker].`
-3. Resume implementation
-
----
-
-## Context to Load
-- Current Linear issue
-- Implementation notes so far
-- Minimal - focus on documenting blocker
-
----
+When unblocked, run `/implement` to move back to In Progress.
 
 ## Natural Language Triggers
-User might say:
-- "I'm blocked" / "this is blocked"
-- "can't proceed" / "need help"
-- "stuck on this" / "hit a wall"
-- "need PM input"
-- "waiting on [something]"
 
-**Run this command when detected.**
+- "I'm blocked" / "can't proceed" / "stuck on this"
 
----
+## Full Rules
 
-## Outputs
-- Issue moved to Blocked state in Linear
-- Blocker documented in Linear comment
-- Relevant people tagged/subscribed
-- User informed of options and how to resume
-
----
-
-## Checklist
-- [ ] Identified current issue
-- [ ] Gathered blocker details
-- [ ] Moved issue to Blocked state
-- [ ] Linked blocking issue (if dependency blocker)
-- [ ] Added detailed blocker comment to Linear (with issue link if applicable)
-- [ ] Tagged/subscribed relevant people
-- [ ] Provided next step options (including how to resume)
-
+See `.docflow/rules/implementation-agent.md`
