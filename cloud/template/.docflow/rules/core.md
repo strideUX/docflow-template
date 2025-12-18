@@ -1,6 +1,6 @@
 # DocFlow Cloud Core Rules
 
-> Version: 4.0.0
+> Version: 4.0.0 | Updated: 2024-12
 > These are essential rules loaded on every interaction.
 
 ## Overview
