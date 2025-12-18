@@ -540,10 +540,39 @@ FIGMA_ACCESS_TOKEN=
 EOF
   echo "   ✓ .env.example created"
 
-  # Create .env if it doesn't exist
+  # Create .env and optionally add API key
   if [ ! -f ".env" ]; then
     cp .env.example .env
-    echo "   ✓ .env created (add your API key)"
+    echo "   ✓ .env created"
+    
+    echo ""
+    echo -e "${YELLOW}🔑 Linear API Key Setup${NC}"
+    echo ""
+    echo "   Would you like to add your Linear API key now?"
+    echo "   (Get from: Linear → Settings → API → Personal API Keys)"
+    echo ""
+    read -p "   Add API key now? (y/n): " ADD_KEY
+    
+    if [[ $ADD_KEY =~ ^[Yy]$ ]]; then
+      echo ""
+      echo "   Paste your Linear API key (input hidden for security):"
+      read -s LINEAR_KEY
+      echo ""
+      
+      if [ -n "$LINEAR_KEY" ]; then
+        # Update the .env file with the key
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+          sed -i '' "s/^LINEAR_API_KEY=.*/LINEAR_API_KEY=${LINEAR_KEY}/" .env
+        else
+          sed -i "s/^LINEAR_API_KEY=.*/LINEAR_API_KEY=${LINEAR_KEY}/" .env
+        fi
+        echo -e "   ${GREEN}✓ API key saved to .env${NC}"
+      else
+        echo "   ⏭ No key entered, you can add it later"
+      fi
+    else
+      echo "   ⏭ Skipped - add your key to .env before running /docflow-setup"
+    fi
   else
     echo "   ⏭ .env already exists"
   fi
