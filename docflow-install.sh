@@ -20,7 +20,7 @@
 
 set -e
 
-DOCFLOW_VERSION="4.2.0"
+DOCFLOW_VERSION="4.2.1"
 RAW_BASE_LOCAL="https://raw.githubusercontent.com/strideUX/docflow-template/main/local/template"
 RAW_BASE_CLOUD="https://raw.githubusercontent.com/strideUX/docflow-template/main/cloud/template"
 RAW_BASE_ROOT="https://raw.githubusercontent.com/strideUX/docflow-template/main"

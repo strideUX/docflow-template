@@ -1,0 +1,30 @@
+{
+  "version": "4.2.1",
+  "date": "2025-12-18",
+  "description": "Milestone API instructions made explicitly actionable",
+  
+  "changes": {
+    "fixes": [
+      {
+        "description": "Made milestone API instructions explicitly actionable so agents execute curl commands instead of suggesting manual creation",
+        "files": [
+          ".docflow/rules/linear-integration.md",
+          ".docflow/rules/pm-agent.md",
+          ".docflow/skills/linear-workflow/SKILL.md"
+        ]
+      }
+    ]
+  },
+  
+  "files_modified": [
+    ".docflow/rules/linear-integration.md",
+    ".docflow/rules/pm-agent.md",
+    ".docflow/skills/linear-workflow/SKILL.md"
+  ],
+  
+  "upgrade_notes": [
+    "Agents will now execute curl commands directly for milestone operations",
+    "Linear MCP limitation explicitly stated in rules",
+    "No configuration changes required"
+  ]
+}

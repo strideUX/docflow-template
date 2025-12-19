@@ -252,14 +252,23 @@ Read `.docflow/config.json` for:
 
 ## Milestones
 
-**Note:** Linear MCP has limited milestone support. Use direct API calls for full functionality.
+**Linear MCP does NOT support milestones. YOU MUST use direct API calls.**
+
+When the user asks to create, query, or assign milestones, **execute these shell commands directly**.
+
+### Setup (Run First)
+
+```bash
+# Get credentials - run this before any milestone operation
+LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
+PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+```
 
 ### Query Project Milestones
 
-```bash
-LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
-PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+**Execute this to list existing milestones:**
 
+```bash
 curl -s -X POST https://api.linear.app/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: $LINEAR_API_KEY" \
@@ -271,6 +280,8 @@ curl -s -X POST https://api.linear.app/graphql \
 
 ### Create Milestone
 
+**Execute this to create a new milestone (substitute values):**
+
 ```bash
 curl -s -X POST https://api.linear.app/graphql \
   -H "Content-Type: application/json" \
@@ -279,15 +290,40 @@ curl -s -X POST https://api.linear.app/graphql \
     "query": "mutation($projectId: String!, $name: String!, $description: String, $targetDate: TimelessDate) { projectMilestoneCreate(input: { projectId: $projectId, name: $name, description: $description, targetDate: $targetDate }) { success projectMilestone { id name } } }",
     "variables": {
       "projectId": "'"$PROJECT_ID"'",
-      "name": "Phase 1: Foundation",
-      "description": "Core infrastructure and setup",
-      "targetDate": "2025-01-15"
+      "name": "MILESTONE_NAME_HERE",
+      "description": "DESCRIPTION_HERE",
+      "targetDate": "YYYY-MM-DD"
     }
+  }'
+```
+
+**Example:** Create "Testing & Deployment" milestone:
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{
+    "query": "mutation($projectId: String!, $name: String!) { projectMilestoneCreate(input: { projectId: $projectId, name: $name }) { success projectMilestone { id name } } }",
+    "variables": { "projectId": "'"$PROJECT_ID"'", "name": "Testing & Deployment" }
   }'
 ```
 
 ### Assign Issue to Milestone
 
+**Execute this to move an issue to a milestone:**
+
+First, get the issue ID (from Linear MCP or issue identifier like "PLA-123"):
+```bash
+# If you have the issue identifier, query for UUID first
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{
+    "query": "query { issue(id: \"PLA-123\") { id title } }"
+  }'
+```
+
+Then assign to milestone:
 ```bash
 curl -s -X POST https://api.linear.app/graphql \
   -H "Content-Type: application/json" \
@@ -295,8 +331,8 @@ curl -s -X POST https://api.linear.app/graphql \
   -d '{
     "query": "mutation($issueId: String!, $milestoneId: String!) { issueUpdate(id: $issueId, input: { projectMilestoneId: $milestoneId }) { success } }",
     "variables": {
-      "issueId": "issue-uuid",
-      "milestoneId": "milestone-uuid"
+      "issueId": "ISSUE_UUID_HERE",
+      "milestoneId": "MILESTONE_UUID_HERE"
     }
   }'
 ```

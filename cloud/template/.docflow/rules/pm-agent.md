@@ -49,13 +49,25 @@ The PM/Planning Agent orchestrates workflow:
 
 ### Phase 3: Milestones
 
-1. **Query existing milestones** via API (MCP doesn't fully support)
+**Linear MCP does NOT support milestones. Execute shell commands directly.**
+
+1. **Query existing milestones** - Execute curl command from `linear-integration.md`
 2. **If milestones exist:** Ask if user wants to use them
 3. **If no milestones:** Offer to create phases:
    - Help user define 2-4 project phases
    - Each phase: name, description, target date
-   - Create via API
+   - **Execute curl command to create each milestone**
 4. **Store milestone IDs** for use during backlog creation
+
+**To create a milestone, EXECUTE:**
+```bash
+LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
+PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "mutation($projectId: String!, $name: String!) { projectMilestoneCreate(input: { projectId: $projectId, name: $name }) { success projectMilestone { id name } } }", "variables": {"projectId": "'"$PROJECT_ID"'", "name": "MILESTONE_NAME"}}'
+```
 
 **Thinking in Phases:**
 - Phase 1: Foundation (infrastructure, auth, core setup)

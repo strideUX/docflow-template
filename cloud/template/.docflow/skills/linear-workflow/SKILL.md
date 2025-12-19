@@ -79,23 +79,41 @@ BACKLOG → READY → IMPLEMENTING → REVIEW → TESTING → COMPLETE
 
 ### Milestones
 
-Milestones group issues into project phases.
+**Linear MCP does NOT support milestones. Execute these shell commands directly.**
 
-**Query milestones (API):**
+Milestones group issues into project phases. When asked to work with milestones, **you must execute curl commands**.
+
+**Setup (run first):**
 ```bash
-curl -s -X POST https://api.linear.app/graphql \
-  -H "Authorization: $LINEAR_API_KEY" \
-  -d '{"query": "query($projectId: String!) { project(id: $projectId) { projectMilestones { nodes { id name targetDate } } } }", "variables": {"projectId": "..."}}'
+LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
+PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
 ```
 
-**Assign issue to milestone (API):**
+**Query milestones - EXECUTE THIS:**
 ```bash
 curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
   -H "Authorization: $LINEAR_API_KEY" \
-  -d '{"query": "mutation($issueId: String!, $milestoneId: String!) { issueUpdate(id: $issueId, input: { projectMilestoneId: $milestoneId }) { success } }", "variables": {"issueId": "...", "milestoneId": "..."}}'
+  -d '{"query": "query($projectId: String!) { project(id: $projectId) { projectMilestones { nodes { id name targetDate } } } }", "variables": {"projectId": "'"$PROJECT_ID"'"}}'
 ```
 
-**During capture:** If project has milestones, ask which one to assign.
+**Create milestone - EXECUTE THIS:**
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "mutation($projectId: String!, $name: String!) { projectMilestoneCreate(input: { projectId: $projectId, name: $name }) { success projectMilestone { id name } } }", "variables": {"projectId": "'"$PROJECT_ID"'", "name": "MILESTONE_NAME"}}'
+```
+
+**Assign issue to milestone - EXECUTE THIS:**
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "mutation($issueId: String!, $milestoneId: String!) { issueUpdate(id: $issueId, input: { projectMilestoneId: $milestoneId }) { success } }", "variables": {"issueId": "ISSUE_UUID", "milestoneId": "MILESTONE_UUID"}}'
+```
+
+**During capture:** Query milestones first, ask which one to assign.
 
 ---
 
