@@ -51,18 +51,24 @@ Handles building features, fixing bugs, and implementation work.
 // TODO: Implement block action handlers for review buttons (PLA-123)
 ```
 
-### MCP Call:
+### MCP Call (MUST include projectId):
+```bash
+# First get IDs from config
+TEAM_ID=$(jq -r '.provider.teamId' .docflow/config.json)
+PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+```
+
 ```
 create_issue(
   title: "Implement block action handlers for review buttons",
-  teamId: "[from config]",
-  projectId: "[from config]", 
+  teamId: "[TEAM_ID from config]",      # REQUIRED
+  projectId: "[PROJECT_ID from config]", # REQUIRED - never omit!
   labelIds: ["triage-label-id"],
   description: "From code: `convex/slack/http.ts:45`\n\nNeeded for Slack interactive components."
 )
 ```
 
-**This connects code TODOs to the backlog for proper tracking.**
+**⚠️ Always include projectId - issues without it won't appear in the project!**
 
 ---
 

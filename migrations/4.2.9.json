@@ -1,0 +1,29 @@
+{
+  "version": "4.2.9",
+  "date": "2025-12-18",
+  "description": "Added critical rule: all issues MUST include projectId from config",
+  
+  "changes": {
+    "fixes": [
+      {
+        "description": "Added 'CRITICAL: Always Use Configured Project' section at top of docflow-core/RULE.md. All create_issue calls must include teamId and projectId from .docflow/config.json.",
+        "files": [
+          ".cursor/rules/docflow-core/RULE.md",
+          ".cursor/rules/implementation-agent/RULE.md"
+        ]
+      }
+    ]
+  },
+  
+  "files_modified": [
+    ".cursor/rules/docflow-core/RULE.md",
+    ".cursor/rules/implementation-agent/RULE.md"
+  ],
+  
+  "upgrade_notes": [
+    "All issues now explicitly require projectId",
+    "Config reading example included inline",
+    "Warning added: issues without projectId break tracking",
+    "TODO → Linear example updated to show projectId requirement"
+  ]
+}

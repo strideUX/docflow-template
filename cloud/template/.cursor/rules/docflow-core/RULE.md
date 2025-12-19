@@ -8,6 +8,31 @@ alwaysApply: true
 
 This project uses **DocFlow Cloud**, a spec-driven development workflow with Linear integration.
 
+## 🚨 CRITICAL: Always Use Configured Project
+
+**ALL issues MUST be created within the configured Linear project. Never create issues outside of it.**
+
+### Get Project IDs from Config:
+```bash
+# Read from .docflow/config.json
+TEAM_ID=$(jq -r '.provider.teamId' .docflow/config.json)
+PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+```
+
+### Every create_issue call MUST include:
+```
+create_issue(
+  title: "...",
+  teamId: "[TEAM_ID from config]",      # REQUIRED
+  projectId: "[PROJECT_ID from config]", # REQUIRED - never omit this
+  ...
+)
+```
+
+**If projectId is omitted, the issue won't be in the project. This breaks tracking.**
+
+---
+
 ## ⚠️ CRITICAL: Linear MCP Limitations
 
 **The Linear MCP CANNOT do these operations. You MUST execute curl commands directly:**
