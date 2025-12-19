@@ -1,0 +1,26 @@
+{
+  "version": "4.2.6",
+  "date": "2025-12-18",
+  "description": "Clarified checkbox updates must use update_issue on description, not comments",
+  
+  "changes": {
+    "fixes": [
+      {
+        "description": "Rewrote checkbox instructions to explicitly show WRONG (adding checkmarks in comments) vs CORRECT (updating description field). Added step-by-step process with example MCP calls.",
+        "files": [
+          ".cursor/rules/docflow-core/RULE.md"
+        ]
+      }
+    ]
+  },
+  
+  "files_modified": [
+    ".cursor/rules/docflow-core/RULE.md"
+  ],
+  
+  "upgrade_notes": [
+    "Instructions now explicitly show wrong vs correct approach",
+    "Step-by-step process with get_issue then update_issue",
+    "Agent should no longer put checkmarks in comments"
+  ]
+}
