@@ -20,7 +20,7 @@
 
 set -e
 
-DOCFLOW_VERSION="4.1.0"
+DOCFLOW_VERSION="4.2.0"
 RAW_BASE_LOCAL="https://raw.githubusercontent.com/strideUX/docflow-template/main/local/template"
 RAW_BASE_CLOUD="https://raw.githubusercontent.com/strideUX/docflow-template/main/cloud/template"
 RAW_BASE_ROOT="https://raw.githubusercontent.com/strideUX/docflow-template/main"
@@ -366,10 +366,12 @@ EOF
   echo -e "   Version: ${YELLOW}$CURRENT_VERSION${NC} → ${GREEN}$DOCFLOW_VERSION${NC}"
   echo ""
   echo -e "${YELLOW}What's new in $DOCFLOW_VERSION:${NC}"
-  echo "   • Priority/dependency workflow in setup and refine"
-  echo "   • Smart 'what's next' recommendations in /activate"
+  echo "   • Milestone management for organizing work into phases"
+  echo "   • Create milestones during project setup"
+  echo "   • Assign issues to milestones during capture"
+  echo "   • Priority/dependency workflow"
+  echo "   • Smart 'what's next' recommendations"
   echo "   • Mandatory assignment for In Progress state"
-  echo "   • Project updates required on /wrap-session"
   echo ""
   
   exit 0

@@ -1,6 +1,6 @@
 # DocFlow Cloud
 
-> Version 4.1.0 - Linear Integration with Manifest-Based Updates
+> Version 4.2.0 - Linear Integration with Milestones & Manifest-Based Updates
 
 DocFlow Cloud is a hybrid spec-driven development workflow where work items live in Linear and project understanding stays local.
 
@@ -254,7 +254,21 @@ Terminal States: Archived, Canceled, Duplicate
 
 ---
 
-## Key Features (v4.1)
+## Key Features (v4.2)
+
+### Milestone Management
+
+Organize work into project phases:
+- Create milestones during `/docflow-setup` (Phase 3)
+- Assign issues to milestones during `/capture`
+- Query and create via Linear GraphQL API
+
+```markdown
+Example phases:
+- Phase 1: Foundation (infrastructure, auth)
+- Phase 2: Core Features (main functionality)
+- Phase 3: Polish (UI, performance, docs)
+```
 
 ### Priority & Dependency Workflow
 
@@ -333,15 +347,17 @@ Auto-apply `triage` label to new issues created in Linear UI.
 
 ---
 
-## What's New in v4.1
+## What's New in v4.2
 
+- **Milestone Management** — Organize work into project phases
+- **Create Milestones in Setup** — Phase 3 guides milestone creation
+- **Milestone Assignment** — Assign issues during `/capture`
 - **Priority/Dependency Workflow** — Set during setup and refine
 - **Smart Activation** — Recommends what to work on based on priority + blockers
 - **Mandatory Assignment** — Can't be In Progress without assignee
 - **Project Updates on Wrap** — Required on `/wrap-session`
 - **Manifest-Based Updates** — Smart updates preserve your customizations
-- **Migration Files** — Track version changes, cleanup deprecated files
 
 ---
 
-*DocFlow Cloud v4.1.0*
+*DocFlow Cloud v4.2.0*

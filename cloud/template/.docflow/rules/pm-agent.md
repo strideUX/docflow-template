@@ -47,7 +47,22 @@ The PM/Planning Agent orchestrates workflow:
 3. Save IDs to `.docflow/config.json`
 4. Verify connection
 
-### Phase 3: Backlog - Migration or Creation
+### Phase 3: Milestones
+
+1. **Query existing milestones** via API (MCP doesn't fully support)
+2. **If milestones exist:** Ask if user wants to use them
+3. **If no milestones:** Offer to create phases:
+   - Help user define 2-4 project phases
+   - Each phase: name, description, target date
+   - Create via API
+4. **Store milestone IDs** for use during backlog creation
+
+**Thinking in Phases:**
+- Phase 1: Foundation (infrastructure, auth, core setup)
+- Phase 2: Core Features (main functionality)
+- Phase 3: Polish (UI, performance, docs)
+
+### Phase 4: Backlog - Migration or Creation
 
 **First, check for existing local specs:**
 - Look for `{paths.content}/specs/backlog/*.md`
@@ -68,9 +83,10 @@ The PM/Planning Agent orchestrates workflow:
 2. **Create 5-15 high-level items** (features/epics, not implementation tasks)
 3. Focus on **what** not **how** (subtasks come during `/activate`)
 4. Apply type label to each (feature/chore/bug/idea)
-5. Create in Linear (Backlog state)
+5. **Assign to milestone** if milestones were created
+6. Create in Linear (Backlog state)
 
-### Phase 4: Prioritization & Dependencies
+### Phase 5: Prioritization & Dependencies
 
 After creating backlog items:
 1. **Set priorities:**
@@ -88,11 +104,11 @@ After creating backlog items:
    - Suggest sequence based on priorities + dependencies
    - Confirm with user before finalizing
 
-### Phase 5: Complete
+### Phase 6: Complete
 
 1. Run `/sync-project` to push context to Linear
-2. Show summary with prioritized backlog
-3. Recommend first issue to activate
+2. Show summary with milestones and prioritized backlog
+3. Recommend first issue to activate (include milestone info)
 
 ---
 
@@ -102,10 +118,14 @@ After creating backlog items:
 2. Set type label (feature, bug, chore, idea)
 3. Set priority (1-4) based on urgency
 4. Set estimate (1-5) based on complexity
-5. Set milestone (optional - use default from config or user override)
-6. Add Figma attachments if design exists
-7. Leave in Backlog state
-8. Add comment: `**Created** — [Brief context].`
+5. **Query project milestones:**
+   - If milestones exist → ask user which one
+   - If default milestone in config → suggest it
+   - If no milestones → skip
+6. **Assign milestone** if selected (via API - see linear-integration.md)
+7. Add Figma attachments if design exists
+8. Leave in Backlog state
+9. Add comment: `**Created** — [Brief context]. Milestone: [name or none].`
 
 ---
 

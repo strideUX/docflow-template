@@ -7,9 +7,10 @@ Complete project setup: define what you're building, connect to Linear, and crea
 This command guides you through:
 1. **Project Definition** - What are we building?
 2. **Linear Connection** - Connect to your team/project
-3. **Initial Backlog** - Capture work items (or migrate existing specs)
-4. **Prioritization** - Set priorities and dependencies
-5. **Sync & Complete** - Push to Linear, recommend first issue
+3. **Milestones** - Create phases to organize work
+4. **Initial Backlog** - Capture work items (assigned to milestones)
+5. **Prioritization** - Set priorities and dependencies
+6. **Sync & Complete** - Push to Linear, recommend first issue
 
 ---
 
@@ -125,7 +126,83 @@ I'll now fill out your context files. Ready to continue?
 
 ---
 
-## Phase 3: Backlog - Migration or Creation
+## Phase 3: Milestones
+
+### Query Existing Milestones
+
+First, check if the project already has milestones:
+
+```bash
+# Query milestones via API
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "query($projectId: String!) { project(id: $projectId) { projectMilestones { nodes { id name targetDate } } } }", "variables": {"projectId": "..."}}'
+```
+
+### If Milestones Exist
+
+```markdown
+📅 **Found existing milestones:**
+
+1. Phase 1: Foundation (Target: Jan 15)
+2. Phase 2: Core Features (Target: Jan 30)
+3. Phase 3: Polish (Target: Feb 15)
+
+Use these for organizing backlog items? (yes/no)
+```
+
+### If No Milestones → Offer to Create
+
+```markdown
+📅 **Milestones help organize work into phases**
+
+Would you like to create milestones for this project?
+
+Example phases:
+- **Phase 1: Foundation** — Infrastructure, auth, core setup
+- **Phase 2: Core Features** — Main functionality
+- **Phase 3: Polish** — UI refinements, testing, docs
+
+Options:
+- **yes** — I'll help you define phases with target dates
+- **skip** — Continue without milestones (can add later)
+```
+
+### Creating Milestones
+
+For each milestone, gather:
+- **Name** (e.g., "Phase 1: Foundation")
+- **Description** (brief scope)
+- **Target Date** (optional but recommended)
+
+```markdown
+Let's define your project phases:
+
+**Milestone 1:**
+- Name: Phase 1: Foundation
+- Description: Core infrastructure, authentication, and data models
+- Target Date: [Ask user or suggest based on project scope]
+
+[Create via API, then continue to next milestone]
+```
+
+**API Call to Create Milestone:**
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{
+    "query": "mutation($projectId: String!, $name: String!, $description: String, $targetDate: TimelessDate) { projectMilestoneCreate(input: { projectId: $projectId, name: $name, description: $description, targetDate: $targetDate }) { success projectMilestone { id name } } }",
+    "variables": { "projectId": "...", "name": "Phase 1: Foundation", "description": "...", "targetDate": "2025-01-15" }
+  }'
+```
+
+### Store Milestone IDs
+
+After creating milestones, store for use during backlog creation.
+
+---
+
+## Phase 4: Backlog - Migration or Creation
 
 ### First: Check for Existing Local Specs
 
@@ -185,12 +262,35 @@ Say "yes" to start capturing, or "skip" to finish setup.
 For each item:
 1. Use `/capture` flow
 2. Apply appropriate template
-3. Create in Linear (Backlog state)
-4. Set type label (feature/chore/bug/idea)
+3. **Ask which milestone** (if milestones exist)
+4. Create in Linear (Backlog state)
+5. Set type label (feature/chore/bug/idea)
+6. Assign to selected milestone
+
+### Milestone Assignment During Capture
+
+If milestones were created/exist:
+```markdown
+**Which phase does this belong to?**
+
+1. Phase 1: Foundation
+2. Phase 2: Core Features
+3. Phase 3: Polish
+4. None (unassigned)
+
+Select (1-4):
+```
+
+Assign via API:
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "mutation($issueId: String!, $milestoneId: String!) { issueUpdate(id: $issueId, input: { projectMilestoneId: $milestoneId }) { success } }", "variables": {"issueId": "...", "milestoneId": "..."}}'
+```
 
 ---
 
-## Phase 4: Prioritization & Dependencies
+## Phase 5: Prioritization & Dependencies
 
 After creating backlog items, guide prioritization:
 
@@ -248,7 +348,7 @@ Update Linear with priorities and dependencies before proceeding.
 
 ---
 
-## Phase 5: Sync & Complete
+## Phase 6: Sync & Complete
 
 1. Run `/sync-project` to push context to Linear
 2. Show summary:
@@ -259,7 +359,8 @@ Update Linear with priorities and dependencies before proceeding.
 **Project:** [Name]
 **Linear Team:** [Team]
 **Linear Project:** [Project]
-**Backlog Items:** [Count] created (prioritized)
+**Milestones:** [Count] phases created
+**Backlog Items:** [Count] created (prioritized, assigned to milestones)
 
 **Context files ready:**
 - `{paths.content}/context/overview.md` ✓
@@ -267,7 +368,7 @@ Update Linear with priorities and dependencies before proceeding.
 - `{paths.content}/context/standards.md` ✓
 
 **Recommended first issue:**
-- [Issue title] (Priority: High, no blockers)
+- [Issue title] (Priority: High, Milestone: Phase 1, no blockers)
 
 **Next steps:**
 - Run `/activate [issue]` to start the recommended issue

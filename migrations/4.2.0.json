@@ -1,0 +1,40 @@
+{
+  "version": "4.2.0",
+  "date": "2024-12-18",
+  "from": "4.1.0",
+  "type": "minor",
+  "description": "Milestone management for organizing work into project phases",
+  
+  "notes": [
+    "Added milestone phase to /docflow-setup (Phase 3)",
+    "Query and create milestones via Linear GraphQL API",
+    "Milestone assignment during /capture",
+    "Think in phases when building initial backlog",
+    "Comprehensive milestone API documentation in linear-integration.md",
+    "Updated linear-workflow skill with milestone handling"
+  ],
+  
+  "files_modified": [
+    ".cursor/commands/docflow-setup.md",
+    ".cursor/commands/capture.md",
+    ".docflow/rules/pm-agent.md",
+    ".docflow/rules/linear-integration.md",
+    ".docflow/skills/linear-workflow/SKILL.md"
+  ],
+  
+  "files_added": [],
+  
+  "files_removed": [],
+  
+  "api_additions": [
+    "Query project milestones",
+    "Create project milestone",
+    "Assign issue to milestone"
+  ],
+  
+  "upgrade_instructions": [
+    "Run the install script with --update flag",
+    "During /docflow-setup, you'll now be prompted to create milestones",
+    "During /capture, you'll be asked which milestone to assign"
+  ]
+}

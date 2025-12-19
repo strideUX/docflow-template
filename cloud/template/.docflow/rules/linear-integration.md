@@ -250,14 +250,94 @@ Read `.docflow/config.json` for:
 - `provider.defaultMilestoneId` - Optional auto-assign
 - `statusMapping` - Maps DocFlow states to Linear states
 
-## Milestones (Optional)
+## Milestones
 
-When creating issues:
-- If defaultMilestoneId is set in config → use it
-- If user specifies milestone → override default
-- If no milestone configured → leave blank (null)
+**Note:** Linear MCP has limited milestone support. Use direct API calls for full functionality.
 
-Query milestones: `linear_getProjectMilestones({ projectId })`
+### Query Project Milestones
+
+```bash
+LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
+PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{
+    "query": "query($projectId: String!) { project(id: $projectId) { projectMilestones { nodes { id name description sortOrder targetDate } } } }",
+    "variables": { "projectId": "'"$PROJECT_ID"'" }
+  }'
+```
+
+### Create Milestone
+
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{
+    "query": "mutation($projectId: String!, $name: String!, $description: String, $targetDate: TimelessDate) { projectMilestoneCreate(input: { projectId: $projectId, name: $name, description: $description, targetDate: $targetDate }) { success projectMilestone { id name } } }",
+    "variables": {
+      "projectId": "'"$PROJECT_ID"'",
+      "name": "Phase 1: Foundation",
+      "description": "Core infrastructure and setup",
+      "targetDate": "2025-01-15"
+    }
+  }'
+```
+
+### Assign Issue to Milestone
+
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{
+    "query": "mutation($issueId: String!, $milestoneId: String!) { issueUpdate(id: $issueId, input: { projectMilestoneId: $milestoneId }) { success } }",
+    "variables": {
+      "issueId": "issue-uuid",
+      "milestoneId": "milestone-uuid"
+    }
+  }'
+```
+
+### Milestone Workflow
+
+**During `/docflow-setup`:**
+1. Query if project has milestones
+2. If none, offer to create phase-based milestones
+3. When creating backlog items, assign to appropriate milestone
+
+**During `/capture`:**
+1. Query project milestones
+2. If milestones exist, ask which one (or none)
+3. Assign on issue creation
+
+**Default Milestone (config):**
+- `provider.defaultMilestoneId` - Auto-assign to this milestone if set
+- User can override per-issue
+
+### Thinking in Milestones
+
+When building initial backlog, group work into phases:
+
+```markdown
+**Phase 1: Foundation** (Week 1-2)
+- Infrastructure setup
+- Auth system
+- Core data models
+
+**Phase 2: Core Features** (Week 3-4)
+- Feature A
+- Feature B
+
+**Phase 3: Polish** (Week 5-6)
+- UI refinements
+- Performance
+- Documentation
+```
+
+Each phase becomes a Linear milestone with a target date.
 
 ## Environment Variables
 

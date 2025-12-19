@@ -303,8 +303,10 @@ docflow-template/
 
 ---
 
-## What's New in v4.1
+## What's New in v4.2
 
+- **Milestone Management** — Organize work into project phases during setup
+- **Milestone Assignment** — Assign issues to milestones during `/capture`
 - **Priority/Dependency Workflow** — Set priorities and blocking relationships during setup and refine
 - **Smart Activation** — `/activate` recommends what to work on next based on priority and blockers
 - **Mandatory Assignment** — Issues must be assigned before moving to In Progress

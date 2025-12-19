@@ -77,6 +77,26 @@ BACKLOG → READY → IMPLEMENTING → REVIEW → TESTING → COMPLETE
 - 4: L (2-3 days)
 - 5: XL (week+)
 
+### Milestones
+
+Milestones group issues into project phases.
+
+**Query milestones (API):**
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "query($projectId: String!) { project(id: $projectId) { projectMilestones { nodes { id name targetDate } } } }", "variables": {"projectId": "..."}}'
+```
+
+**Assign issue to milestone (API):**
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "mutation($issueId: String!, $milestoneId: String!) { issueUpdate(id: $issueId, input: { projectMilestoneId: $milestoneId }) { success } }", "variables": {"issueId": "...", "milestoneId": "..."}}'
+```
+
+**During capture:** If project has milestones, ask which one to assign.
+
 ---
 
 ## Comment Format
