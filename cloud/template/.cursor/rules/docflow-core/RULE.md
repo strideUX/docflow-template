@@ -63,6 +63,37 @@ curl -s -X POST https://api.linear.app/graphql \
 
 ---
 
+## ⚠️ REQUIRED: Update Checkboxes in Description
+
+**Acceptance criteria checkboxes live in the issue DESCRIPTION, not comments.**
+
+### When to Update Checkboxes:
+- ✅ During implementation - as each criterion is completed
+- ✅ Before moving to "In Review" - all implemented criteria should be checked
+- ✅ **MANDATORY before "Done"** - ALL checkboxes must be checked
+
+### How to Update:
+1. Read current issue description via `get_issue`
+2. Find `- [ ] Criterion text` 
+3. Change to `- [x] Criterion text`
+4. Save ENTIRE description via `update_issue` with `description` field
+
+**Example MCP call:**
+```
+update_issue(
+  id: "ISSUE-123",
+  description: "...full description with - [x] checked boxes..."
+)
+```
+
+**Before closing ANY issue to Done:**
+1. Get the issue description
+2. Verify ALL `- [ ]` are now `- [x]`
+3. If any unchecked, either check them or confirm with user
+4. Then change status to Done
+
+---
+
 ## Essential Reading
 
 **Read these files for complete rules:**

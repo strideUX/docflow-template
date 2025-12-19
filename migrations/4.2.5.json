@@ -1,0 +1,27 @@
+{
+  "version": "4.2.5",
+  "date": "2025-12-18",
+  "description": "Added mandatory checkbox update requirement, especially before Done",
+  
+  "changes": {
+    "enhancements": [
+      {
+        "description": "Added 'REQUIRED: Update Checkboxes in Description' section to always-loaded docflow-core/RULE.md with explicit instructions for when/how to update, and mandatory check before closing to Done",
+        "files": [
+          ".cursor/rules/docflow-core/RULE.md"
+        ]
+      }
+    ]
+  },
+  
+  "files_modified": [
+    ".cursor/rules/docflow-core/RULE.md"
+  ],
+  
+  "upgrade_notes": [
+    "Checkboxes must be updated during implementation",
+    "ALL checkboxes must be checked before moving to Done",
+    "Agent must verify checkbox state before closing issues",
+    "Instructions include example MCP call for update_issue"
+  ]
+}
