@@ -142,3 +142,52 @@ When blocker is resolved, `/implement` moves issue back to "In Progress":
 **Update Context Files when:**
 - New technologies added (stack.md)
 - New conventions established (standards.md)
+
+---
+
+## TODO Comments → Linear Issues
+
+**When adding a TODO comment in code, immediately create a Linear issue and link it.**
+
+### Why?
+- TODOs in code get lost
+- Creating an issue ensures it's tracked
+- The issue ID in the comment makes it searchable
+
+### Process:
+
+1. **Write the TODO comment** (initial)
+   ```typescript
+   // TODO: Implement rate limiting for API endpoints
+   ```
+
+2. **Create Linear issue:**
+   ```
+   create_issue(
+     title: "Implement rate limiting for API endpoints",
+     teamId: "[from .docflow/config.json]",
+     projectId: "[from .docflow/config.json]",
+     labelIds: ["[triage-label-id]"],
+     description: "From code: `src/api/routes.ts:123`\n\nContext: [why this is needed]"
+   )
+   ```
+
+3. **Get issue identifier** from response (e.g., `PLA-456`)
+
+4. **Update the comment** to include the ID:
+   ```typescript
+   // TODO: Implement rate limiting for API endpoints (PLA-456)
+   ```
+
+### Format:
+```
+// TODO: [Description] (ISSUE-ID)
+```
+
+### Labels:
+- Use `triage` label so it gets refined later via `/refine`
+- The issue stays in Backlog until triaged
+
+### Finding Triage Label ID:
+Query labels: `list_labels(teamId: "...")`
+Look for label named "triage" and use its ID.

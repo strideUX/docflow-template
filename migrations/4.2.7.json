@@ -1,0 +1,29 @@
+{
+  "version": "4.2.7",
+  "date": "2025-12-18",
+  "description": "Added TODO comment → Linear issue behavior",
+  
+  "changes": {
+    "features": [
+      {
+        "description": "When adding TODO comments in code, agent should create a Linear issue (backlog + triage label) and include the issue ID in the comment",
+        "files": [
+          ".cursor/rules/implementation-agent/RULE.md",
+          ".docflow/rules/implementation-agent.md"
+        ]
+      }
+    ]
+  },
+  
+  "files_modified": [
+    ".cursor/rules/implementation-agent/RULE.md",
+    ".docflow/rules/implementation-agent.md"
+  ],
+  
+  "upgrade_notes": [
+    "TODOs in code now get logged to Linear automatically",
+    "Format: // TODO: Description (PLA-123)",
+    "Uses triage label for later refinement",
+    "Connects code directly to backlog tracking"
+  ]
+}
