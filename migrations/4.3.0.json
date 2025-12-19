@@ -1,0 +1,42 @@
+{
+  "version": "4.3.0",
+  "date": "2025-12-18",
+  "description": "Major workflow governance update - intent mapping, no improvisation, workflow boundaries",
+  
+  "changes": {
+    "features": [
+      {
+        "description": "Added Intent → Command Mapping table to core rules. Loose instructions now map to defined command procedures.",
+        "details": "When user says 'activate this' or 'work on this', agent reads and follows .cursor/commands/activate.md procedure instead of improvising."
+      },
+      {
+        "description": "Added 'NO IMPROVISATION' rule - agent must follow command procedures for workflow actions",
+        "details": "Prevents agent from skipping steps when given loose instructions."
+      },
+      {
+        "description": "Added Workflow Boundaries - command chaining rules and mandatory STOP after completion",
+        "details": "Agent executes chained commands fully but STOPs after final command. Does not auto-start next task."
+      },
+      {
+        "description": "Added Mandatory Prerequisites before work begins",
+        "details": "Issue must have assignment, estimate, and priority before moving to In Progress."
+      },
+      {
+        "description": "Status Change Protocol now requires update_issue(stateId) call, not just comments",
+        "details": "Fixes issue where agent added comments but didn't actually change Linear status."
+      }
+    ]
+  },
+  
+  "files_modified": [
+    ".cursor/rules/docflow-core/RULE.md"
+  ],
+  
+  "upgrade_notes": [
+    "This is a workflow governance update",
+    "Loose instructions now follow command procedures",
+    "Agent will STOP after completing requested commands",
+    "Prerequisites (assign, size, priority) enforced before In Progress",
+    "Status changes now paired: update_issue + create_comment"
+  ]
+}

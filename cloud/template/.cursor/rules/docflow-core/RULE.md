@@ -8,6 +8,69 @@ alwaysApply: true
 
 This project uses **DocFlow Cloud**, a spec-driven development workflow with Linear integration.
 
+---
+
+## 🔄 Intent → Command Mapping (NO IMPROVISATION)
+
+**Workflow actions have defined procedures. Do NOT improvise. Follow command procedures.**
+
+| User Intent | Command to Follow | Read Procedure From |
+|-------------|-------------------|---------------------|
+| "activate [task]" / "start [task]" / "work on" / "pick up" | `/activate` | `.cursor/commands/activate.md` |
+| "implement" / "build" / "code this" | `/implement` | `.cursor/commands/implement.md` |
+| "I'm blocked" / "stuck" / "can't proceed" | `/block` | `.cursor/commands/block.md` |
+| "capture this" / "add to backlog" / "log this" | `/capture` | `.cursor/commands/capture.md` |
+| "refine" / "triage" / "ready for work" | `/refine` | `.cursor/commands/refine.md` |
+| "review this" / "ready for review" | `/review` | `.cursor/commands/review.md` |
+| "test this" / "validate" / "QA" | `/validate` | `.cursor/commands/validate.md` |
+| "done" / "complete" / "close" / "ship it" | `/close` | `.cursor/commands/close.md` |
+| "what's the status" / "where are we" | `/status` | `.cursor/commands/status.md` |
+
+**When user intent matches a command:**
+1. Read the command file for the full procedure
+2. Follow ALL steps in the procedure
+3. Do not skip steps or improvise
+
+**If intent is ambiguous:** Ask user which command/workflow they want.
+
+---
+
+## 🛑 Workflow Boundaries
+
+### Command Chaining
+If user requests multiple actions (e.g., "activate and implement"):
+1. Execute each command's FULL procedure in sequence
+2. If an issue or question arises between commands, STOP and clarify
+3. After the final command completes, STOP and report
+
+### After ANY Command Completes
+1. Report what was done
+2. **STOP** - Do not automatically start the next task
+3. Wait for user instruction
+
+**Example:**
+```
+User: "Activate PLA-85 and implement it"
+Do: /activate full procedure → /implement full procedure → STOP and report
+Do NOT: Continue to review → done → next task without instruction
+```
+
+---
+
+## ⛔ Mandatory Prerequisites (Before Work Begins)
+
+**Before moving ANY issue to "In Progress", verify:**
+
+| Prerequisite | If Missing |
+|--------------|------------|
+| **Assigned** | Ask user who to assign, then assign via `update_issue` |
+| **Estimate** | Ask user for size (1-5), then set via `update_issue` |
+| **Priority** | If 0/None, ask or infer, then set |
+
+**Only proceed to implementation after ALL prerequisites are set.**
+
+---
+
 ## 🚨 CRITICAL: Always Use Configured Project
 
 **ALL issues MUST be created within the configured Linear project. Never create issues outside of it.**
@@ -69,17 +132,19 @@ curl -s -X POST https://api.linear.app/graphql \
 
 ## ⚠️ REQUIRED: Status Change Protocol
 
-**Every status change requires BOTH a comment AND (for Done) checkbox updates.**
+**Every status change requires BOTH an `update_issue` call AND a comment.**
 
-| Transition | Actions Required |
-|------------|------------------|
-| → Backlog | 1. `create_comment`: `**Created** — [description]` |
-| → Todo | 1. `create_comment`: `**Refined** — Ready for activation.` |
-| → In Progress | 1. `create_comment`: `**Activated** — Starting implementation.` |
-| → Blocked | 1. `create_comment`: `**Blocked** — [reason]` |
-| → In Review | 1. `create_comment`: `**Ready for Review** — [summary]` |
-| → QA | 1. `create_comment`: `**Review Approved** — Ready for testing.` |
+| Transition | Actions Required (in order) |
+|------------|----------------------------|
+| → Backlog | 1. `update_issue(stateId)` 2. `create_comment`: `**Created** — [description]` |
+| → Todo | 1. `update_issue(stateId)` 2. `create_comment`: `**Refined** — Ready for activation.` |
+| → In Progress | 1. Verify prerequisites (assigned, sized) 2. `update_issue(stateId)` 3. `create_comment`: `**Activated**` |
+| → Blocked | 1. `update_issue(stateId)` 2. `create_comment`: `**Blocked** — [reason]` |
+| → In Review | 1. `update_issue(stateId)` 2. `create_comment`: `**Ready for Review** — [summary]` |
+| → QA | 1. `update_issue(stateId)` 2. `create_comment`: `**Review Approved**` |
 | **→ Done** | **3 STEPS REQUIRED - SEE BELOW** |
+
+**You MUST call `update_issue(id, stateId)` to change status. Comments alone don't change status.**
 
 ---
 
