@@ -42,65 +42,67 @@ curl -s -X POST https://api.linear.app/graphql \
 
 ---
 
-## ⚠️ REQUIRED: Comments on Every Status Change
+## ⚠️ REQUIRED: Status Change Protocol
 
-**You MUST add a comment when changing issue status. No exceptions.**
+**Every status change requires BOTH a comment AND (for Done) checkbox updates.**
 
-| Transition | Comment Format |
-|------------|----------------|
-| → Backlog | `**Created** — [Brief description of what this is]` |
-| → Todo | `**Refined** — [What was improved]. Priority: [P]. Ready for activation.` |
-| → In Progress | `**Activated** — Assigned to [name]. Starting implementation.` |
-| → Blocked | `**Blocked** — [What's blocking]. Needs: [what's needed to unblock].` |
-| → In Progress (unblocked) | `**Unblocked** — [What resolved the blocker].` |
-| → In Review | `**Ready for Review** — [Summary of changes]. Files: [key files changed].` |
-| → QA | `**Review Approved** — Ready for testing.` |
-| → Done | `**Complete** — [Final summary]. All criteria verified.` |
-| → Archived | `**Archived** — [Reason for deferral].` |
-| → Canceled | `**Canceled** — [Reason].` |
-
-**Use Linear MCP `add_comment` for every status transition.**
+| Transition | Actions Required |
+|------------|------------------|
+| → Backlog | 1. `create_comment`: `**Created** — [description]` |
+| → Todo | 1. `create_comment`: `**Refined** — Ready for activation.` |
+| → In Progress | 1. `create_comment`: `**Activated** — Starting implementation.` |
+| → Blocked | 1. `create_comment`: `**Blocked** — [reason]` |
+| → In Review | 1. `create_comment`: `**Ready for Review** — [summary]` |
+| → QA | 1. `create_comment`: `**Review Approved** — Ready for testing.` |
+| **→ Done** | **3 STEPS REQUIRED - SEE BELOW** |
 
 ---
 
-## ⚠️ REQUIRED: Update Checkboxes in DESCRIPTION (Not Comments!)
+## 🚨 CLOSING TO DONE: 3 MANDATORY STEPS
 
-**Checkboxes are in the issue DESCRIPTION. You must UPDATE THE DESCRIPTION to check them off.**
+**You MUST complete ALL 3 steps in this EXACT order. Do not skip any step.**
 
-### ❌ WRONG: Adding checkmarks in comments
-Do NOT put `✓` or `[x]` in comments. That doesn't update the actual checkboxes.
+### Step 1: Update checkboxes in DESCRIPTION (NOT comments!)
 
-### ✅ CORRECT: Update the description field
-Use `update_issue` with the `description` parameter to modify the actual checkboxes.
-
-### Step-by-Step Process:
-
-**Step 1: Get current description**
 ```
+# First, get the current description
 get_issue(id: "PLA-123")
-→ Returns description with: "- [ ] OAuth install flow works..."
-```
 
-**Step 2: Modify the checkbox text**
-Change `- [ ]` to `- [x]` in the description string.
-
-**Step 3: Save updated description**
-```
+# Find all "- [ ]" and change to "- [x]"
+# Then save the ENTIRE description back:
 update_issue(
-  id: "PLA-123",
-  description: "## Acceptance Criteria\n- [x] OAuth install flow works...\n- [x] Tokens stored securely..."
+  id: "PLA-123", 
+  description: "[full description with - [x] checked boxes]"
 )
 ```
 
-### When to Update:
-- ✅ After completing each criterion during implementation
-- ✅ **MANDATORY before "Done"** - call `update_issue` with all boxes checked
+**❌ WRONG:** Putting ✓ or ☑️ in a comment - this does NOT update the description
+**✅ CORRECT:** Calling `update_issue` with `description` parameter
 
-### Before Closing to Done:
-1. Call `get_issue` to read current description
-2. Check if any `- [ ]` remain unchecked
-3. Call `update_issue` with description containing all `- [x]`
-4. THEN change status to Done
+### Step 2: Add completion comment
+
+```
+create_comment(
+  issueId: "PLA-123",
+  body: "**Complete** — [summary of what was done]"
+)
+```
+
+### Step 3: Change status to Done
+
+```
+update_issue(id: "PLA-123", stateId: "[done-state-id]")
+```
+
+---
+
+## Checkboxes During Implementation
+
+Update checkboxes as you complete criteria (not just at the end):
+
+1. `get_issue` → read current description
+2. Change `- [ ] Criterion` to `- [x] Criterion`  
+3. `update_issue` with full updated description
 
 ---
 

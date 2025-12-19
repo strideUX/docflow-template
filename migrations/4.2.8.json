@@ -1,0 +1,27 @@
+{
+  "version": "4.2.8",
+  "date": "2025-12-18",
+  "description": "Combined status change and checkbox update into single protocol with 3 mandatory steps for Done",
+  
+  "changes": {
+    "fixes": [
+      {
+        "description": "Rewrote status change rules to make Done transition a 3-step mandatory protocol: 1) update_issue with checkboxes, 2) create_comment, 3) change status. Made checkbox update FIRST step so it can't be skipped.",
+        "files": [
+          ".cursor/rules/docflow-core/RULE.md"
+        ]
+      }
+    ]
+  },
+  
+  "files_modified": [
+    ".cursor/rules/docflow-core/RULE.md"
+  ],
+  
+  "upgrade_notes": [
+    "Done transition now explicitly 3 steps in exact order",
+    "Step 1 is checkbox update - can't be skipped",
+    "Clear WRONG vs CORRECT examples inline",
+    "Checkbox update is now part of status change protocol, not separate section"
+  ]
+}
