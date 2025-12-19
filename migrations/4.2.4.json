@@ -1,0 +1,28 @@
+{
+  "version": "4.2.4",
+  "date": "2025-12-18",
+  "description": "Added mandatory comment requirement for all status transitions",
+  
+  "changes": {
+    "enhancements": [
+      {
+        "description": "Added explicit 'REQUIRED: Comment on Every Status Change' section with format table to always-loaded docflow-core/RULE.md and linear-integration/RULE.md",
+        "files": [
+          ".cursor/rules/docflow-core/RULE.md",
+          ".cursor/rules/linear-integration/RULE.md"
+        ]
+      }
+    ]
+  },
+  
+  "files_modified": [
+    ".cursor/rules/docflow-core/RULE.md",
+    ".cursor/rules/linear-integration/RULE.md"
+  ],
+  
+  "upgrade_notes": [
+    "Agents will now add comments on every status transition",
+    "Comment format standardized for each transition type",
+    "Especially enforced for → Done transitions"
+  ]
+}

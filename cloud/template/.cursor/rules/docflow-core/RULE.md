@@ -42,6 +42,27 @@ curl -s -X POST https://api.linear.app/graphql \
 
 ---
 
+## ⚠️ REQUIRED: Comments on Every Status Change
+
+**You MUST add a comment when changing issue status. No exceptions.**
+
+| Transition | Comment Format |
+|------------|----------------|
+| → Backlog | `**Created** — [Brief description of what this is]` |
+| → Todo | `**Refined** — [What was improved]. Priority: [P]. Ready for activation.` |
+| → In Progress | `**Activated** — Assigned to [name]. Starting implementation.` |
+| → Blocked | `**Blocked** — [What's blocking]. Needs: [what's needed to unblock].` |
+| → In Progress (unblocked) | `**Unblocked** — [What resolved the blocker].` |
+| → In Review | `**Ready for Review** — [Summary of changes]. Files: [key files changed].` |
+| → QA | `**Review Approved** — Ready for testing.` |
+| → Done | `**Complete** — [Final summary]. All criteria verified.` |
+| → Archived | `**Archived** — [Reason for deferral].` |
+| → Canceled | `**Canceled** — [Reason].` |
+
+**Use Linear MCP `add_comment` for every status transition.**
+
+---
+
 ## Essential Reading
 
 **Read these files for complete rules:**

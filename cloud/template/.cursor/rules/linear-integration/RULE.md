@@ -38,6 +38,21 @@ curl -s -X POST https://api.linear.app/graphql \
 
 ---
 
+## ⚠️ REQUIRED: Comment on Every Status Change
+
+**Always add a comment when changing status. Use `add_comment` MCP tool.**
+
+| Transition | Comment |
+|------------|---------|
+| → Todo | `**Refined** — Ready for activation.` |
+| → In Progress | `**Activated** — Starting implementation.` |
+| → Blocked | `**Blocked** — [reason]. Needs: [what].` |
+| → In Review | `**Ready for Review** — [summary of changes].` |
+| → QA | `**Review Approved** — Ready for testing.` |
+| → Done | `**Complete** — All criteria verified.` |
+
+---
+
 ## When to Apply
 
 - Working with Linear issues
