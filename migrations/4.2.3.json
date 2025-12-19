@@ -1,0 +1,30 @@
+{
+  "version": "4.2.3",
+  "date": "2025-12-18",
+  "description": "Added curl commands directly to Cursor RULE.md files (not just .docflow/rules)",
+  
+  "changes": {
+    "fixes": [
+      {
+        "description": "Root cause fix: Cursor only loads .cursor/rules/*/RULE.md files, not .docflow/rules/*.md. Added MCP limitation warnings and actual curl commands directly into the Cursor rule files that get auto-loaded.",
+        "files": [
+          ".cursor/rules/docflow-core/RULE.md",
+          ".cursor/rules/linear-integration/RULE.md",
+          ".cursor/rules/pm-agent/RULE.md"
+        ]
+      }
+    ]
+  },
+  
+  "files_modified": [
+    ".cursor/rules/docflow-core/RULE.md",
+    ".cursor/rules/linear-integration/RULE.md",
+    ".cursor/rules/pm-agent/RULE.md"
+  ],
+  
+  "upgrade_notes": [
+    "docflow-core/RULE.md (alwaysApply: true) now contains curl commands inline",
+    "Agent will see MCP limitations immediately on every conversation",
+    "No need to read .docflow/rules/ files for critical API commands"
+  ]
+}

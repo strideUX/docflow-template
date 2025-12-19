@@ -8,6 +8,30 @@ alwaysApply: false
 
 Handles planning, capturing, reviewing, and closing work.
 
+## ⚠️ CRITICAL: Use Curl for These Operations
+
+**Linear MCP cannot create milestones or post project updates. Execute curl commands directly:**
+
+### Create Milestone:
+```bash
+LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
+PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "mutation($projectId: String!, $name: String!) { projectMilestoneCreate(input: { projectId: $projectId, name: $name }) { success projectMilestone { id name } } }", "variables": {"projectId": "'"$PROJECT_ID"'", "name": "MILESTONE_NAME"}}'
+```
+
+### Post Project Update:
+```bash
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "mutation($projectId: String!, $body: String!, $health: ProjectUpdateHealthType!) { projectUpdateCreate(input: { projectId: $projectId, body: $body, health: $health }) { success } }", "variables": {"projectId": "'"$PROJECT_ID"'", "body": "UPDATE_TEXT", "health": "onTrack"}}'
+```
+
+---
+
 ## When to Apply
 
 - User mentions planning, capturing, or organizing work

@@ -8,6 +8,40 @@ alwaysApply: true
 
 This project uses **DocFlow Cloud**, a spec-driven development workflow with Linear integration.
 
+## ⚠️ CRITICAL: Linear MCP Limitations
+
+**The Linear MCP CANNOT do these operations. You MUST execute curl commands directly:**
+
+| Operation | MCP Support | Action Required |
+|-----------|-------------|-----------------|
+| Create Milestone | ❌ NO | Execute curl command below |
+| Assign to Milestone | ❌ NO | Execute curl command below |
+| Post Project Update | ❌ NO | Execute curl command below |
+
+**DO NOT try MCP tools first. Execute shell commands immediately.**
+
+### Create Milestone (EXECUTE THIS):
+```bash
+LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
+PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "mutation($projectId: String!, $name: String!) { projectMilestoneCreate(input: { projectId: $projectId, name: $name }) { success projectMilestone { id name } } }", "variables": {"projectId": "'"$PROJECT_ID"'", "name": "MILESTONE_NAME_HERE"}}'
+```
+
+### Post Project Update (EXECUTE THIS):
+```bash
+LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
+PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{"query": "mutation($projectId: String!, $body: String!, $health: ProjectUpdateHealthType!) { projectUpdateCreate(input: { projectId: $projectId, body: $body, health: $health }) { success } }", "variables": {"projectId": "'"$PROJECT_ID"'", "body": "UPDATE_TEXT_HERE", "health": "onTrack"}}'
+```
+
+---
+
 ## Essential Reading
 
 **Read these files for complete rules:**
@@ -30,6 +64,7 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 ### Critical Rules
 
 - ❌ Never create local spec files - ALL specs live in Linear
+- ❌ Never use MCP for milestones/project updates - use curl commands above
 - ✅ Context stays local in `{paths.content}/context/`
 - ✅ Knowledge stays local in `{paths.content}/knowledge/`
 - ✅ Update Linear, not local files for status/progress
