@@ -4,6 +4,20 @@
 
 ---
 
+## ⚠️ CRITICAL: MCP Limitations
+
+**The Linear MCP CANNOT do these operations - you MUST use curl commands:**
+
+| Operation | MCP Support | What To Do |
+|-----------|-------------|------------|
+| Create Milestone | ❌ NO | Execute curl command (see Milestones section) |
+| Assign to Milestone | ❌ NO | Execute curl command (see Milestones section) |
+| Post Project Update | ❌ NO | Execute curl command (see Project Updates section) |
+
+**DO NOT try MCP tools for these operations. Go directly to the curl commands.**
+
+---
+
 ## Status States
 
 ### Full Workflow (Features & Bugs)

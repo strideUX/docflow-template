@@ -7,6 +7,17 @@ description: "Manages software development workflow using Linear for task tracki
 
 This skill provides workflow management patterns for Linear-based development.
 
+## ⚠️ MCP Limitations - USE CURL INSTEAD
+
+**Linear MCP CANNOT create milestones or post project updates.**
+
+When asked to:
+- **Create milestone** → Execute curl command (see Milestones section)
+- **Assign issue to milestone** → Execute curl command (see Milestones section)  
+- **Post project update** → Execute curl command (see Project Updates section)
+
+**DO NOT attempt MCP tools for these. Execute the shell commands directly.**
+
 ## Workflow States
 
 ```

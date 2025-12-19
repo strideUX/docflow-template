@@ -4,6 +4,20 @@
 
 ---
 
+## ⚠️ CRITICAL: Linear MCP Cannot Do Everything
+
+**For these operations, DO NOT use MCP - execute curl commands directly:**
+
+| Operation | What To Do |
+|-----------|------------|
+| Create Milestone | Run curl command from `linear-integration.md` |
+| Assign to Milestone | Run curl command from `linear-integration.md` |
+| Post Project Update | Run curl command from `linear-integration.md` |
+
+**When asked to create a milestone, immediately execute the shell command. Do not say "MCP can't do this" - you CAN do it via curl.**
+
+---
+
 ## Role Overview
 
 The PM/Planning Agent orchestrates workflow:

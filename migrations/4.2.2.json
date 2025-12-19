@@ -1,0 +1,30 @@
+{
+  "version": "4.2.2",
+  "date": "2025-12-18",
+  "description": "Added prominent MCP limitation warnings at top of rule files",
+  
+  "changes": {
+    "fixes": [
+      {
+        "description": "Added CRITICAL warnings at top of linear-integration.md, pm-agent.md, and SKILL.md explicitly stating MCP cannot create milestones and agent must use curl commands",
+        "files": [
+          ".docflow/rules/linear-integration.md",
+          ".docflow/rules/pm-agent.md",
+          ".docflow/skills/linear-workflow/SKILL.md"
+        ]
+      }
+    ]
+  },
+  
+  "files_modified": [
+    ".docflow/rules/linear-integration.md",
+    ".docflow/rules/pm-agent.md",
+    ".docflow/skills/linear-workflow/SKILL.md"
+  ],
+  
+  "upgrade_notes": [
+    "MCP limitation warnings now at TOP of relevant rule files",
+    "Agents should no longer try MCP for milestones/project updates",
+    "Instructions explicitly state 'execute curl command' not just 'use curl'"
+  ]
+}
