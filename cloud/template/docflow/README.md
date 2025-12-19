@@ -27,9 +27,14 @@ This project uses DocFlow Cloud - a hybrid workflow where:
 │   └── stale-check.sh
 ├── skills/                # Portable Agent Skills
 │   ├── linear-workflow/
+│   ├── figma-mcp/         # Figma integration workflow
+│   ├── component-workflow/ # Component patterns & testing
 │   ├── spec-templates/
 │   └── docflow-commands/
-└── templates/             # Issue templates
+├── templates/             # Issue templates
+└── design-system/         # (Optional) Created by /design-setup
+    ├── token-mapping.md   # Figma → code translations
+    └── component-patterns.md
 
 {this-folder}/             # PROJECT CONTENT (this folder)
 ├── context/               # Project fundamentals
@@ -111,7 +116,38 @@ These are **replaced by Linear**:
 /validate         - Test implementation
 /close            - Move issue to Done
 /docflow-update   - Sync rules from source repo
+/design-setup     - (Optional) Initialize design system integration
 ```
+
+---
+
+## Design System (Optional)
+
+If you have a Figma design system with tokens, run `/design-setup` to enable enhanced Figma integration:
+
+```
+/design-setup
+```
+
+This creates:
+- `.docflow/design-system/token-mapping.md` - Your Figma → code translations
+- `.docflow/design-system/component-patterns.md` - Your reusable components
+
+And updates `.docflow/config.json` with:
+```json
+{
+  "designSystem": {
+    "enabled": true,
+    "figmaFiles": {
+      "designs": "your-designs-file-key",
+      "system": "your-design-system-file-key"
+    }
+  }
+}
+```
+
+**Without design system:** Baseline Figma workflow (5-phase, screenshot-first) always works.
+**With design system:** Token enforcement, validation, stricter design consistency.
 
 ---
 

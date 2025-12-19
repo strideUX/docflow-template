@@ -15,10 +15,26 @@ Set up design system integration to enhance Figma-to-code accuracy.
 
 ### Phase 1: Gather Information
 
-1. **Ask about design system source:**
-   - "Do you have a Figma file with your design system/tokens?"
-   - If yes, get the file key
-   - If no, we'll create a manual token mapping
+1. **Ask about Figma files:**
+   
+   ```markdown
+   📐 **Figma File Configuration**
+   
+   Do you have Figma files for this project?
+   
+   I'll need:
+   - **Design System File** (optional) — Contains your design tokens (colors, spacing, typography)
+   - **Designs File** (optional) — Contains your actual UI designs
+   
+   **How to find the file key:**
+   From a Figma URL like: `https://www.figma.com/file/abc123xyz/DesignSystem`
+   The file key is: `abc123xyz`
+   
+   Please provide:
+   1. Design System file key (for tokens): ___________
+   2. Designs file key (for UI): ___________
+   3. Or type "skip" to set up manually later
+   ```
 
 2. **Determine styling framework:**
    - Tailwind CSS (ask version: 3 or 4)
@@ -111,28 +127,59 @@ If no:
 
 ### Phase 6: Complete
 
-1. **Show summary:**
-   ```
-   ✅ Design System Configured
+1. **Update config with all collected information:**
    
-   Token Mapping: .docflow/design-system/token-mapping.md
-   Component Patterns: .docflow/design-system/component-patterns.md
-   Validation: [enabled/disabled]
-   
-   Framework: Tailwind CSS v4
-   Asset Path: public/images
-   Icon Strategy: Figma-only
+   Save to `.docflow/config.json`:
+   ```json
+   {
+     "designSystem": {
+       "enabled": true,
+       "framework": "tailwind",
+       "tailwindVersion": 4,
+       "figmaFiles": {
+         "designs": "[designs-file-key-from-user]",
+         "system": "[system-file-key-from-user]"
+       },
+       "assetPath": "public/images",
+       "iconStrategy": "figma-only",
+       "validation": {
+         "script": null,
+         "preCommit": false
+       }
+     }
+   }
    ```
 
-2. **Explain enhancement:**
+2. **Show summary:**
+   ```markdown
+   ✅ **Design System Configured!**
+   
+   **Files Created:**
+   - `.docflow/design-system/token-mapping.md` — Edit to add your token translations
+   - `.docflow/design-system/component-patterns.md` — Document your components
+   
+   **Configuration Saved:**
+   - Framework: Tailwind CSS v4
+   - Figma Design System: [file-key or "not set"]
+   - Figma Designs: [file-key or "not set"]
+   - Asset Path: public/images
+   - Icon Strategy: Figma-only
+   - Validation: [enabled/disabled]
+   
+   **What This Enables:**
    - Figma workflow now enforces token usage
-   - Specification tables map to project tokens
-   - Validation catches hardcoded values (if enabled)
+   - Specification tables must map to project tokens
+   - Implementation validated against token-mapping.md
+   
+   **Next Steps:**
+   1. Fill out `.docflow/design-system/token-mapping.md` with your project's tokens
+   2. Run `/implement` on an issue with Figma attachment to test the workflow
+   3. Optionally add validation script for automated enforcement
+   ```
 
-3. **Next steps:**
-   - Review and customize token-mapping.md
-   - Add any missing component patterns
-   - Run `/implement` on an issue with Figma to test
+3. **If Figma file keys were provided:**
+   - Offer to run token extraction: "Would you like me to extract tokens from your Figma design system now?"
+   - If yes, call `get_variable_defs(fileKey)` and populate token-mapping.md
 
 ## Notes
 

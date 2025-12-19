@@ -374,6 +374,12 @@ Update Linear with priorities and dependencies before proceeding.
 - Run `/activate [issue]` to start the recommended issue
 - Run `/start-session` to begin work
 - Run `/capture` to add more items
+
+**Optional: Design System Integration**
+If you have a Figma design system with tokens, run `/design-setup` to enable:
+- Token enforcement for pixel-perfect implementations
+- Figma → code translation mappings
+- Automated design system validation
 ```
 
 ---

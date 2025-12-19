@@ -1,6 +1,6 @@
 # DocFlow Cloud
 
-> Version 4.2.0 - Linear Integration with Milestones & Manifest-Based Updates
+> Version 4.4.0 - Design System Integration & Enhanced Figma Workflow
 
 DocFlow Cloud is a hybrid spec-driven development workflow where work items live in Linear and project understanding stays local.
 
@@ -39,9 +39,14 @@ Add your API key to `.env`:
 
 ```bash
 LINEAR_API_KEY=lin_api_your_key_here
+
+# Optional: For Figma design integration
+FIGMA_ACCESS_TOKEN=figd_your_token_here
 ```
 
-Get from: **Linear → Settings → API → Personal API Keys**
+Get from:
+- Linear: **Linear → Settings → API → Personal API Keys**
+- Figma: **Figma → Settings → Personal Access Tokens**
 
 ### 5. Run Setup
 
@@ -49,6 +54,16 @@ Get from: **Linear → Settings → API → Personal API Keys**
 cursor /path/to/your/project
 # Then run: /docflow-setup
 ```
+
+### 6. Optional: Design System Setup
+
+If you have a Figma design system with tokens:
+
+```
+/design-setup
+```
+
+This enables enhanced token enforcement for pixel-perfect implementations.
 
 ---
 
@@ -64,11 +79,13 @@ DocFlow Cloud works best with MCP servers installed in Cursor.
    - **Command:** `npx`
    - **Args:** `-y mcp-remote https://mcp.linear.app/mcp`
 
-### Figma MCP (Optional)
+### Figma MCP (Optional but Recommended)
 
 - **Name:** `figma`
 - **Command:** `npx`
 - **Args:** `-y @anthropic/mcp-figma`
+
+Required for design-to-code workflow. Get your access token from Figma settings.
 
 ---
 
@@ -77,8 +94,8 @@ DocFlow Cloud works best with MCP servers installed in Cursor.
 ```
 your-project/
 ├── .docflow/                    ← DOCFLOW FRAMEWORK (updated via --update)
-│   ├── config.json              ← Provider settings (YOUR Linear IDs preserved)
-│   ├── version                  ← Current version (4.2.0)
+│   ├── config.json              ← Provider settings + design system config
+│   ├── version                  ← Current version (4.4.0)
 │   ├── rules/                   ← Canonical rule content
 │   │   ├── core.md
 │   │   ├── pm-agent.md
@@ -86,100 +103,112 @@ your-project/
 │   │   ├── qe-agent.md
 │   │   ├── linear-integration.md
 │   │   ├── figma-integration.md
+│   │   ├── designer-agent.md    ← NEW: Design system governance
 │   │   └── session-awareness.md
 │   ├── scripts/                 ← Shell scripts for efficiency
-│   │   ├── status-summary.sh
-│   │   ├── session-context.sh
-│   │   └── stale-check.sh
 │   ├── skills/                  ← Portable agent skills
-│   │   ├── linear-workflow/SKILL.md
-│   │   ├── spec-templates/SKILL.md
-│   │   └── docflow-commands/SKILL.md
-│   └── templates/               ← Issue templates
-│       ├── feature.md
-│       ├── bug.md
-│       ├── chore.md
-│       ├── idea.md
-│       └── quick-capture.md
+│   │   ├── linear-workflow/
+│   │   ├── figma-mcp/           ← NEW: 5-phase Figma workflow
+│   │   ├── component-workflow/  ← NEW: Component patterns & testing
+│   │   ├── spec-templates/
+│   │   └── docflow-commands/
+│   ├── templates/               ← Issue templates
+│   │   ├── feature.md, bug.md, ...
+│   │   ├── design-system/       ← NEW: Token mapping templates
+│   │   └── scripts/             ← NEW: Validation script template
+│   └── design-system/           ← Created by /design-setup (if enabled)
+│       ├── token-mapping.md     ← Your project's Figma → code mappings
+│       └── component-patterns.md
 │
 ├── .cursor/
-│   ├── commands/                ← 16 slash commands
-│   └── rules/                   ← Cursor rule folders (pointers to .docflow/rules/)
-│       ├── docflow-core/RULE.md
-│       ├── pm-agent/RULE.md
-│       └── ...
+│   ├── commands/                ← 17 slash commands (includes /design-setup)
+│   └── rules/                   ← Cursor rule folders
 │
 ├── docflow/                     ← PROJECT CONTENT (preserved on update)
 │   ├── context/
-│   │   ├── overview.md          ← Project vision, goals
-│   │   ├── stack.md             ← Technology choices
-│   │   └── standards.md         ← Coding conventions
-│   └── knowledge/               ← Decisions, notes, learnings
+│   └── knowledge/
 │
-├── .claude/rules.md             ← Claude adapter
-├── .warp/rules.md               ← Warp adapter
-├── .github/copilot-instructions.md
 ├── AGENTS.md                    ← Universal agent instructions
 └── .env                         ← Secrets (never commit)
 ```
 
 ---
 
-## Update System
+## Design System Integration (NEW in v4.4)
 
-DocFlow uses a **manifest-based update system** that knows exactly which files it owns.
+DocFlow now supports optional design system integration for pixel-perfect Figma implementations.
 
-### Manifest File
+### Baseline Behavior (Always Active)
 
-The `manifest.json` defines file ownership:
+Even without design system configuration, you get:
+- **5-phase Figma workflow** via `figma-mcp` skill
+- **Screenshot-first** approach
+- **Specification tables** for all implementations
+- **Visual validation** checklist
+
+### Enhanced Behavior (With Design System)
+
+Run `/design-setup` to enable:
+- Token enforcement for all Figma implementations
+- Project-specific `token-mapping.md` with Figma → code translations
+- Optional validation script to catch hardcoded values
+- Stricter design consistency rules
+
+### Setup Process
+
+```
+/design-setup
+```
+
+The command will ask:
+1. **Figma design system file key** - If you have a Figma file with design tokens
+2. **Framework** - Tailwind CSS (version 3 or 4), CSS Modules, etc.
+3. **Asset configuration** - Where to store images/icons
+4. **Validation** - Whether to add automated design system checks
+
+### Configuration
+
+After setup, `.docflow/config.json` includes:
 
 ```json
 {
-  "version": "4.2.0",
-  "ownership": {
-    "owned_directories": [".docflow/rules", ".docflow/scripts", ...],
-    "owned_files": [".cursor/commands/activate.md", "AGENTS.md", ...],
-    "preserved_files": ["docflow/context/*", "docflow/knowledge/*", ".env"],
-    "merged_files": {
-      ".docflow/config.json": {
-        "preserve_keys": ["provider.teamId", "provider.projectId"]
-      }
+  "designSystem": {
+    "enabled": true,
+    "framework": "tailwind",
+    "tailwindVersion": 4,
+    "figmaFiles": {
+      "designs": "abc123",      ← Your main design file
+      "system": "xyz789"        ← Your design system file (tokens)
+    },
+    "assetPath": "public/images",
+    "iconStrategy": "figma-only",
+    "validation": {
+      "script": "scripts/check-design-system.mjs",
+      "preCommit": false
     }
   }
 }
 ```
 
-### What Happens on Update
+### Token Mapping
 
-| File Type | Action |
-|-----------|--------|
-| **Owned directories** | Replaced entirely |
-| **Owned files** | Overwritten |
-| **Preserved files** | Never touched |
-| **Merged files** | Updated but preserves specified keys |
+`.docflow/design-system/token-mapping.md` contains your project's translations:
 
-### Your Custom Files Are Safe
+```markdown
+## Colors
 
+| Figma Variable | Hex | Tailwind Class |
+|----------------|-----|----------------|
+| `--bg-primary` | #ffffff | `bg-bg-primary` |
+| `--text-primary` | #111827 | `text-text-primary` |
+
+## Spacing
+
+| Figma (px) | Token | Class |
+|------------|-------|-------|
+| 4px | spacing-xs | `p-xs`, `gap-xs` |
+| 8px | spacing-sm | `p-sm`, `gap-sm` |
 ```
-.cursor/rules/
-  ├── docflow-core/       ← DocFlow (updated)
-  ├── pm-agent/           ← DocFlow (updated)
-  ├── my-custom-rule/     ← YOURS (preserved)
-  └── project-specific/   ← YOURS (preserved)
-```
-
-### Migration Files
-
-Version changes are tracked in `migrations/`:
-
-```
-migrations/
-  ├── 4.0.0.json          ← Restructure from v3
-  ├── 4.1.0.json          ← Priority/dependency workflow
-  └── 4.2.0.json          ← Milestone management
-```
-
-These tell the installer what deprecated files to clean up.
 
 ---
 
@@ -208,11 +237,12 @@ INTAKE
 Terminal States: Archived, Canceled, Duplicate
 ```
 
-### Three-Agent Model
+### Four-Agent Model
 
 1. **PM Agent**: Captures, triages, refines, activates, reviews code, closes
 2. **Implementation Agent**: Builds features (code + tests + docs)
 3. **QE Agent**: Validates with user
+4. **Designer Agent**: Design system setup, token extraction, design governance
 
 ---
 
@@ -250,57 +280,36 @@ Terminal States: Archived, Canceled, Duplicate
 | Command | Description |
 |---------|-------------|
 | `/docflow-setup` | Initial project setup |
+| `/design-setup` | **NEW:** Initialize design system integration |
 | `/sync-project` | Push context to Linear project description |
 | `/project-update` | Post project health update |
 
 ---
 
-## Key Features (v4.2)
+## Key Features
 
-### Milestone Management
+### v4.4: Design System Integration
 
-Organize work into project phases:
-- Create milestones during `/docflow-setup` (Phase 3)
+- **figma-mcp skill** — Complete 5-phase workflow for Figma implementations
+- **component-workflow skill** — React patterns, checklists, testing templates
+- **designer-agent** — Design system governance and token extraction
+- **Token mapping** — Project-specific Figma → code translations
+- **Validation script** — Optional automated design system enforcement
+- **Optional enhancement** — Design system adds to baseline, doesn't replace it
+
+### v4.3: Project Configuration
+
+- Mandatory projectId for all issues
+- Improved config reading patterns
+
+### v4.2: Milestone Management
+
+- Create milestones during `/docflow-setup`
 - Assign issues to milestones during `/capture`
-- Query and create via Linear GraphQL API
-
-```markdown
-Example phases:
-- Phase 1: Foundation (infrastructure, auth)
-- Phase 2: Core Features (main functionality)
-- Phase 3: Polish (UI, performance, docs)
-```
-
-### Priority & Dependency Workflow
-
-During `/docflow-setup` and `/refine`:
-- Set priorities (Urgent → High → Medium → Low)
-- Create blocking relationships between issues
-- Suggested implementation order
-
-### Smart Activation
-
-When you run `/activate` without specifying an issue:
-- Queries all Todo/Backlog issues
-- Filters out blocked items
-- Ranks by priority
-- Recommends what to work on next
-
-### Mandatory Assignment
-
-Issues **must** be assigned before moving to In Progress. The agent:
-1. Gets current Linear user via `get_viewer()`
-2. Assigns the issue
-3. Verifies assignment succeeded
-4. Only then moves to In Progress
-
-### Project Updates on Wrap
-
-`/wrap-session` now **requires** posting a project update to Linear:
-- Summarizes what was completed
-- Notes what's in progress
-- Lists blockers
-- Sets health status (onTrack/atRisk/offTrack)
+- Priority/dependency workflow
+- Smart activation recommendations
+- Mandatory assignment for In Progress
+- Project updates on wrap
 
 ---
 
@@ -331,12 +340,6 @@ Issues **must** be assigned before moving to In Progress. The agent:
 | Canceled | CANCELED |
 | Duplicate | DUPLICATE |
 
-### Quick Capture Template
-
-Set as default template in Linear. Copy from `.docflow/templates/quick-capture.md`.
-
-Auto-apply `triage` label to new issues created in Linear UI.
-
 ---
 
 ## Documentation
@@ -348,17 +351,15 @@ Auto-apply `triage` label to new issues created in Linear UI.
 
 ---
 
-## What's New in v4.2
+## What's New in v4.4
 
-- **Milestone Management** — Organize work into project phases
-- **Create Milestones in Setup** — Phase 3 guides milestone creation
-- **Milestone Assignment** — Assign issues during `/capture`
-- **Priority/Dependency Workflow** — Set during setup and refine
-- **Smart Activation** — Recommends what to work on based on priority + blockers
-- **Mandatory Assignment** — Can't be In Progress without assignee
-- **Project Updates on Wrap** — Required on `/wrap-session`
-- **Manifest-Based Updates** — Smart updates preserve your customizations
+- **Enhanced Figma Integration** — 5-phase workflow (screenshot → extract → spec → implement → validate)
+- **Component Workflow Skill** — React patterns, checklists, testing templates
+- **Design System Integration** — Optional token enforcement via `/design-setup`
+- **Designer Agent** — New agent role for design governance
+- **Token Mapping Templates** — Figma → code translation documentation
+- **Validation Script** — Automated design system enforcement (optional)
 
 ---
 
-*DocFlow Cloud v4.2.0*
+*DocFlow Cloud v4.4.0*
