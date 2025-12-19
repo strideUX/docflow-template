@@ -78,7 +78,7 @@ DocFlow Cloud works best with MCP servers installed in Cursor.
 your-project/
 ├── .docflow/                    ← DOCFLOW FRAMEWORK (updated via --update)
 │   ├── config.json              ← Provider settings (YOUR Linear IDs preserved)
-│   ├── version                  ← Current version (4.1.0)
+│   ├── version                  ← Current version (4.2.0)
 │   ├── rules/                   ← Canonical rule content
 │   │   ├── core.md
 │   │   ├── pm-agent.md
@@ -135,7 +135,7 @@ The `manifest.json` defines file ownership:
 
 ```json
 {
-  "version": "4.1.0",
+  "version": "4.2.0",
   "ownership": {
     "owned_directories": [".docflow/rules", ".docflow/scripts", ...],
     "owned_files": [".cursor/commands/activate.md", "AGENTS.md", ...],
@@ -175,7 +175,8 @@ Version changes are tracked in `migrations/`:
 ```
 migrations/
   ├── 4.0.0.json          ← Restructure from v3
-  └── 4.1.0.json          ← Priority/dependency workflow
+  ├── 4.1.0.json          ← Priority/dependency workflow
+  └── 4.2.0.json          ← Milestone management
 ```
 
 These tell the installer what deprecated files to clean up.

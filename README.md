@@ -124,7 +124,7 @@ DocFlow uses a **manifest-based update system** to keep projects current while p
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Your Project                                                │
-│  ├── .docflow/version         ← Current version (4.1.0)     │
+│  ├── .docflow/version         ← Current version (4.2.0)     │
 │  ├── .docflow/config.json     ← YOUR Linear IDs (preserved) │
 │  ├── .docflow/rules/*         ← Updated from template       │
 │  ├── .cursor/commands/*       ← Updated from template       │
@@ -166,7 +166,8 @@ Each version has a migration file documenting changes:
 ```
 migrations/
   ├── 4.0.0.json          ← Baseline (restructure from v3)
-  └── 4.1.0.json          ← Priority/dependency workflow
+  ├── 4.1.0.json          ← Priority/dependency workflow
+  └── 4.2.0.json          ← Milestone management
 ```
 
 These help the installer know what files to clean up from previous versions.
@@ -199,7 +200,7 @@ BACKLOG → TODO → IN PROGRESS → IN REVIEW → QA → DONE
 your-project/
 ├── .docflow/                    ← DocFlow framework
 │   ├── config.json              ← Linear IDs, settings
-│   ├── version                  ← Current version (4.1.0)
+│   ├── version                  ← Current version (4.2.0)
 │   ├── rules/                   ← Canonical rule content
 │   │   ├── core.md
 │   │   ├── pm-agent.md
@@ -298,7 +299,8 @@ docflow-template/
 │
 └── migrations/                  # Version migration files
     ├── 4.0.0.json               # Baseline (restructure)
-    └── 4.1.0.json               # Priority/dependency workflow
+    ├── 4.1.0.json               # Priority/dependency workflow
+    └── 4.2.0.json               # Milestone management
 ```
 
 ---
@@ -323,6 +325,7 @@ docflow-template/
 - [x] Manifest-based updates
 - [x] Priority/dependency workflow
 - [x] Linear project updates
+- [x] Milestone management
 - [ ] Jira provider
 - [ ] GitHub Issues provider
 
