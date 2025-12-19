@@ -1,5 +1,5 @@
 {
-  "version": "4.3.0",
+  "version": "4.4.0",
   "description": "DocFlow Cloud - Manifest of all managed files",
   "repository": "github.com/strideUX/docflow-template",
   
@@ -20,7 +20,8 @@
         ".cursor/rules/linear-integration",
         ".cursor/rules/figma-integration",
         ".cursor/rules/session-awareness",
-        ".cursor/rules/templates"
+        ".cursor/rules/templates",
+        ".cursor/rules/designer-agent"
       ]
     },
     
@@ -34,6 +35,7 @@
         ".cursor/commands/close.md",
         ".cursor/commands/docflow-setup.md",
         ".cursor/commands/docflow-update.md",
+        ".cursor/commands/design-setup.md",
         ".cursor/commands/implement.md",
         ".cursor/commands/project-update.md",
         ".cursor/commands/refine.md",
@@ -60,7 +62,8 @@
         "docflow/context/overview.md",
         "docflow/context/stack.md",
         "docflow/context/standards.md",
-        "docflow/knowledge/**"
+        "docflow/knowledge/**",
+        ".docflow/design-system/**"
       ]
     },
     
@@ -68,7 +71,7 @@
       "description": "Files where specific keys are preserved during update",
       "files": {
         ".docflow/config.json": {
-          "preserve_keys": ["provider.teamId", "provider.projectId", "provider.defaultMilestoneId", "paths.content"]
+          "preserve_keys": ["provider.teamId", "provider.projectId", "provider.defaultMilestoneId", "paths.content", "designSystem"]
         }
       }
     },
@@ -98,6 +101,7 @@
         "block.md",
         "capture.md",
         "close.md",
+        "design-setup.md",
         "docflow-setup.md",
         "docflow-update.md",
         "implement.md",
@@ -118,11 +122,13 @@
         "linear-integration": ["RULE.md"],
         "figma-integration": ["RULE.md"],
         "session-awareness": ["RULE.md"],
-        "templates": ["RULE.md"]
+        "templates": ["RULE.md"],
+        "designer-agent": ["RULE.md"]
       },
       ".docflow": {
         "rules": [
           "core.md",
+          "designer-agent.md",
           "figma-integration.md",
           "implementation-agent.md",
           "linear-integration.md",
@@ -138,16 +144,28 @@
         "skills": {
           "docflow-commands": ["SKILL.md"],
           "linear-workflow": ["SKILL.md"],
-          "spec-templates": ["SKILL.md"]
+          "spec-templates": ["SKILL.md"],
+          "figma-mcp": ["SKILL.md", "PROMPTING.md", "TROUBLESHOOTING.md"],
+          "component-workflow": ["SKILL.md", "CHECKLIST.md", "PATTERNS.md"]
         },
-        "templates": [
-          "bug.md",
-          "chore.md",
-          "feature.md",
-          "idea.md",
-          "quick-capture.md",
-          "README.md"
-        ],
+        "templates": {
+          "root": [
+            "bug.md",
+            "chore.md",
+            "feature.md",
+            "idea.md",
+            "quick-capture.md",
+            "README.md"
+          ],
+          "design-system": [
+            "token-mapping.md",
+            "component-patterns.md",
+            "README.md"
+          ],
+          "scripts": [
+            "check-design-system.template.mjs"
+          ]
+        },
         "root": ["config.json", "version"]
       },
       ".claude": ["rules.md"],
@@ -157,3 +175,4 @@
     }
   }
 }
+

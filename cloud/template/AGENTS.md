@@ -22,6 +22,17 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 | **PM/Planning** | Planning, reviewing, closing | `.docflow/rules/pm-agent.md` |
 | **Implementation** | Building features | `.docflow/rules/implementation-agent.md` |
 | **QE/Validation** | Testing with user | `.docflow/rules/qe-agent.md` |
+| **Designer** | Design system, tokens | `.docflow/rules/designer-agent.md` |
+
+---
+
+## Key Skills
+
+| Skill | Purpose | Path |
+|-------|---------|------|
+| **figma-mcp** | Figma integration workflow | `.docflow/skills/figma-mcp/` |
+| **component-workflow** | Component patterns & testing | `.docflow/skills/component-workflow/` |
+| **linear-workflow** | Linear MCP integration | `.docflow/skills/linear-workflow/` |
 
 ---
 
@@ -31,6 +42,7 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 - **Context stays local** (`{paths.content}/context/`, `{paths.content}/knowledge/`)
 - **Update Linear, not files** for status/progress
 - **Load rules situationally** based on current task
+- **Design system is optional** - baseline Figma behavior always works
 
 ---
 
@@ -43,6 +55,18 @@ Commands are in `.cursor/commands/`. Use natural language or slash commands.
 - `/capture` - Create issue
 - `/implement` - Build feature
 - `/status` - Check Linear state
+- `/design-setup` - Initialize design system (optional)
+
+---
+
+## Design System (Optional)
+
+If `.docflow/config.json` has `designSystem.enabled: true`:
+- Token mapping enforced for all Figma implementations
+- Load `.docflow/design-system/token-mapping.md` for translations
+- Validation script can enforce design system compliance
+
+Run `/design-setup` to initialize design system integration.
 
 ---
 

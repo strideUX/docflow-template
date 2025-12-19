@@ -1,0 +1,101 @@
+{
+  "version": "4.4.0",
+  "date": "2025-12-19",
+  "description": "Design system integration layer - enhanced Figma workflow with optional token enforcement",
+  
+  "changes": {
+    "features": [
+      {
+        "description": "Added figma-mcp skill with complete 5-phase workflow for pixel-perfect Figma implementation",
+        "files": [
+          ".docflow/skills/figma-mcp/SKILL.md",
+          ".docflow/skills/figma-mcp/PROMPTING.md",
+          ".docflow/skills/figma-mcp/TROUBLESHOOTING.md"
+        ]
+      },
+      {
+        "description": "Added component-workflow skill with React patterns, testing templates, and validation checklists",
+        "files": [
+          ".docflow/skills/component-workflow/SKILL.md",
+          ".docflow/skills/component-workflow/CHECKLIST.md",
+          ".docflow/skills/component-workflow/PATTERNS.md"
+        ]
+      },
+      {
+        "description": "Added designer-agent rules for design system setup and token extraction",
+        "files": [
+          ".docflow/rules/designer-agent.md"
+        ]
+      },
+      {
+        "description": "Added /design-setup command to initialize optional design system integration",
+        "files": [
+          ".cursor/commands/design-setup.md"
+        ]
+      },
+      {
+        "description": "Added design system templates (token-mapping, component-patterns, validation script)",
+        "files": [
+          ".docflow/templates/design-system/token-mapping.md",
+          ".docflow/templates/design-system/component-patterns.md",
+          ".docflow/templates/design-system/README.md",
+          ".docflow/templates/scripts/check-design-system.template.mjs"
+        ]
+      },
+      {
+        "description": "Added optional designSystem config section for enhanced token enforcement",
+        "files": [
+          ".docflow/config.json"
+        ]
+      }
+    ],
+    "improvements": [
+      {
+        "description": "Updated figma-integration rule to reference new skills and support design system enhancement",
+        "files": [
+          ".docflow/rules/figma-integration.md",
+          ".cursor/rules/figma-integration/RULE.md"
+        ]
+      }
+    ]
+  },
+  
+  "files_added": [
+    ".docflow/skills/figma-mcp/SKILL.md",
+    ".docflow/skills/figma-mcp/PROMPTING.md",
+    ".docflow/skills/figma-mcp/TROUBLESHOOTING.md",
+    ".docflow/skills/component-workflow/SKILL.md",
+    ".docflow/skills/component-workflow/CHECKLIST.md",
+    ".docflow/skills/component-workflow/PATTERNS.md",
+    ".docflow/rules/designer-agent.md",
+    ".cursor/commands/design-setup.md",
+    ".docflow/templates/design-system/token-mapping.md",
+    ".docflow/templates/design-system/component-patterns.md",
+    ".docflow/templates/design-system/README.md",
+    ".docflow/templates/scripts/check-design-system.template.mjs"
+  ],
+  
+  "files_modified": [
+    ".docflow/config.json",
+    ".docflow/version",
+    ".docflow/rules/figma-integration.md",
+    ".cursor/rules/figma-integration/RULE.md"
+  ],
+  
+  "config_changes": {
+    "added": {
+      "designSystem": "Optional design system configuration (null by default)"
+    }
+  },
+  
+  "upgrade_notes": [
+    "Design system integration is OPTIONAL - baseline Figma workflow always works",
+    "Run /design-setup to enable design system with token enforcement",
+    "New figma-mcp skill provides enhanced 5-phase workflow for all Figma work",
+    "component-workflow skill adds React patterns and testing templates",
+    "Validation script template available for automated design system enforcement"
+  ],
+  
+  "breaking_changes": []
+}
+

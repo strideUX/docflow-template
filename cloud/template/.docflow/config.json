@@ -1,5 +1,5 @@
 {
-  "version": "4.3.0",
+  "version": "4.4.0",
   "sourceRepo": "github.com/strideUX/docflow-template",
   "paths": {
     "content": "docflow"
@@ -21,6 +21,7 @@
     "ARCHIVED": "Archived",
     "CANCELED": "Canceled",
     "DUPLICATE": "Duplicate"
-  }
+  },
+  "designSystem": null
 }
 

@@ -20,7 +20,7 @@
 
 set -e
 
-DOCFLOW_VERSION="4.3.0"
+DOCFLOW_VERSION="4.4.0"
 RAW_BASE_LOCAL="https://raw.githubusercontent.com/strideUX/docflow-template/main/local/template"
 RAW_BASE_CLOUD="https://raw.githubusercontent.com/strideUX/docflow-template/main/cloud/template"
 RAW_BASE_ROOT="https://raw.githubusercontent.com/strideUX/docflow-template/main"
@@ -230,7 +230,7 @@ if [ "$UPDATE_MODE" = true ]; then
   echo "   [1/5] Updating .docflow/rules..."
   rm -rf .docflow/rules
   mkdir -p .docflow/rules
-  for rule in core pm-agent implementation-agent qe-agent linear-integration figma-integration session-awareness; do
+  for rule in core pm-agent implementation-agent qe-agent linear-integration figma-integration session-awareness designer-agent; do
     download_file "${RAW_BASE}/.docflow/rules/${rule}.md" ".docflow/rules/${rule}.md"
   done
   
@@ -245,19 +245,32 @@ if [ "$UPDATE_MODE" = true ]; then
   echo "   [3/5] Updating .docflow/skills..."
   rm -rf .docflow/skills
   mkdir -p .docflow/skills/linear-workflow .docflow/skills/spec-templates .docflow/skills/docflow-commands
+  mkdir -p .docflow/skills/figma-mcp .docflow/skills/component-workflow
   download_file "${RAW_BASE}/.docflow/skills/linear-workflow/SKILL.md" ".docflow/skills/linear-workflow/SKILL.md"
   download_file "${RAW_BASE}/.docflow/skills/spec-templates/SKILL.md" ".docflow/skills/spec-templates/SKILL.md"
   download_file "${RAW_BASE}/.docflow/skills/docflow-commands/SKILL.md" ".docflow/skills/docflow-commands/SKILL.md"
+  download_file "${RAW_BASE}/.docflow/skills/figma-mcp/SKILL.md" ".docflow/skills/figma-mcp/SKILL.md"
+  download_file "${RAW_BASE}/.docflow/skills/figma-mcp/PROMPTING.md" ".docflow/skills/figma-mcp/PROMPTING.md"
+  download_file "${RAW_BASE}/.docflow/skills/figma-mcp/TROUBLESHOOTING.md" ".docflow/skills/figma-mcp/TROUBLESHOOTING.md"
+  download_file "${RAW_BASE}/.docflow/skills/component-workflow/SKILL.md" ".docflow/skills/component-workflow/SKILL.md"
+  download_file "${RAW_BASE}/.docflow/skills/component-workflow/CHECKLIST.md" ".docflow/skills/component-workflow/CHECKLIST.md"
+  download_file "${RAW_BASE}/.docflow/skills/component-workflow/PATTERNS.md" ".docflow/skills/component-workflow/PATTERNS.md"
   
   echo "   [4/5] Updating .docflow/templates..."
   rm -rf .docflow/templates
-  mkdir -p .docflow/templates
+  mkdir -p .docflow/templates .docflow/templates/design-system .docflow/templates/scripts
   for template in feature bug chore idea quick-capture README; do
     download_file "${RAW_BASE}/.docflow/templates/${template}.md" ".docflow/templates/${template}.md"
   done
+  # Design system templates
+  for ds_template in token-mapping component-patterns README; do
+    download_file "${RAW_BASE}/.docflow/templates/design-system/${ds_template}.md" ".docflow/templates/design-system/${ds_template}.md"
+  done
+  # Script templates
+  download_file "${RAW_BASE}/.docflow/templates/scripts/check-design-system.template.mjs" ".docflow/templates/scripts/check-design-system.template.mjs"
   
   echo "   [5/5] Updating Cursor rules..."
-  for rule_dir in docflow-core pm-agent implementation-agent qe-agent linear-integration figma-integration session-awareness templates; do
+  for rule_dir in docflow-core pm-agent implementation-agent qe-agent linear-integration figma-integration session-awareness templates designer-agent; do
     rm -rf ".cursor/rules/${rule_dir}"
     mkdir -p ".cursor/rules/${rule_dir}"
     download_file "${RAW_BASE}/.cursor/rules/${rule_dir}/RULE.md" ".cursor/rules/${rule_dir}/RULE.md"
@@ -269,7 +282,7 @@ if [ "$UPDATE_MODE" = true ]; then
   echo ""
   echo "   Updating commands..."
   mkdir -p .cursor/commands
-  for cmd in activate attach block capture close docflow-setup docflow-update implement project-update refine review start-session status sync-project validate wrap-session; do
+  for cmd in activate attach block capture close docflow-setup docflow-update implement project-update refine review start-session status sync-project validate wrap-session design-setup; do
     download_file "${RAW_BASE}/.cursor/commands/${cmd}.md" ".cursor/commands/${cmd}.md"
   done
   
@@ -366,12 +379,12 @@ EOF
   echo -e "   Version: ${YELLOW}$CURRENT_VERSION${NC} → ${GREEN}$DOCFLOW_VERSION${NC}"
   echo ""
   echo -e "${YELLOW}What's new in $DOCFLOW_VERSION:${NC}"
-  echo "   • Milestone management for organizing work into phases"
-  echo "   • Create milestones during project setup"
-  echo "   • Assign issues to milestones during capture"
-  echo "   • Priority/dependency workflow"
-  echo "   • Smart 'what's next' recommendations"
-  echo "   • Mandatory assignment for In Progress state"
+  echo "   • Enhanced Figma integration with 5-phase workflow (figma-mcp skill)"
+  echo "   • Component workflow skill with patterns and checklists"
+  echo "   • Optional design system integration with token enforcement"
+  echo "   • Designer agent for design system setup and token extraction"
+  echo "   • /design-setup command to initialize design system"
+  echo "   • Validation script template for automated design checks"
   echo ""
   
   exit 0
@@ -662,7 +675,7 @@ echo "   [1/7] Installing Cursor rules..."
 
 if [ "$MODE" == "cloud" ]; then
   # New folder-based rules structure
-  for rule_dir in docflow-core session-awareness pm-agent implementation-agent qe-agent linear-integration figma-integration templates; do
+  for rule_dir in docflow-core session-awareness pm-agent implementation-agent qe-agent linear-integration figma-integration templates designer-agent; do
     mkdir -p ".cursor/rules/${rule_dir}"
     download_template_file ".cursor/rules/${rule_dir}/RULE.md" ".cursor/rules/${rule_dir}/RULE.md"
   done
@@ -682,7 +695,7 @@ done
 
 # Cloud-specific commands
 if [ "$MODE" == "cloud" ]; then
-  for cmd in docflow-update sync-project project-update attach refine; do
+  for cmd in docflow-update sync-project project-update attach refine design-setup; do
     download_template_file ".cursor/commands/${cmd}.md" ".cursor/commands/${cmd}.md"
   done
 fi
@@ -704,7 +717,7 @@ for cmd in start-session wrap-session capture review activate implement validate
   ln -sf "../../.cursor/commands/${cmd}.md" "${cmd}.md" 2>/dev/null || true
 done
 if [ "$MODE" == "cloud" ]; then
-  for cmd in docflow-update sync-project project-update attach refine; do
+  for cmd in docflow-update sync-project project-update attach refine design-setup; do
     ln -sf "../../.cursor/commands/${cmd}.md" "${cmd}.md" 2>/dev/null || true
   done
 fi
@@ -726,9 +739,15 @@ if [ "$MODE" == "cloud" ]; then
   for template in README feature bug chore idea quick-capture; do
     download_template_file ".docflow/templates/${template}.md" ".docflow/templates/${template}.md"
   done
+  # Design system templates
+  mkdir -p .docflow/templates/design-system .docflow/templates/scripts
+  for ds_template in token-mapping component-patterns README; do
+    download_template_file ".docflow/templates/design-system/${ds_template}.md" ".docflow/templates/design-system/${ds_template}.md"
+  done
+  download_template_file ".docflow/templates/scripts/check-design-system.template.mjs" ".docflow/templates/scripts/check-design-system.template.mjs"
   
   # Download rules
-  for rule in core linear-integration pm-agent implementation-agent qe-agent figma-integration session-awareness; do
+  for rule in core linear-integration pm-agent implementation-agent qe-agent figma-integration session-awareness designer-agent; do
     download_template_file ".docflow/rules/${rule}.md" ".docflow/rules/${rule}.md"
   done
   
@@ -742,6 +761,14 @@ if [ "$MODE" == "cloud" ]; then
   download_template_file ".docflow/skills/linear-workflow/SKILL.md" ".docflow/skills/linear-workflow/SKILL.md"
   download_template_file ".docflow/skills/spec-templates/SKILL.md" ".docflow/skills/spec-templates/SKILL.md"
   download_template_file ".docflow/skills/docflow-commands/SKILL.md" ".docflow/skills/docflow-commands/SKILL.md"
+  # Figma and component workflow skills
+  mkdir -p .docflow/skills/figma-mcp .docflow/skills/component-workflow
+  download_template_file ".docflow/skills/figma-mcp/SKILL.md" ".docflow/skills/figma-mcp/SKILL.md"
+  download_template_file ".docflow/skills/figma-mcp/PROMPTING.md" ".docflow/skills/figma-mcp/PROMPTING.md"
+  download_template_file ".docflow/skills/figma-mcp/TROUBLESHOOTING.md" ".docflow/skills/figma-mcp/TROUBLESHOOTING.md"
+  download_template_file ".docflow/skills/component-workflow/SKILL.md" ".docflow/skills/component-workflow/SKILL.md"
+  download_template_file ".docflow/skills/component-workflow/CHECKLIST.md" ".docflow/skills/component-workflow/CHECKLIST.md"
+  download_template_file ".docflow/skills/component-workflow/PATTERNS.md" ".docflow/skills/component-workflow/PATTERNS.md"
   
   # Update content path in config if customized
   if [ "$CONTENT_FOLDER" != "docflow" ]; then
