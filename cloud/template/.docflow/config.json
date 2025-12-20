@@ -22,6 +22,40 @@
     "CANCELED": "Canceled",
     "DUPLICATE": "Duplicate"
   },
-  "designSystem": null
+  "designSystem": null,
+  "aiLabor": {
+    "enabled": true,
+    "defaultProvider": "claude-sonnet-4",
+    "thresholds": {
+      "warnTokens": 200000,
+      "warnCost": 5.00,
+      "requireApproval": 10.00
+    },
+    "tracking": {
+      "recordActuals": true,
+      "calibrationEnabled": true
+    },
+    "providerRates": {
+      "claude-sonnet-4": {
+        "input": 3.00,
+        "output": 15.00,
+        "inputRatio": 0.70,
+        "outputRatio": 0.30
+      },
+      "claude-opus-4": {
+        "input": 15.00,
+        "output": 75.00,
+        "inputRatio": 0.70,
+        "outputRatio": 0.30
+      },
+      "gpt-4o": {
+        "input": 2.50,
+        "output": 10.00,
+        "inputRatio": 0.70,
+        "outputRatio": 0.30
+      }
+    }
+  }
 }
+
 

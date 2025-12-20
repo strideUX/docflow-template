@@ -71,7 +71,7 @@
       "description": "Files where specific keys are preserved during update",
       "files": {
         ".docflow/config.json": {
-          "preserve_keys": ["provider.teamId", "provider.projectId", "provider.defaultMilestoneId", "paths.content", "designSystem"]
+          "preserve_keys": ["provider.teamId", "provider.projectId", "provider.defaultMilestoneId", "paths.content", "designSystem", "aiLabor.defaultProvider", "aiLabor.thresholds", "aiLabor.providerRates"]
         }
       }
     },
@@ -142,6 +142,7 @@
           "status-summary.sh"
         ],
         "skills": {
+          "ai-labor-estimate": ["SKILL.md", "provider-costs.md"],
           "docflow-commands": ["SKILL.md"],
           "linear-workflow": ["SKILL.md"],
           "spec-templates": ["SKILL.md"],
@@ -175,4 +176,5 @@
     }
   }
 }
+
 

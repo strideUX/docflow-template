@@ -125,7 +125,48 @@ Remove these instructions when creating the final issue.
 
 ---
 
+## AI Effort Estimate
+<!-- 
+AGENT: Fill this section during /refine using the ai-labor-estimate skill.
+See .docflow/skills/ai-labor-estimate/SKILL.md for calculation details.
+Update Actuals section during /close for calibration.
+-->
+
+### Sizing Factors
+
+| Factor | Value | Multiplier |
+|--------|-------|------------|
+| **Task Type** | feature | base: 40k |
+| **Scope** | [S/M/L/XL] | ×[0.5/1.0/2.0/4.0] |
+| **Novelty** | [existing/partial/greenfield] | ×[0.7/1.2/2.0] |
+| **Clarity** | [defined/discovery/exploratory] | ×[0.8/1.5/2.5] |
+| **Codebase** | [simple/moderate/complex] | ×[0.8/1.0/1.5] |
+
+### Estimate
+
+**Provider**: [Claude Sonnet 4]  
+**Calculated Tokens**: ~[X]k  
+**Confidence**: ±[40-60]%  
+**Token Range**: [low]k - [high]k  
+**Cost Range**: $[low] - $[high]
+
+### Approach Comparison
+
+| Approach | Est. Cost | Est. Time | Recommendation |
+|----------|-----------|-----------|----------------|
+| **Full AI** | $[X] | [X] hrs | [When to use] |
+| **AI-Assisted** | $[X] + [X]hrs | [X] hrs | [When to use] |
+| **Human-Led** | $[X] (review) | [X] hrs | [When to use] |
+
+### Actuals (fill on /close)
+**Actual Tokens**: [fill after completion]  
+**Variance**: [+/-X]% [under/over estimate]  
+**Notes**: [what drove variance - blockers, scope changes, retries]
+
+---
+
 _Created: YYYY-MM-DD_
+
 
 
 

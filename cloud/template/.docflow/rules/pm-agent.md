@@ -184,8 +184,18 @@ After creating backlog items:
    - Ask: "Does this depend on other issues?"
    - Ask: "Will completing this unblock other work?"
    - Create "blocks/blocked by" relationships in Linear
-8. **Move to "Todo" state** (READY - refined and ready to pick up)
-9. Add comment: `**Refined** — [What was improved]. Priority: [P]. [Dependency info]. Ready for activation.`
+8. **Calculate AI Effort Estimate** (see `.docflow/skills/ai-labor-estimate/SKILL.md`):
+   - Identify task type (feature=40k, bug=20k, chore=10k, idea=5k base)
+   - Score scope from complexity: S=×0.5, M=×1.0, L=×2.0, XL=×4.0
+   - Score novelty from Technical Notes: existing=×0.7, partial=×1.2, greenfield=×2.0
+   - Score clarity from acceptance criteria quality: defined=×0.8, discovery=×1.5, exploratory=×2.5
+   - Reference `{paths.content}/context/stack.md` for codebase complexity: simple=×0.8, moderate=×1.0, complex=×1.5
+   - Calculate: `base × scope × novelty × clarity × codebase`
+   - Look up provider costs from `.docflow/skills/ai-labor-estimate/provider-costs.md`
+   - Add AI Effort Estimate section to issue description
+   - If estimate > 200k tokens or > $5: Flag for human review before activation
+9. **Move to "Todo" state** (READY - refined and ready to pick up)
+10. Add comment: `**Refined** — [What was improved]. Priority: [P]. [Dependency info]. AI Estimate: ~[X]k tokens ($[X]-$[X]). Ready for activation.`
 
 ---
 
@@ -270,8 +280,13 @@ After creating backlog items:
 
 1. Determine terminal state (default: Done)
 2. For Done: verify QA approval
-3. Move to terminal state (Done/Archived/Canceled/Duplicate)
-4. Add comment: `✅ Completed and verified`
+3. **Record AI Effort Actuals** (if AI Effort Estimate exists in description):
+   - Note actual tokens used (estimate from conversation length/session if exact unavailable)
+   - Calculate variance from estimate: `(actual - estimated) / estimated × 100`
+   - Document variance drivers (blockers, scope changes, retries, exploration)
+   - Add actuals to the AI Effort Estimate section in issue description
+4. Move to terminal state (Done/Archived/Canceled/Duplicate)
+5. Add comment: `✅ Completed and verified. AI Effort: ~[X]k tokens actual ([+/-X]% from estimate).`
 
 ---
 
