@@ -243,16 +243,30 @@ After creating backlog items:
 
 5. Set estimate if not already set (ask or infer)
 
-6. **Assign issue (REQUIRED):**
+6. **Validate AI Effort Estimate exists** (see `.docflow/skills/ai-labor-estimate/SKILL.md`):
+   - Check issue description for "## AI Effort Estimate" section
+   - **If missing**: 
+     - WARN user: "⚠️ This issue is missing an AI Effort Estimate."
+     - Ask: "Would you like me to calculate one now before activation?"
+     - If yes → Run estimation (same as `/refine` step 8), update description
+     - If no → Proceed but note: "Proceeding without estimate - actuals won't have comparison baseline."
+   - **If present but incomplete** (placeholder values like `[X]k`):
+     - WARN: "AI Effort Estimate exists but has placeholder values."
+     - Offer to complete it now
+   - **If estimate exceeds thresholds** (`aiLabor.thresholds` in config):
+     - > 200k tokens or > $5: Show warning, confirm before proceeding
+     - > $10 (requireApproval): Require explicit user approval
+
+7. **Assign issue (REQUIRED):**
    ```typescript
    update_issue({ issueId: "xxx", assigneeId: "user-id" })
    ```
 
-7. **Verify assignment succeeded** - query issue, confirm assignee set
+8. **Verify assignment succeeded** - query issue, confirm assignee set
 
-8. Move to "In Progress" state (only after assignment confirmed)
+9. Move to "In Progress" state (only after assignment confirmed)
 
-9. Add comment: `**Activated** — Assigned to [name], Priority: [P], Estimate: [E].`
+10. Add comment: `**Activated** — Assigned to [name], Priority: [P], Estimate: [E]. AI Effort: ~[X]k tokens ($[X]-$[X]).`
 
 ---
 

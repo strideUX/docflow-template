@@ -19,9 +19,29 @@ This skill enables agents to:
 | Trigger | Action |
 |---------|--------|
 | `/refine [spec]` | Calculate estimate, add to issue |
-| `/activate [spec]` | Verify estimate exists, warn if missing |
+| `/activate [spec]` | **Validate** estimate exists; if missing, offer to calculate; warn on high estimates |
+| `/implement [spec]` | **Validate** estimate exists; if missing, offer to calculate; show estimate in checklist |
 | `/close [spec]` | Record actuals, calculate variance |
+| Implementation complete | Estimate tokens used, update actuals in issue |
 | User asks "how much will this cost?" | Run estimation |
+
+### Validation Flow (for /activate and /implement)
+
+```
+1. Read issue description
+2. Search for "## AI Effort Estimate" section
+3. IF missing:
+   → WARN: "⚠️ Missing AI Effort Estimate"
+   → OFFER: "Would you like me to calculate one now?"
+   → IF yes: Run estimation, update description
+   → IF no: Proceed with warning about no baseline
+4. IF present but has placeholders ([X]k):
+   → OFFER: "Estimate exists but incomplete. Fill it now?"
+5. IF estimate exceeds thresholds:
+   → tokens > 200k OR cost > $5: Show warning
+   → cost > $10: Require explicit approval
+6. Continue with activation/implementation
+```
 
 ---
 
@@ -173,7 +193,7 @@ Add to issue comment on completion:
 
 ## Agent Instructions
 
-### During /refine
+### During /refine (PM Agent)
 
 1. **Read the spec** completely
 2. **Identify task type** from labels (feature, bug, chore, idea)
@@ -184,23 +204,63 @@ Add to issue comment on completion:
    - Reference `stack.md` → codebase complexity
 4. **Calculate estimate** using formula
 5. **Look up provider costs** from `provider-costs.md` or `.docflow/config.json`
-6. **Add estimate section** to issue description
+6. **Add estimate section** to issue description (replace placeholders with values)
 7. **If estimate exceeds threshold**, flag for human review:
-   - \> 200k tokens → Consider breaking down
+   - \> 200k tokens → Consider breaking down the issue
    - \> $5 estimated → Confirm before proceeding
+8. **Include estimate in refine comment**: `AI Estimate: ~Xk tokens ($X-$X)`
 
-### During /activate
+### During /activate (PM Agent)
 
-1. **Check for AI Effort Estimate section**
-2. **If missing**: Warn user, suggest running `/refine` first
-3. **If present**: Confirm estimate before proceeding
+1. **Search issue description** for "## AI Effort Estimate"
+2. **If missing**:
+   - WARN: "⚠️ This issue is missing an AI Effort Estimate."
+   - ASK: "Would you like me to calculate one now before activation?"
+   - If yes → Calculate and add to description
+   - If no → Proceed but note: "No baseline for actuals comparison"
+3. **If present but incomplete** (still has `[X]k` placeholders):
+   - OFFER: "AI Effort Estimate exists but has placeholder values. Complete it now?"
+4. **If present and exceeds thresholds**:
+   - \> 200k tokens or \> $5 → Show warning, ask for confirmation
+   - \> $10 → Require explicit "yes proceed" before continuing
+5. **Include in activation comment**: `AI Effort: ~Xk tokens ($X-$X)`
 
-### During /close
+### During /implement (Implementation Agent)
 
-1. **Record actual tokens** if available (from conversation length, API logs)
-2. **Calculate variance** from estimate
-3. **Add actuals comment** to issue
-4. **Update internal calibration** (note patterns for future estimates)
+1. **Search issue description** for "## AI Effort Estimate"
+2. **If missing**:
+   - WARN: "⚠️ Missing AI Effort Estimate - tracking actuals won't have comparison baseline."
+   - OFFER: "Calculate estimate before starting implementation?"
+   - If yes → Calculate estimate, update description
+   - If no → Proceed with warning
+3. **If present**:
+   - Show estimate in implementation checklist
+   - Note: "Tracking against estimate of ~Xk tokens"
+4. **During implementation**:
+   - Keep rough mental model of token usage
+   - Note if work is going significantly over estimate (scope discovery, retries)
+
+### On Implementation Complete (Implementation Agent)
+
+1. **Estimate actual tokens used**:
+   - Rough method: conversation turns × ~2k tokens/turn
+   - Or estimate based on files changed, complexity of work
+2. **Update AI Effort Estimate section** in issue description:
+   - Fill "Actual Tokens" field
+   - Calculate variance percentage
+   - Add notes on variance drivers
+3. **Include in completion comment**: `AI Effort: ~Xk actual (estimated Xk, +/-X% variance)`
+
+### During /close (PM Agent)
+
+1. **Verify actuals were recorded** (from implementation completion)
+2. **If actuals missing**: Estimate based on issue activity/comments
+3. **Calculate final variance** from estimate
+4. **Add final actuals to issue** if not already present
+5. **Log patterns for calibration**:
+   - Which factor assessments were off?
+   - What should be adjusted for similar future work?
+6. **Include in close comment**: `Final AI Effort: ~Xk tokens (+/-X% from estimate)`
 
 ---
 

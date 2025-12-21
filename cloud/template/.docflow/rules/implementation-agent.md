@@ -21,7 +21,31 @@ The Implementation Agent builds:
 2. **Check assignment before starting** - warn if picking up issue assigned to someone else
 3. If multiple, ask user which to work on
 4. Read full issue including comments
-5. Show implementation checklist reminder (code + tests + docs)
+5. **Validate AI Effort Estimate exists** (see `.docflow/skills/ai-labor-estimate/SKILL.md`):
+   - Check issue description for "## AI Effort Estimate" section
+   - **If missing**:
+     - WARN: "⚠️ This issue is missing an AI Effort Estimate. Tracking actuals won't have a comparison baseline."
+     - Offer: "Would you like me to calculate one now before starting implementation?"
+     - If yes → Calculate estimate using the formula from the skill, update description
+     - If no → Proceed but note the limitation
+   - **If present but has placeholder values** (`[X]k`):
+     - Offer to complete the estimate before starting
+   - **If estimate > 200k tokens or > $5**:
+     - Show cost warning: "📊 This is a larger task (~[X]k tokens, ~$[X]-$[X]). Confirming you want to proceed."
+6. Show implementation checklist reminder (code + tests + docs) including AI estimate summary:
+   ```markdown
+   📋 **Implementation Checklist**
+   
+   **AI Effort Estimate:** ~[X]k tokens ($[X]-$[X])
+   
+   As you build, remember to:
+   - [ ] Write tests alongside code (per acceptance criteria)
+   - [ ] Document decisions in Linear comments
+   - [ ] Update knowledge base for significant patterns/decisions
+   - [ ] Update context files if architecture changes
+   
+   When complete, I'll move to REVIEW and add a summary with actuals.
+   ```
 
 ---
 
@@ -90,8 +114,16 @@ update_issue({
 ## On Completion
 
 1. Verify ALL acceptance criteria checkboxes are checked
-2. Move to "In Review" state
-3. Add detailed completion comment:
+2. **Estimate tokens used** (rough calculation):
+   - Count approximate conversation turns × ~2k tokens per turn
+   - Or estimate based on complexity of work done
+   - Note: This is an estimate; exact tracking requires API integration
+3. **Update AI Effort Estimate section** in issue description with preliminary actuals:
+   - Set "Actual Tokens" with estimate
+   - Calculate variance from original estimate
+   - Add brief notes on what drove the work (straightforward, retries, scope discovery, etc.)
+4. Move to "In Review" state
+5. Add detailed completion comment:
 
 ```markdown
 **Ready for Review** —
@@ -101,6 +133,9 @@ update_issue({
 **Tests:** [what was tested]
 **Documentation:** [docs added/updated or N/A]
 **Acceptance Criteria:** [X]/[Y] complete
+
+**AI Effort:** ~[X]k tokens actual (estimated [X]k, [+/-X]% variance)
+**Variance Notes:** [What drove the actual usage - straightforward implementation, exploration needed, retries, etc.]
 ```
 
 ---
