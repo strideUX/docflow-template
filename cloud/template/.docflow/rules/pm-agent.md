@@ -1,20 +1,7 @@
 # PM/Planning Agent Rules
 
-> Load when planning, capturing, reviewing, or closing work.
-
----
-
-## ⚠️ CRITICAL: Linear MCP Cannot Do Everything
-
-**For these operations, DO NOT use MCP - execute curl commands directly:**
-
-| Operation | What To Do |
-|-----------|------------|
-| Create Milestone | Run curl command from `linear-integration.md` |
-| Assign to Milestone | Run curl command from `linear-integration.md` |
-| Post Project Update | Run curl command from `linear-integration.md` |
-
-**When asked to create a milestone, immediately execute the shell command. Do not say "MCP can't do this" - you CAN do it via curl.**
+> Load when planning, capturing, reviewing, or closing work.  
+> **Also load**: `always.md` for comment templates and verification gates.
 
 ---
 
@@ -30,399 +17,377 @@ The PM/Planning Agent orchestrates workflow:
 
 ---
 
-## When Setting Up Project (via /docflow-setup)
+## ⚠️ CRITICAL: Linear MCP Limitations
 
-### Phase 1: Project Definition
+**For these operations, DO NOT use MCP - execute scripts directly:**
 
-1. **Welcome and gather input** - Ask what they're building
-2. **Accept any format:**
-   - Loose concept ("I want to build a todo app")
-   - Detailed description (paragraphs)
-   - PRD/spec file (@filename reference)
+| Operation | Script to Run |
+|-----------|---------------|
+| Transition + Comment | `.docflow/scripts/transition-issue.sh` |
+| Activate Issue | `.docflow/scripts/activate-issue.sh` |
+| Wrap Session | `.docflow/scripts/wrap-session.sh` |
+| Create Milestone | See `linear-integration.md` curl commands |
 
-3. **Interactive refinement:**
-   - **For loose concepts:** Ask discovery questions (problem, users, value prop, success metrics, v1 scope)
-   - **For PRDs:** Critically review for gaps, ambiguities, scope creep; suggest improvements
-   - Engage in back-and-forth, don't just accept input
-   - Reflect understanding, ask clarifying questions, challenge assumptions
+---
 
-4. **Confirm understanding** before filling files:
-   - Project name, vision, problem, users, goals, scope
-   
-5. **Fill context files:**
-   - `{paths.content}/context/overview.md` - Vision, goals, scope
-   - `{paths.content}/context/stack.md` - Tech choices
-   - `{paths.content}/context/standards.md` - Conventions (defaults OK)
+## /capture - Create New Issue
 
-### Phase 2: Linear Connection
+### Execution Checklist
 
-1. Query Linear teams → user selects
-2. Query/create Linear project
-3. Save IDs to `.docflow/config.json`
-4. Verify connection
+```
+□ 1. DETERMINE type from user input
+     feature | bug | chore | idea
 
-### Phase 3: Milestones
+□ 2. CREATE Linear issue
+     create_issue({
+       teamId: "[from config]",
+       projectId: "[from config]",
+       title: "[descriptive title]",
+       description: "[use template from .docflow/templates/]",
+       labelIds: ["[type-label-id]"],
+       priority: 0  // None until triaged
+     })
 
-**Linear MCP does NOT support milestones. Execute shell commands directly.**
+□ 3. VERIFY issue created
+     Confirm issue ID returned
 
-1. **Query existing milestones** - Execute curl command from `linear-integration.md`
-2. **If milestones exist:** Ask if user wants to use them
-3. **If no milestones:** Offer to create phases:
-   - Help user define 2-4 project phases
-   - Each phase: name, description, target date
-   - **Execute curl command to create each milestone**
-4. **Store milestone IDs** for use during backlog creation
+□ 4. ADD COMMENT using template:
+     "**Captured** — Added to backlog. Type: [type]. [Brief context]."
 
-**To create a milestone, EXECUTE:**
-```bash
-LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
-PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
-curl -s -X POST https://api.linear.app/graphql \
-  -H "Content-Type: application/json" \
-  -H "Authorization: $LINEAR_API_KEY" \
-  -d '{"query": "mutation($projectId: String!, $name: String!) { projectMilestoneCreate(input: { projectId: $projectId, name: $name }) { success projectMilestone { id name } } }", "variables": {"projectId": "'"$PROJECT_ID"'", "name": "MILESTONE_NAME"}}'
+□ 5. RESPOND to user
+     "Captured as [ISSUE-ID]: [title]. In backlog for refinement."
 ```
 
-**Thinking in Phases:**
-- Phase 1: Foundation (infrastructure, auth, core setup)
-- Phase 2: Core Features (main functionality)
-- Phase 3: Polish (UI, performance, docs)
+---
 
-### Phase 4: Backlog - Migration or Creation
+## /refine - Triage or Refine Issue
 
-**First, check for existing local specs:**
-- Look for `{paths.content}/specs/backlog/*.md`
-- Look for `{paths.content}/specs/complete/*.md`
+### If Issue Has `triage` Label (Raw Capture)
 
-**If local specs exist → Migrate:**
-1. Show count of specs found
-2. Offer to migrate to Linear
-3. For each backlog spec:
-   - Read file, extract title/description/criteria
-   - Create Linear issue (Backlog state)
-4. For each completed spec:
-   - Create Linear issue (Done state)
-5. Offer to archive local specs folder (move to `specs-archived/`)
+```
+□ 1. READ issue content
 
-**If no local specs → New project:**
-1. Ask if user wants to capture initial items
-2. **Create 5-15 high-level items** (features/epics, not implementation tasks)
-3. Focus on **what** not **how** (subtasks come during `/activate`)
-4. Apply type label to each (feature/chore/bug/idea)
-5. **Assign to milestone** if milestones were created
-6. Create in Linear (Backlog state)
+□ 2. CLASSIFY type
+     Ask if unclear: "Is this a feature, bug, chore, or idea?"
 
-### Phase 5: Prioritization & Dependencies
+□ 3. APPLY template from .docflow/templates/[type].md
+     Update description with template structure
 
-After creating backlog items:
-1. **Set priorities:**
-   - Urgent: Blocking launch, critical bugs
-   - High: Core v1 features, foundational work, unblocks others
-   - Medium: Important but not blocking
-   - Low: Nice-to-have, future enhancements
+□ 4. REMOVE triage label, ADD type label
 
-2. **Identify dependencies:**
-   - What blocks what? (e.g., auth before admin panel)
-   - Create "blocks/blocked by" relationships in Linear
-   - External blockers? (APIs, designs, etc.)
+□ 5. SET initial priority (P1-P4)
 
-3. **Present implementation order:**
-   - Suggest sequence based on priorities + dependencies
-   - Confirm with user before finalizing
+□ 6. RUN transition script:
+     .docflow/scripts/transition-issue.sh [ISSUE-ID] "Backlog" \
+       "**Triaged** — Classified as [type], template applied. Priority: P[X]."
 
-### Phase 6: Complete
+□ 7. RESPOND to user
+     "Triaged [ISSUE-ID] as [type]. Ready for refinement."
+```
 
-1. Run `/sync-project` to push context to Linear
-2. Show summary with milestones and prioritized backlog
-3. Recommend first issue to activate (include milestone info)
+### If Issue Already Templated (Refinement)
+
+```
+□ 1. LOAD context
+     - Issue description and comments
+     - {paths.content}/context/overview.md
+     - {paths.content}/knowledge/INDEX.md
+
+□ 2. ASSESS completeness
+     - Is context clear?
+     - Are acceptance criteria specific and testable?
+     - Are technical notes filled?
+
+□ 3. IDENTIFY gaps
+     Ask clarifying questions if needed (CREATIVE - use judgment)
+
+□ 4. REFINE content (CREATIVE)
+     - Improve acceptance criteria
+     - Add technical notes
+     - Fill missing sections
+
+□ 5. SET complexity estimate if not set
+     XS | S | M | L | XL → estimate: 1-5
+
+□ 6. SET priority if not set
+     - Urgent (P1): Blocking launch, critical bug
+     - High (P2): Core feature, foundational, unblocks others
+     - Medium (P3): Important but not blocking
+     - Low (P4): Enhancement, nice-to-have
+
+□ 7. CHECK dependencies
+     Ask: "Does this depend on other issues?"
+     Ask: "Will completing this unblock other work?"
+     Create blocking relationships if needed
+
+□ 8. CALCULATE AI Effort Estimate
+     See .docflow/skills/ai-labor-estimate/SKILL.md
+     - Identify task type base tokens
+     - Score scope, novelty, clarity, codebase
+     - Calculate estimate and cost range
+     - ADD estimate section to description
+
+□ 9. UPDATE description with all changes
+     update_issue({ id: "...", description: "..." })
+
+□ 10. RUN transition script:
+      .docflow/scripts/transition-issue.sh [ISSUE-ID] "Todo" \
+        "**Refined** — [What improved]. Priority: P[X]. Dependencies: [list or none]. AI Estimate: ~[X]k tokens ($[X]-$[X]). Ready for activation."
+
+□ 11. RESPOND to user
+      "Refined [ISSUE-ID]. Priority P[X], estimate [size]. Ready to activate."
+```
 
 ---
 
-## When Creating Specs (via /capture)
+## /activate - Start Work on Issue
 
-1. Create Linear issue with appropriate template
-2. Set type label (feature, bug, chore, idea)
-3. Set priority (1-4) based on urgency
-4. Set estimate (1-5) based on complexity
-5. **Query project milestones:**
-   - If milestones exist → ask user which one
-   - If default milestone in config → suggest it
-   - If no milestones → skip
-6. **Assign milestone** if selected (via API - see linear-integration.md)
-7. Add Figma attachments if design exists
-8. Leave in Backlog state
-9. Add comment: `**Created** — [Brief context]. Milestone: [name or none].`
+### If No Issue Specified → Recommend
 
----
+```
+□ 1. QUERY issues in Todo or Backlog
+     Get priority, estimate, blocking relationships
 
-## When Triaging (issues with triage label via /refine)
+□ 2. FILTER to ready issues
+     - Not blocked by incomplete work
+     - Not assigned to others
 
-1. Find issues with `triage` label
-2. Analyze raw content
-3. Suggest type classification (feature/bug/chore/idea)
-4. Apply appropriate template from `.docflow/templates/`
-5. Remove `triage` label, add type label
-6. **Set initial priority** based on content/urgency
-7. **Identify dependencies** if apparent
-8. Add comment: `**Triaged** — Classified as [type], template applied. Priority: [P].`
+□ 3. RANK by
+     Priority (P1 → P4) → Unblocked status → Smaller estimate
 
----
+□ 4. PRESENT recommendation (CREATIVE)
+     Show top pick with reasoning
+     Show 2-3 alternatives
+     Show blocked issues and blockers
 
-## When Refining (templated backlog items via /refine)
-
-1. Load issue + `{paths.content}/context/overview.md` + knowledge INDEX
-2. Assess completeness (context, user story, acceptance criteria)
-3. Identify gaps and improvements
-4. Refine acceptance criteria, add technical notes
-5. Set complexity estimate if not set
-6. **Set priority if not set:**
-   - Urgent: Blocking launch, critical bug
-   - High: Core feature, foundational, unblocks others
-   - Medium: Important but not blocking
-   - Low: Enhancement, future, nice-to-have
-7. **Set dependencies:**
-   - Ask: "Does this depend on other issues?"
-   - Ask: "Will completing this unblock other work?"
-   - Create "blocks/blocked by" relationships in Linear
-8. **Calculate AI Effort Estimate** (see `.docflow/skills/ai-labor-estimate/SKILL.md`):
-   - Identify task type (feature=40k, bug=20k, chore=10k, idea=5k base)
-   - Score scope from complexity: S=×0.5, M=×1.0, L=×2.0, XL=×4.0
-   - Score novelty from Technical Notes: existing=×0.7, partial=×1.2, greenfield=×2.0
-   - Score clarity from acceptance criteria quality: defined=×0.8, discovery=×1.5, exploratory=×2.5
-   - Reference `{paths.content}/context/stack.md` for codebase complexity: simple=×0.8, moderate=×1.0, complex=×1.5
-   - Calculate: `base × scope × novelty × clarity × codebase`
-   - Look up provider costs from `.docflow/skills/ai-labor-estimate/provider-costs.md`
-   - Add AI Effort Estimate section to issue description
-   - If estimate > 200k tokens or > $5: Flag for human review before activation
-9. **Move to "Todo" state** (READY - refined and ready to pick up)
-10. Add comment: `**Refined** — [What was improved]. Priority: [P]. [Dependency info]. AI Estimate: ~[X]k tokens ($[X]-$[X]). Ready for activation.`
-
----
-
-## When Activating Work (via /activate)
-
-### If No Issue Specified → Smart Recommendation
-
-1. **Query available issues:**
-   - Get issues in Todo or Backlog state
-   - Include priority, estimate, and blocking relationships
-
-2. **Filter to ready issues:**
-   - Exclude issues blocked by incomplete work
-   - Exclude issues already assigned to others
-
-3. **Rank by:**
-   - Priority (Urgent → High → Medium → Low)
-   - Unblocked status
-   - Estimate (smaller = quicker wins, optional tiebreaker)
-
-4. **Present recommendation:**
-   - Show top recommended issue with reasoning
-   - Show 2-3 alternatives
-   - Show blocked issues (and what's blocking them)
-   - Ask which to activate
+□ 5. WAIT for user selection
+```
 
 ### When Activating Specific Issue
 
-#### ⚠️ ASSIGNMENT IS MANDATORY - No In Progress without assignee
-
-1. **Determine assignee (REQUIRED):**
-   - Try: `get_viewer()` to get current Linear user
-   - Try: `list_users()` and match by name/email
-   - If can't determine → **ASK explicitly**: "Who should this be assigned to?"
-   - **NEVER skip assignment**
-
-2. **Check current assignment:**
-   - Unassigned → assign to determined user
-   - Assigned to current user → proceed
-   - Assigned to someone else → **WARN and confirm** before reassigning
-
-3. **Check if blocked** - warn if blocked by incomplete issues
-
-4. Set priority if not already set (ask or infer)
-
-5. Set estimate if not already set (ask or infer)
-
-6. **Validate AI Effort Estimate exists** (see `.docflow/skills/ai-labor-estimate/SKILL.md`):
-   - Check issue description for "## AI Effort Estimate" section
-   - **If missing**: 
-     - WARN user: "⚠️ This issue is missing an AI Effort Estimate."
-     - Ask: "Would you like me to calculate one now before activation?"
-     - If yes → Run estimation (same as `/refine` step 8), update description
-     - If no → Proceed but note: "Proceeding without estimate - actuals won't have comparison baseline."
-   - **If present but incomplete** (placeholder values like `[X]k`):
-     - WARN: "AI Effort Estimate exists but has placeholder values."
-     - Offer to complete it now
-   - **If estimate exceeds thresholds** (`aiLabor.thresholds` in config):
-     - > 200k tokens or > $5: Show warning, confirm before proceeding
-     - > $10 (requireApproval): Require explicit user approval
-
-7. **Assign issue (REQUIRED):**
-   ```typescript
-   update_issue({ issueId: "xxx", assigneeId: "user-id" })
-   ```
-
-8. **Verify assignment succeeded** - query issue, confirm assignee set
-
-9. Move to "In Progress" state (only after assignment confirmed)
-
-10. Add comment: `**Activated** — Assigned to [name], Priority: [P], Estimate: [E]. AI Effort: ~[X]k tokens ($[X]-$[X]).`
-
----
-
-## When Reviewing Code (via /review)
-
-1. Check Linear for issues in "In Review" state
-2. Read issue description + all implementation comments
-3. Load `{paths.content}/context/standards.md`
-4. **Analyze actual code changes:**
-   - Read changed files (from completion comment)
-   - Check against standards.md conventions
-   - Look for obvious issues or anti-patterns
-   - Verify error handling is appropriate
-5. **Verify acceptance criteria:**
-   - All functionality criteria checked in code
-   - Tests written and cover requirements
-   - Documentation updated (or N/A appropriate)
-6. **Make decision:**
-   - If approved: Move to "QA" state, add approval comment
-   - If issues found: Move back to "In Progress", add specific feedback
-
----
-
-## When Closing (after QE approval via /close)
-
-1. Determine terminal state (default: Done)
-2. For Done: verify QA approval
-3. **Record AI Effort Actuals** (if AI Effort Estimate exists in description):
-   - Note actual tokens used (estimate from conversation length/session if exact unavailable)
-   - Calculate variance from estimate: `(actual - estimated) / estimated × 100`
-   - Document variance drivers (blockers, scope changes, retries, exploration)
-   - Add actuals to the AI Effort Estimate section in issue description
-4. Move to terminal state (Done/Archived/Canceled/Duplicate)
-5. Add comment: `✅ Completed and verified. AI Effort: ~[X]k tokens actual ([+/-X]% from estimate).`
-
----
-
-## When Wrapping Session (via /wrap-session)
-
-### ⚠️ PROJECT UPDATE IS REQUIRED
-
-Every session wrap must post a project update to Linear.
-
-### Steps
-
-1. **Gather session context:**
-   - Query Linear for issues touched this session
-   - Identify completed, in-progress, and blocked items
-
-2. **Update individual issues:**
-   - Add progress comments to in-progress work
-   - Note specific blockers or next steps
-
-3. **Compose session summary:**
-   ```markdown
-   **Session Summary — [Date]**
-
-   ✅ **Completed:**
-   - [PLA-XX] — [What was done]
-
-   🔄 **In Progress:**
-   - [PLA-XX] — [Current state]
-
-   📋 **Next Up:**
-   - [PLA-XX] — [Priority for next session]
-
-   🚧 **Blockers:** [None / List blockers]
-   ```
-
-4. **Determine health status:**
-   - `onTrack` — Progress made, no blockers
-   - `atRisk` — Minor blockers, slight delays
-   - `offTrack` — Major blockers, significantly behind
-
-5. **Post project update to Linear (REQUIRED):**
-   
-   Use direct API call (MCP does not support project updates):
-   ```bash
-   LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
-   PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
-   
-   curl -s -X POST https://api.linear.app/graphql \
-     -H "Content-Type: application/json" \
-     -H "Authorization: $LINEAR_API_KEY" \
-     -d '{"query": "mutation($projectId: String!, $body: String!, $health: ProjectUpdateHealthType!) { projectUpdateCreate(input: { projectId: $projectId, body: $body, health: $health }) { success projectUpdate { id url } } }", "variables": {"projectId": "'"$PROJECT_ID"'", "body": "[SUMMARY]", "health": "onTrack"}}'
-   ```
-
-6. **Confirm with user:**
-   - Show summary that was posted
-   - Provide link to project updates in Linear
-
----
-
-## When Syncing Project (via /sync-project)
-
-**Only sync if project description is empty or user explicitly requests update.**
-
-### Steps
-
-1. **Check existing description** - Query Linear project via MCP
-2. **If description exists** - Ask user before overwriting
-3. **If empty or confirmed** - Generate from context files
-
-### Generating Project Description
-
-**Read these context files:**
-- `{paths.content}/context/overview.md` - Vision, goals, scope
-- `{paths.content}/context/stack.md` - Technology choices
-- `{paths.content}/context/standards.md` - Conventions
-
-**Generate short summary (≤255 characters):**
 ```
-[Project Name]: [Vision sentence]. Built with [key tech]. [Current phase].
+□ 1. READ full issue description
+
+□ 2. CHECK AI Effort Estimate
+     Search for "## AI Effort Estimate" section
+     
+     IF MISSING:
+       → Say: "⚠️ Missing AI Effort Estimate."
+       → Ask: "Calculate now before activation?"
+       → If yes: Run estimation, update description
+       → If no: Note limitation, proceed
+     
+     IF EXCEEDS THRESHOLD (>$5 or >200k tokens):
+       → Say: "📊 Larger task: ~[X]k tokens (~$[X]-$[X])"
+       → Ask: "Confirm activation?"
+       → Wait for explicit "yes"
+
+□ 3. DETERMINE assignee (MANDATORY)
+     Try: get_viewer() for current user
+     Or ASK: "Who should this be assigned to?"
+     ❌ DO NOT proceed without assignee
+
+□ 4. CHECK current assignment
+     If assigned to someone else → WARN and confirm
+
+□ 5. CHECK if blocked
+     If blocked by incomplete issues → WARN
+
+□ 6. SET priority if not set (ask or infer)
+
+□ 7. SET estimate if not set (ask or infer)
+
+□ 8. RUN activate script:
+     .docflow/scripts/activate-issue.sh [ISSUE-ID] [assignee-email] [priority] [estimate]
+
+□ 9. VERIFY activation
+     Query issue, confirm:
+     - State = "In Progress"
+     - Assignee is set
+
+□ 10. RESPOND to user
+      "✅ Activated [ISSUE-ID]. Assigned to @[name], P[X], [estimate]. AI Effort: ~[X]k tokens."
 ```
 
-**Generate full description:**
-```markdown
-## Overview
-[From overview.md: Vision + Problem Statement]
-
-## Goals
-[From overview.md: Key Goals list]
-
-## Tech Stack
-[From stack.md: Core technologies and key patterns]
-
-## Standards
-[From standards.md: Brief highlights of conventions]
-
-## Scope
-**In Scope:** [From overview.md]
-**Out of Scope:** [From overview.md]
-
 ---
-*Synced from local context files via DocFlow*
+
+## /review - Code Review
+
+### Execution Checklist
+
+```
+□ 1. QUERY issues in "In Review" state
+
+□ 2. LOAD issue
+     - Full description
+     - All comments (especially implementation notes)
+     - {paths.content}/context/standards.md
+
+□ 3. CHECK acceptance criteria
+     All must be checked off [x] in description
+     If any unchecked → Fail review
+
+□ 4. READ implementation summary comment
+     Understand what was built
+
+□ 5. ANALYZE against standards.md (CREATIVE - use judgment)
+     - Code organization correct?
+     - Naming conventions followed?
+     - Error handling appropriate?
+     - Tests written?
+
+□ 6. MAKE DECISION
+
+     IF APPROVED:
+       □ RUN transition script:
+         .docflow/scripts/transition-issue.sh [ISSUE-ID] "QA" \
+           "**Code Review Passed** — Standards verified, criteria met. Moving to QA."
+       □ RESPOND: "Code review passed for [ISSUE-ID]. Ready for QE testing."
+
+     IF CHANGES NEEDED:
+       □ RUN transition script:
+         .docflow/scripts/transition-issue.sh [ISSUE-ID] "In Progress" \
+           "**Code Review: Changes Needed** —\n\n**Issues Found:**\n1. [issue]\n2. [issue]\n\nMoving back to In Progress."
+       □ RESPOND: "Code review found issues for [ISSUE-ID]. See comment for details."
 ```
 
-### Update Linear
+---
 
-1. Use `update_project` with short description + full content
-2. Confirm sync with user
-3. Add note: `**Project Synced** — Description updated from context files.`
+## /close - Archive Completed Work
+
+### Execution Checklist
+
+```
+□ 1. VERIFY QE approval
+     Check for "**QE Approved**" comment
+     If not present → Cannot close
+
+□ 2. RECORD AI Effort Actuals
+     Read AI Effort Estimate section
+     Fill in:
+     - Actual Tokens: [estimate from activity]
+     - Variance: [+/-X]%
+     - Notes: [variance drivers]
+     Update description with actuals
+
+□ 3. DETERMINE terminal state
+     Default: Done
+     Or: Archived, Canceled, Duplicate (if specified)
+
+□ 4. RUN transition script:
+     .docflow/scripts/transition-issue.sh [ISSUE-ID] "Done" \
+       "✅ **Closed** — Verified and complete. Final AI Effort: ~[X]k tokens ([+/-X]% from estimate)."
+
+□ 5. RESPOND to user
+     "Closed [ISSUE-ID]. Final AI effort: ~[X]k tokens."
+```
+
+### For Archive/Cancel/Duplicate
+
+```
+□ 1. CONFIRM reason with user
+
+□ 2. RUN transition script with appropriate state and comment:
+     
+     Archive:
+       "**Archived** — Deferred to future. Reason: [reason]."
+     
+     Cancel:
+       "**Canceled** — Will not pursue. Reason: [reason]."
+     
+     Duplicate:
+       "**Duplicate** — Already exists as [ISSUE-ID]."
+
+□ 3. RESPOND to user
+```
+
+---
+
+## /wrap-session - End Session
+
+### Execution Checklist (MANDATORY PROJECT UPDATE)
+
+```
+□ 1. GATHER session data
+     Query Linear for issues touched today:
+     - Completed issues
+     - In-progress issues
+     - Blocked issues
+
+□ 2. COMPOSE summary (CREATIVE - make it informative)
+     Use template from always.md:
+     
+     **Session Summary — [YYYY-MM-DD]**
+     
+     ✅ **Completed:**
+     - [ISSUE-ID] — [What was done]
+     
+     🔄 **In Progress:**
+     - [ISSUE-ID] — [Current state]
+     
+     📋 **Next Up:**
+     - [ISSUE-ID] — [Priority for next session]
+     
+     🚧 **Blockers:** [None / List]
+
+□ 3. DETERMINE health status
+     onTrack | atRisk | offTrack
+
+□ 4. EXECUTE wrap script (DO NOT just describe it):
+     .docflow/scripts/wrap-session.sh "[SUMMARY]" "[HEALTH]"
+
+□ 5. VERIFY response includes URL
+     If script fails → Report error, do not skip
+
+□ 6. RESPOND to user
+     "Session wrapped! Project update posted: [URL]"
+```
+
+**❌ DO NOT:**
+- Skip posting if user seems rushed
+- Summarize in chat without POSTing
+- Say "I would post..." — EXECUTE the script
+
+---
+
+## /sync-project - Sync Context to Linear
+
+### Execution Checklist
+
+```
+□ 1. CHECK existing project description
+     Query Linear project via MCP
+
+□ 2. IF description exists
+     Ask: "Project has existing description. Overwrite?"
+     Wait for confirmation
+
+□ 3. READ context files
+     - {paths.content}/context/overview.md
+     - {paths.content}/context/stack.md
+     - {paths.content}/context/standards.md
+
+□ 4. GENERATE description (CREATIVE)
+     Short summary (≤255 chars) for Linear project summary
+     Full markdown description for Linear project description
+
+□ 5. UPDATE Linear project
+     update_project({ id: "...", description: "..." })
+
+□ 6. RESPOND to user
+     "Project synced to Linear."
+```
 
 ---
 
 ## Context Loading
 
-**For Planning:**
-- `{paths.content}/context/overview.md` (project vision)
-- Query Linear for backlog issues
-- Load active issue being planned
-
-**For Review:**
-- Linear issue being reviewed
-- `{paths.content}/context/standards.md` (code checklist)
-- Implementation comments from Linear
+| Task | Load These |
+|------|------------|
+| Planning | overview.md, query Linear for backlog |
+| Refining | overview.md, knowledge/INDEX.md, issue being refined |
+| Reviewing | standards.md, issue being reviewed, implementation comments |
+| Closing | Issue being closed, AI Estimate section |
 
 ---
 
@@ -431,36 +396,36 @@ Every session wrap must post a project update to Linear.
 | Phrase | Command |
 |--------|---------|
 | "capture that" / "add to backlog" | /capture |
-| "refine [issue]" / "triage [issue]" | /refine |
+| "refine [issue]" / "triage" | /refine |
 | "what needs triage" | Show triage queue |
 | "activate [issue]" | /activate (specific) |
-| "what should I work on?" / "what's next?" | /activate (smart recommend) |
-| "review [issue]" / "code review" | /review |
-| "close [issue]" / "mark complete" | /close (Done) |
-| "archive [issue]" / "defer" | /close (Archived) |
-| "cancel [issue]" / "won't do" | /close (Canceled) |
-| "wrap it up" / "I'm done" / "end of day" | /wrap-session (posts project update) |
-| "post project update" | /project-update |
+| "what should I work on?" | /activate (recommend) |
+| "review [issue]" | /review |
+| "close [issue]" | /close (Done) |
+| "archive" / "defer" | /close (Archived) |
+| "cancel" / "won't do" | /close (Canceled) |
+| "wrap up" / "end of day" | /wrap-session |
 | "sync project" | /sync-project |
 
 ---
 
 ## Documentation Rules
 
-### When to Document
+### When to Create Knowledge Base Entries (CREATIVE - use judgment)
 
-**Document in `{paths.content}/knowledge/` when:**
-- **decisions/** - Architectural or significant technical decisions
-- **notes/** - Gotchas, learnings, non-obvious solutions
-- **features/** - Complex feature explanations
+**Add to `{paths.content}/knowledge/` when:**
+- Architectural decision made → `decisions/`
+- Non-obvious solution discovered → `notes/`
+- Complex feature needs explanation → `features/`
 
 **Update `{paths.content}/context/` when:**
-- `stack.md` - Adding new technology, changing patterns
-- `standards.md` - New conventions, updated guidelines
-- `overview.md` - Scope changes, new links
+- New technology added → `stack.md`
+- New convention established → `standards.md`
+- Scope changes → `overview.md`
 
-### Auto-Update Knowledge INDEX
+### After Adding Documentation
 
-When adding documentation to `{paths.content}/knowledge/`:
-1. Add entry to `{paths.content}/knowledge/INDEX.md`
-2. Format: `| [Title](path/to/file.md) | Brief description | YYYY-MM-DD |`
+```
+□ 1. ADD entry to {paths.content}/knowledge/INDEX.md
+     Format: | [Title](path) | Description | Date |
+```

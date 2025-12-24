@@ -1,6 +1,7 @@
 # Implementation Agent Rules
 
-> Load when building features, fixing bugs, or implementing specs.
+> Load when building features, fixing bugs, or implementing specs.  
+> **Also load**: `always.md` for comment templates and verification gates.
 
 ---
 
@@ -15,214 +16,286 @@ The Implementation Agent builds:
 
 ---
 
-## On Startup (via /implement)
+## /implement - Start or Continue Implementation
 
-1. Query Linear for issues in "Todo" (ready to pick up) or "In Progress" or "Blocked"
-2. **Check assignment before starting** - warn if picking up issue assigned to someone else
-3. If multiple, ask user which to work on
-4. Read full issue including comments
-5. **Validate AI Effort Estimate exists** (see `.docflow/skills/ai-labor-estimate/SKILL.md`):
-   - Check issue description for "## AI Effort Estimate" section
-   - **If missing**:
-     - WARN: "⚠️ This issue is missing an AI Effort Estimate. Tracking actuals won't have a comparison baseline."
-     - Offer: "Would you like me to calculate one now before starting implementation?"
-     - If yes → Calculate estimate using the formula from the skill, update description
-     - If no → Proceed but note the limitation
-   - **If present but has placeholder values** (`[X]k`):
-     - Offer to complete the estimate before starting
-   - **If estimate > 200k tokens or > $5**:
-     - Show cost warning: "📊 This is a larger task (~[X]k tokens, ~$[X]-$[X]). Confirming you want to proceed."
-6. Show implementation checklist reminder (code + tests + docs) including AI estimate summary:
-   ```markdown
-   📋 **Implementation Checklist**
-   
-   **AI Effort Estimate:** ~[X]k tokens ($[X]-$[X])
-   
-   As you build, remember to:
-   - [ ] Write tests alongside code (per acceptance criteria)
-   - [ ] Document decisions in Linear comments
-   - [ ] Update knowledge base for significant patterns/decisions
-   - [ ] Update context files if architecture changes
-   
-   When complete, I'll move to REVIEW and add a summary with actuals.
-   ```
+### Execution Checklist
 
----
+```
+□ 1. QUERY Linear for available issues
+     States: "Todo", "In Progress", "Blocked"
+     Filter: Assigned to me or unassigned
 
-## Context to Load
+□ 2. IF multiple issues → Ask user which to work on
 
-- Current Linear issue (full description + comments)
-- `{paths.content}/context/stack.md` (technical patterns)
-- `{paths.content}/context/standards.md` (code conventions)
-- If issue has Figma attachment → call Figma MCP for design context
+□ 3. IF issue assigned to someone else
+     → WARN: "This is assigned to @[name]. Continue anyway?"
+     → Wait for confirmation
 
----
+□ 4. READ full issue
+     - Description
+     - All comments
+     - Attachments (check for Figma links)
 
-## Implementation Checklist
+□ 5. CHECK AI Effort Estimate
+     Search for "## AI Effort Estimate" section
+     
+     IF MISSING:
+       → Say: "⚠️ Missing AI Effort Estimate. No baseline for tracking."
+       → Ask: "Calculate estimate before starting?"
+       → If yes: Calculate using skill, update description
+       → If no: Proceed with warning
+     
+     IF PRESENT:
+       → Note: "Tracking against estimate of ~[X]k tokens"
 
-**Implementation = Code + Tests + Docs**
+□ 6. LOAD context files
+     - {paths.content}/context/stack.md
+     - {paths.content}/context/standards.md
+     - If Figma attached: Call Figma MCP
 
-Remind at start of implementation:
-```markdown
-📋 **Implementation Checklist**
+□ 7. SHOW implementation checklist with estimate:
+     
+     📋 **Implementation Checklist**
+     
+     **Issue:** [ISSUE-ID] - [Title]
+     **AI Effort Estimate:** ~[X]k tokens ($[X]-$[X])
+     
+     **Acceptance Criteria:**
+     - [ ] [Criterion 1]
+     - [ ] [Criterion 2]
+     ...
+     
+     **Remember:**
+     - Write tests alongside code
+     - Update checkboxes in description as you complete criteria
+     - Document decisions in comments
+     
+     Ready to start!
 
-As you build, remember to:
-- [ ] Write tests alongside code (per acceptance criteria)
-- [ ] Document decisions in Linear comments
-- [ ] Update knowledge base for significant patterns/decisions
-- [ ] Update context files if architecture changes
-
-When complete, I'll move to REVIEW and add a summary.
+□ 8. IF issue not already In Progress
+     Run: .docflow/scripts/transition-issue.sh [ISSUE-ID] "In Progress" \
+       "**Implementation Started** — Picking up work."
 ```
 
 ---
 
 ## During Implementation
 
-1. Write tests alongside code (not after)
-2. Update description checkboxes as criteria are completed
-3. Add progress comments: `**Progress** — What was done.`
-4. Document decisions in comments (dated)
-5. If Figma attached: call Figma MCP for design specs
-6. Document significant patterns/decisions to knowledge base
+### Completing Acceptance Criteria (DETERMINISTIC)
 
-### Updating Checkboxes (IMPORTANT)
+For each criterion completed:
 
-**Checkboxes live in the DESCRIPTION, not comments.**
+```
+□ 1. READ current description
+     get_issue({ id: "..." })
 
-When completing an acceptance criterion:
+□ 2. FIND the checkbox
+     "- [ ] Criterion text"
 
-1. **Read** the current issue description via Linear MCP
-2. **Find** the specific checkbox in the description: `- [ ] Criterion text`
-3. **Update** it to checked: `- [x] Criterion text`
-4. **Save** the ENTIRE updated description back via `update_issue`
-5. **Add a brief comment** noting progress (optional)
+□ 3. CHANGE to checked
+     "- [x] Criterion text"
 
-**Example Linear MCP call:**
-```typescript
-update_issue({
-  issueId: "ISSUE-ID",
-  description: "## Acceptance Criteria\n- [x] First criterion (done)\n- [x] Second criterion (done)\n- [ ] Third criterion (pending)"
-})
+□ 4. SAVE entire updated description
+     update_issue({ id: "...", description: "..." })
+
+□ 5. OPTIONALLY add progress comment
+     "**Progress** — [What was done]. [X]/[Y] criteria complete."
 ```
 
-**DO NOT:** Add checkboxes as comments - they belong in the description.
-**DO:** Update the description in-place as you complete each criterion.
+**❌ DO NOT:**
+- Put checkmarks in comments
+- Create new checkboxes in comments
+- Leave description unchanged
 
----
+### Progress Comments
 
-## On Completion
+Add when significant progress made:
 
-1. Verify ALL acceptance criteria checkboxes are checked
-2. **Estimate tokens used** (rough calculation):
-   - Count approximate conversation turns × ~2k tokens per turn
-   - Or estimate based on complexity of work done
-   - Note: This is an estimate; exact tracking requires API integration
-3. **Update AI Effort Estimate section** in issue description with preliminary actuals:
-   - Set "Actual Tokens" with estimate
-   - Calculate variance from original estimate
-   - Add brief notes on what drove the work (straightforward, retries, scope discovery, etc.)
-4. Move to "In Review" state
-5. Add detailed completion comment:
+```
+**Progress** — [What was completed]. [X]/[Y] criteria done.
+```
 
-```markdown
-**Ready for Review** —
+### Decisions During Implementation (CREATIVE)
 
-**Summary:** [What was built/fixed]
-**Files Changed:** [count] files
-**Tests:** [what was tested]
-**Documentation:** [docs added/updated or N/A]
-**Acceptance Criteria:** [X]/[Y] complete
+When making technical decisions:
 
-**AI Effort:** ~[X]k tokens actual (estimated [X]k, [+/-X]% variance)
-**Variance Notes:** [What drove the actual usage - straightforward implementation, exploration needed, retries, etc.]
+```
+□ 1. DOCUMENT in Linear comment:
+     **Decision: [Title]**
+     
+     **Context:** [Why decision was needed]
+     **Decision:** [What was decided]
+     **Rationale:** [Why this choice]
+
+□ 2. IF significant architectural decision
+     → Also add to {paths.content}/knowledge/decisions/
 ```
 
 ---
 
-## On Blocker (via /block)
+## /block - Document Blocker
 
-1. Move to "Blocked" state
-2. If blocked by another issue, create dependency link (blockedByIssueIds)
-3. Add comment: `**Blocked** — [What's blocking]. Needs: [what's needed].`
-4. Tag PM/reviewer if needed
+### Execution Checklist
+
+```
+□ 1. IDENTIFY blocker
+     What is blocking? What is needed?
+
+□ 2. CHECK if blocked by another issue
+     If yes: Note the blocking issue ID
+
+□ 3. RUN transition script:
+     .docflow/scripts/transition-issue.sh [ISSUE-ID] "Blocked" \
+       "**Blocked** — [What is blocking]. Needs: [What is needed]. Blocking since: [date]."
+
+□ 4. IF blocked by another issue
+     Create blocking relationship in Linear:
+     issueRelationCreate({ issueId: blocking, relatedIssueId: blocked, type: "blocks" })
+
+□ 5. RESPOND to user
+     "Marked [ISSUE-ID] as blocked. Will resume when [blocker] resolved."
+```
+
+### Unblocking
+
+When blocker is resolved:
+
+```
+□ 1. RUN transition script:
+     .docflow/scripts/transition-issue.sh [ISSUE-ID] "In Progress" \
+       "**Unblocked** — [What resolved the blocker]. Resuming implementation."
+
+□ 2. RESPOND to user
+     "Unblocked [ISSUE-ID]. Resuming work."
+```
 
 ---
 
-## Resuming from Blocked
+## Implementation Complete
 
-When blocker is resolved, `/implement` moves issue back to "In Progress":
-- Add comment: `**Unblocked** — [What resolved the blocker].`
+### Execution Checklist (DETERMINISTIC)
 
----
+```
+□ 1. VERIFY all acceptance criteria checked
+     Read description, confirm all checkboxes are [x]
+     IF ANY UNCHECKED:
+       → List remaining items
+       → Ask: "Complete these before marking done?"
+       → Do not proceed until all checked
 
-## Natural Language Triggers
+□ 2. ESTIMATE tokens used
+     Rough calculation:
+     - Count conversation turns × ~2k tokens/turn
+     - Or estimate based on complexity
+     Note: This is approximate
 
-| Phrase | Action |
-|--------|--------|
-| "implement [issue]" / "build [issue]" | /implement |
-| "let's work on LIN-XXX" | /implement |
-| "I'm blocked" / "can't proceed" | /block |
-| "attach [file]" | /attach |
+□ 3. UPDATE AI Effort Estimate section
+     Read current description
+     Fill in Actuals section:
+     - Actual Tokens: ~[X]k
+     - Variance: [+/-X]% from estimate
+     - Notes: [What drove the work]
+     Save updated description
 
----
+□ 4. RUN transition script:
+     .docflow/scripts/transition-issue.sh [ISSUE-ID] "In Review" \
+       "**Ready for Review** —
+       
+       **Summary:** [What was built/fixed]
+       **Files Changed:** [count] files
+       **Tests:** [What was tested]
+       **Docs:** [Updated/N/A]
+       **Criteria:** [X]/[Y] complete
+       **AI Effort:** ~[X]k actual (est. [X]k, [+/-X]%)"
 
-## Documentation During Implementation
+□ 5. VERIFY state changed
+     Query issue, confirm state = "In Review"
 
-**Add to Knowledge Base when:**
-- Architectural decisions made
-- Non-obvious solutions discovered
-- Complex patterns established
-
-**Update Context Files when:**
-- New technologies added (stack.md)
-- New conventions established (standards.md)
+□ 6. RESPOND to user
+     "Implementation complete for [ISSUE-ID]. Moved to code review."
+```
 
 ---
 
 ## TODO Comments → Linear Issues
 
-**When adding a TODO comment in code, immediately create a Linear issue and link it.**
+### When Adding TODO in Code (DETERMINISTIC)
 
-### Why?
-- TODOs in code get lost
-- Creating an issue ensures it's tracked
-- The issue ID in the comment makes it searchable
-
-### Process:
-
-1. **Write the TODO comment** (initial)
-   ```typescript
-   // TODO: Implement rate limiting for API endpoints
-   ```
-
-2. **Create Linear issue:**
-   ```
-   create_issue(
-     title: "Implement rate limiting for API endpoints",
-     teamId: "[from .docflow/config.json]",
-     projectId: "[from .docflow/config.json]",
-     labelIds: ["[triage-label-id]"],
-     description: "From code: `src/api/routes.ts:123`\n\nContext: [why this is needed]"
-   )
-   ```
-
-3. **Get issue identifier** from response (e.g., `PLA-456`)
-
-4. **Update the comment** to include the ID:
-   ```typescript
-   // TODO: Implement rate limiting for API endpoints (PLA-456)
-   ```
-
-### Format:
 ```
-// TODO: [Description] (ISSUE-ID)
+□ 1. WRITE initial TODO comment
+     // TODO: Implement rate limiting
+
+□ 2. CREATE Linear issue immediately
+     create_issue({
+       title: "Implement rate limiting",
+       teamId: "[from config]",
+       projectId: "[from config]",
+       labelIds: ["[triage-label-id]"],
+       description: "From code: `src/api/routes.ts:123`\n\nContext: [why needed]"
+     })
+
+□ 3. GET issue identifier from response
+     e.g., "PLA-456"
+
+□ 4. UPDATE the code comment
+     // TODO: Implement rate limiting (PLA-456)
 ```
 
-### Labels:
-- Use `triage` label so it gets refined later via `/refine`
-- The issue stays in Backlog until triaged
+**Format:** `// TODO: [Description] (ISSUE-ID)`
 
-### Finding Triage Label ID:
-Query labels: `list_labels(teamId: "...")`
-Look for label named "triage" and use its ID.
+---
+
+## Context to Load
+
+| Situation | Load |
+|-----------|------|
+| Starting work | Issue, stack.md, standards.md |
+| Figma attached | Call Figma MCP for design context |
+| Making decisions | Issue, relevant knowledge docs |
+| Completing | Issue description (for checkbox update) |
+
+---
+
+## Natural Language Triggers
+
+| Phrase | Command |
+|--------|---------|
+| "implement [issue]" | /implement |
+| "build [issue]" | /implement |
+| "let's work on..." | /implement |
+| "I'm blocked" | /block |
+| "can't proceed" | /block |
+
+---
+
+## Quality Checklist (CREATIVE - apply judgment)
+
+Before marking complete, consider:
+
+- [ ] Code follows patterns in stack.md
+- [ ] Naming conventions match standards.md
+- [ ] Error handling is appropriate
+- [ ] Tests cover key functionality
+- [ ] No obvious security issues
+- [ ] Performance is reasonable
+
+---
+
+## Documentation During Implementation (CREATIVE)
+
+### When to Document
+
+**Add to knowledge base when:**
+- Non-obvious solution discovered → `notes/`
+- Architectural decision made → `decisions/`
+- Complex pattern established → `features/`
+
+**Update context files when:**
+- New technology added → `stack.md`
+- New convention established → `standards.md`
+
+### After Adding Documentation
+
+```
+□ 1. ADD entry to {paths.content}/knowledge/INDEX.md
+```

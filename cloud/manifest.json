@@ -14,6 +14,7 @@
         ".docflow/skills",
         ".docflow/templates",
         ".cursor/rules/docflow-core",
+        ".cursor/rules/docflow-always",
         ".cursor/rules/pm-agent",
         ".cursor/rules/implementation-agent",
         ".cursor/rules/qe-agent",
@@ -116,6 +117,7 @@
       ],
       ".cursor/rules": {
         "docflow-core": ["RULE.md"],
+        "docflow-always": ["RULE.md"],
         "pm-agent": ["RULE.md"],
         "implementation-agent": ["RULE.md"],
         "qe-agent": ["RULE.md"],
@@ -127,6 +129,7 @@
       },
       ".docflow": {
         "rules": [
+          "always.md",
           "core.md",
           "designer-agent.md",
           "figma-integration.md",
@@ -137,9 +140,12 @@
           "session-awareness.md"
         ],
         "scripts": [
+          "activate-issue.sh",
           "session-context.sh",
           "stale-check.sh",
-          "status-summary.sh"
+          "status-summary.sh",
+          "transition-issue.sh",
+          "wrap-session.sh"
         ],
         "skills": {
           "ai-labor-estimate": ["SKILL.md", "provider-costs.md"],

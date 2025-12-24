@@ -98,12 +98,35 @@ DocFlow Cloud is a hybrid spec-driven workflow:
 ## Loading Additional Rules
 
 Load these from `.docflow/rules/` based on context:
-- **pm-agent.md** - When planning, capturing, reviewing
+
+### Always Load Together
+- **always.md** - Deterministic rules, comment templates, verification gates
+  - Load with ANY agent-specific rules
+  - Contains non-negotiable workflow steps
+
+### Agent-Specific Rules
+- **pm-agent.md** - When planning, capturing, reviewing, closing
 - **implementation-agent.md** - When building features
 - **qe-agent.md** - When testing/validating
-- **linear-integration.md** - When working with Linear API
-- **figma-integration.md** - When Figma designs involved
+
+### Integration Rules
+- **linear-integration.md** - When working with Linear API directly
+- **figma-integration.md** - When Figma designs are involved
 - **session-awareness.md** - For session management
+
+---
+
+## Scripts
+
+Execute scripts for atomic operations:
+
+| Script | Purpose |
+|--------|---------|
+| `.docflow/scripts/transition-issue.sh` | State change + comment atomically |
+| `.docflow/scripts/activate-issue.sh` | Assign + start work atomically |
+| `.docflow/scripts/wrap-session.sh` | Post project update to Linear |
+
+**ALWAYS execute scripts, don't just describe them.**
 
 ---
 
