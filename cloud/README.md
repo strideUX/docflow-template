@@ -1,6 +1,6 @@
 # DocFlow Cloud
 
-> Version 4.4.0 - Design System Integration & Enhanced Figma Workflow
+> Version 4.5.0 - Workflow Consistency & AI Labor Estimates
 
 DocFlow Cloud is a hybrid spec-driven development workflow where work items live in Linear and project understanding stays local.
 
@@ -95,21 +95,26 @@ Required for design-to-code workflow. Get your access token from Figma settings.
 your-project/
 ├── .docflow/                    ← DOCFLOW FRAMEWORK (updated via --update)
 │   ├── config.json              ← Provider settings + design system config
-│   ├── version                  ← Current version (4.4.0)
+│   ├── version                  ← Current version (4.5.0)
 │   ├── rules/                   ← Canonical rule content
+│   │   ├── always.md            ← NEW: Mandatory deterministic rules
 │   │   ├── core.md
 │   │   ├── pm-agent.md
 │   │   ├── implementation-agent.md
 │   │   ├── qe-agent.md
 │   │   ├── linear-integration.md
 │   │   ├── figma-integration.md
-│   │   ├── designer-agent.md    ← NEW: Design system governance
+│   │   ├── designer-agent.md    ← Design system governance
 │   │   └── session-awareness.md
-│   ├── scripts/                 ← Shell scripts for efficiency
+│   ├── scripts/                 ← Shell scripts for atomic operations
+│   │   ├── wrap-session.sh      ← NEW: Consistent session wrap
+│   │   ├── transition-issue.sh  ← NEW: Status transitions + comments
+│   │   └── activate-issue.sh    ← NEW: Issue activation flow
 │   ├── skills/                  ← Portable agent skills
+│   │   ├── ai-labor-estimate/   ← NEW: Token/cost estimation
 │   │   ├── linear-workflow/
-│   │   ├── figma-mcp/           ← NEW: 5-phase Figma workflow
-│   │   ├── component-workflow/  ← NEW: Component patterns & testing
+│   │   ├── figma-mcp/           ← 5-phase Figma workflow
+│   │   ├── component-workflow/  ← Component patterns & testing
 │   │   ├── spec-templates/
 │   │   └── docflow-commands/
 │   ├── templates/               ← Issue templates
@@ -288,6 +293,15 @@ Terminal States: Archived, Canceled, Duplicate
 
 ## Key Features
 
+### v4.5: Workflow Consistency & AI Labor Estimates
+
+- **AI Labor Estimates** — Token/cost estimation during `/refine`, validated on `/activate` and `/implement`
+- **Deterministic Rules** — `always.md` with mandatory rules that never vary
+- **Exact Comment Templates** — Standardized formats for status changes and project updates
+- **Shell Scripts** — `wrap-session.sh`, `transition-issue.sh`, `activate-issue.sh` for atomic operations
+- **Structured Checklists** — Numbered verification steps in all agent rules
+- **Configurable Thresholds** — Warning and approval limits in `config.json`
+
 ### v4.4: Design System Integration
 
 - **figma-mcp skill** — Complete 5-phase workflow for Figma implementations
@@ -351,15 +365,23 @@ Terminal States: Archived, Canceled, Duplicate
 
 ---
 
-## What's New in v4.4
+## What's New in v4.5
 
-- **Enhanced Figma Integration** — 5-phase workflow (screenshot → extract → spec → implement → validate)
-- **Component Workflow Skill** — React patterns, checklists, testing templates
-- **Design System Integration** — Optional token enforcement via `/design-setup`
-- **Designer Agent** — New agent role for design governance
-- **Token Mapping Templates** — Figma → code translation documentation
-- **Validation Script** — Automated design system enforcement (optional)
+- **AI Labor Estimates** — Token and cost estimation for issues during `/refine`, validated on `/activate` and `/implement`
+- **Deterministic Workflow Rules** — `always.md` with mandatory rules and exact comment templates
+- **Shell Scripts for Consistency** — `wrap-session.sh`, `transition-issue.sh`, `activate-issue.sh` for atomic operations
+- **Structured Agent Checklists** — Numbered steps with explicit verification in all agent rules
+- **Configurable Thresholds** — Warning and approval limits for AI labor costs in `config.json`
+
+### v4.4: Design System Integration
+
+- **figma-mcp skill** — Complete 5-phase workflow for Figma implementations
+- **component-workflow skill** — React patterns, checklists, testing templates
+- **designer-agent** — Design system governance and token extraction
+- **Token mapping** — Project-specific Figma → code translations
+- **Validation script** — Optional automated design system enforcement
+- **Optional enhancement** — Design system adds to baseline, doesn't replace it
 
 ---
 
-*DocFlow Cloud v4.4.0*
+*DocFlow Cloud v4.5.0*

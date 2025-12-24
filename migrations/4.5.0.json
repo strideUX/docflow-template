@@ -1,0 +1,102 @@
+{
+  "version": "4.5.0",
+  "date": "2025-12-24",
+  "description": "Workflow consistency enforcement - AI Labor Estimates, deterministic rules, and shell scripts for repeatable workflow steps",
+  
+  "changes": {
+    "features": [
+      {
+        "description": "Added AI Labor Estimate skill for token/cost estimation on issues",
+        "files": [
+          ".docflow/skills/ai-labor-estimate/SKILL.md",
+          ".docflow/skills/ai-labor-estimate/provider-costs.md"
+        ]
+      },
+      {
+        "description": "Added always.md with mandatory deterministic rules and exact comment templates",
+        "files": [
+          ".docflow/rules/always.md"
+        ]
+      },
+      {
+        "description": "Added shell scripts for atomic, programmatic workflow operations",
+        "files": [
+          ".docflow/scripts/wrap-session.sh",
+          ".docflow/scripts/transition-issue.sh",
+          ".docflow/scripts/activate-issue.sh"
+        ]
+      }
+    ],
+    "improvements": [
+      {
+        "description": "Restructured pm-agent rules with numbered checklists and verification steps",
+        "files": [
+          ".docflow/rules/pm-agent.md"
+        ]
+      },
+      {
+        "description": "Restructured implementation-agent rules with numbered checklists",
+        "files": [
+          ".docflow/rules/implementation-agent.md"
+        ]
+      },
+      {
+        "description": "Restructured qe-agent rules with numbered checklists",
+        "files": [
+          ".docflow/rules/qe-agent.md"
+        ]
+      },
+      {
+        "description": "Updated core.md to always load always.md rules",
+        "files": [
+          ".docflow/rules/core.md"
+        ]
+      },
+      {
+        "description": "Added AI Effort Estimate section to feature and bug templates",
+        "files": [
+          ".docflow/templates/feature.md",
+          ".docflow/templates/bug.md"
+        ]
+      }
+    ]
+  },
+  
+  "files_added": [
+    ".docflow/skills/ai-labor-estimate/SKILL.md",
+    ".docflow/skills/ai-labor-estimate/provider-costs.md",
+    ".docflow/rules/always.md",
+    ".docflow/scripts/wrap-session.sh",
+    ".docflow/scripts/transition-issue.sh",
+    ".docflow/scripts/activate-issue.sh"
+  ],
+  
+  "files_modified": [
+    ".docflow/version",
+    ".docflow/config.json",
+    ".docflow/rules/core.md",
+    ".docflow/rules/pm-agent.md",
+    ".docflow/rules/implementation-agent.md",
+    ".docflow/rules/qe-agent.md",
+    ".docflow/templates/feature.md",
+    ".docflow/templates/bug.md"
+  ],
+  
+  "config_changes": {
+    "added": {
+      "aiLabor": "AI Labor Estimate configuration with defaultProvider, thresholds, and providerRates"
+    }
+  },
+  
+  "upgrade_notes": [
+    "AI Labor Estimates are now calculated during /refine and validated during /activate and /implement",
+    "always.md contains mandatory rules that MUST be followed for consistent workflow",
+    "Shell scripts provide programmatic consistency for wrap-session, transitions, and activation",
+    "Agent rules are now structured as numbered checklists with explicit verification steps",
+    "Feature and bug templates include AI Effort Estimate section for sizing",
+    "Configure aiLabor.thresholds in config.json to set warning and approval limits"
+  ],
+  
+  "breaking_changes": []
+}
+

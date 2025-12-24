@@ -124,7 +124,7 @@ DocFlow uses a **manifest-based update system** to keep projects current while p
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Your Project                                                │
-│  ├── .docflow/version         ← Current version (4.2.0)     │
+│  ├── .docflow/version         ← Current version (4.5.0)     │
 │  ├── .docflow/config.json     ← YOUR Linear IDs (preserved) │
 │  ├── .docflow/rules/*         ← Updated from template       │
 │  ├── .cursor/commands/*       ← Updated from template       │
@@ -167,7 +167,9 @@ Each version has a migration file documenting changes:
 migrations/
   ├── 4.0.0.json          ← Baseline (restructure from v3)
   ├── 4.1.0.json          ← Priority/dependency workflow
-  └── 4.2.0.json          ← Milestone management
+  ├── 4.2.0.json          ← Milestone management
+  ├── 4.4.0.json          ← Design system integration
+  └── 4.5.0.json          ← Workflow consistency
 ```
 
 These help the installer know what files to clean up from previous versions.
@@ -200,8 +202,9 @@ BACKLOG → TODO → IN PROGRESS → IN REVIEW → QA → DONE
 your-project/
 ├── .docflow/                    ← DocFlow framework
 │   ├── config.json              ← Linear IDs, settings
-│   ├── version                  ← Current version (4.2.0)
+│   ├── version                  ← Current version (4.5.0)
 │   ├── rules/                   ← Canonical rule content
+│   │   ├── always.md            ← Mandatory deterministic rules
 │   │   ├── core.md
 │   │   ├── pm-agent.md
 │   │   ├── implementation-agent.md
@@ -209,8 +212,9 @@ your-project/
 │   │   ├── linear-integration.md
 │   │   ├── figma-integration.md
 │   │   └── session-awareness.md
-│   ├── scripts/                 ← Shell scripts for efficiency
+│   ├── scripts/                 ← Shell scripts for atomic operations
 │   ├── skills/                  ← Portable agent skills
+│   │   └── ai-labor-estimate/   ← Token/cost estimation
 │   └── templates/               ← Issue templates
 │
 ├── .cursor/
@@ -300,20 +304,29 @@ docflow-template/
 └── migrations/                  # Version migration files
     ├── 4.0.0.json               # Baseline (restructure)
     ├── 4.1.0.json               # Priority/dependency workflow
-    └── 4.2.0.json               # Milestone management
+    ├── 4.2.0.json               # Milestone management
+    ├── 4.4.0.json               # Design system integration
+    └── 4.5.0.json               # Workflow consistency
 ```
 
 ---
 
-## What's New in v4.2
+## What's New in v4.5
 
-- **Milestone Management** — Organize work into project phases during setup
-- **Milestone Assignment** — Assign issues to milestones during `/capture`
-- **Priority/Dependency Workflow** — Set priorities and blocking relationships during setup and refine
-- **Smart Activation** — `/activate` recommends what to work on next based on priority and blockers
-- **Mandatory Assignment** — Issues must be assigned before moving to In Progress
-- **Project Updates on Wrap** — `/wrap-session` posts progress to Linear project updates
-- **Manifest-Based Updates** — Smart updates that preserve your customizations
+- **AI Labor Estimates** — Token and cost estimation for issues during `/refine`
+- **Deterministic Workflow Rules** — `always.md` with mandatory rules that never vary
+- **Shell Scripts for Consistency** — Atomic operations for `wrap-session`, `transition-issue`, `activate-issue`
+- **Structured Agent Checklists** — Numbered steps with explicit verification in all agent rules
+- **Configurable Cost Thresholds** — Warning and approval limits in config
+
+### Recent Versions
+
+| Version | Key Features |
+|---------|--------------|
+| **v4.5** | Workflow consistency, AI Labor Estimates |
+| **v4.4** | Design system integration, Figma MCP skill |
+| **v4.3** | Project configuration improvements |
+| **v4.2** | Milestone management, smart activation |
 
 ---
 
@@ -326,6 +339,9 @@ docflow-template/
 - [x] Priority/dependency workflow
 - [x] Linear project updates
 - [x] Milestone management
+- [x] Design system integration (v4.4)
+- [x] AI Labor Estimates (v4.5)
+- [x] Workflow consistency enforcement (v4.5)
 - [ ] Jira provider
 - [ ] GitHub Issues provider
 
