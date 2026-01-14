@@ -14,7 +14,8 @@
     "product": {
       "name": null,
       "labelId": null,
-      "icon": null
+      "icon": null,
+      "color": null
     }
   },
   "statusMapping": {

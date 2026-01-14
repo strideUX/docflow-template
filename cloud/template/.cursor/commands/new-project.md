@@ -16,7 +16,7 @@ Create a new project in Linear with configured product label and icon, and add i
 
 2. **Read Config**
    - Load `.docflow/config.json`
-   - Get: `provider.teamId`, `workspace.product.labelId`, `workspace.product.icon`
+   - Get: `provider.teamId`, `workspace.product.labelId`, `workspace.product.icon`, `workspace.product.color`
 
 3. **Create Project in Linear**
 
@@ -24,12 +24,13 @@ Create a new project in Linear with configured product label and icon, and add i
 curl -s -X POST https://api.linear.app/graphql \
   -H "Authorization: $LINEAR_API_KEY" \
   -d '{
-    "query": "mutation($teamIds: [String!]!, $name: String!, $description: String, $icon: String) { projectCreate(input: { teamIds: $teamIds, name: $name, description: $description, icon: $icon }) { success project { id name url } } }",
+    "query": "mutation($teamIds: [String!]!, $name: String!, $description: String, $icon: String, $color: String) { projectCreate(input: { teamIds: $teamIds, name: $name, description: $description, icon: $icon, color: $color }) { success project { id name url } } }",
     "variables": {
       "teamIds": ["[teamId from config]"],
       "name": "[project name]",
       "description": "[description]",
-      "icon": "[icon from config.workspace.product.icon]"
+      "icon": "[icon from config.workspace.product.icon]",
+      "color": "[color from config.workspace.product.color]"
     }
   }'
 ```
@@ -61,24 +62,15 @@ You can now use `/capture` to add issues to this project.
 - "create project"
 - "start new project"
 
-## Linear Icons
+## Linear Icons & Colors
 
-Available icons (use exact name):
-- Rocket
-- Code
-- Bug
-- Star
-- Heart
-- Flag
-- Bookmark
-- Lightning
-- Mountain
-- Sun
-- Moon
-- Cloud
-- Fire
-- Leaf
-- Globe
+**Icons** (use lowercase name from Linear's icon picker):
+- comment, code, bug, rocket, star, heart, flag, bookmark
+- lightning, mountain, sun, moon, cloud, fire, leaf, globe
+- (many more - check Linear's project icon picker for full list)
+
+**Colors** (use the color name):
+- Gray, Purple, Blue, Teal, Green, Yellow, Orange, Red, Pink
 
 ## Full Rules
 

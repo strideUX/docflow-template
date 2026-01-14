@@ -99,7 +99,8 @@
       "workspace.defaultMilestoneId": "Default milestone for new issues",
       "workspace.product.name": "Product name for project creation",
       "workspace.product.labelId": "Label ID applied to new projects",
-      "workspace.product.icon": "Icon used for new projects"
+      "workspace.product.icon": "Icon used for new projects (lowercase name from Linear picker)",
+      "workspace.product.color": "Color used for new projects (Gray, Purple, Blue, Teal, Green, Yellow, Orange, Red, Pink)"
     },
     "removed": {
       "provider.projectId": "Replaced by workspace.activeProjects array"

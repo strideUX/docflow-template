@@ -209,6 +209,8 @@ if [ "$UPDATE_MODE" = true ]; then
   PRODUCT_NAME=""
   PRODUCT_LABEL_ID=""
   PRODUCT_ICON=""
+  PRODUCT_COLOR=""
+  STATUS_MAPPING=""
   if [ -f ".docflow/config.json" ]; then
     if command -v python3 &> /dev/null; then
       TEAM_ID=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('provider',{}).get('teamId',''))" 2>/dev/null || echo "")
@@ -219,6 +221,8 @@ if [ "$UPDATE_MODE" = true ]; then
       PRODUCT_NAME=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('product',{}).get('name',''))" 2>/dev/null || echo "")
       PRODUCT_LABEL_ID=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('product',{}).get('labelId',''))" 2>/dev/null || echo "")
       PRODUCT_ICON=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('product',{}).get('icon',''))" 2>/dev/null || echo "")
+      PRODUCT_COLOR=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('product',{}).get('color',''))" 2>/dev/null || echo "")
+      STATUS_MAPPING=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(json.dumps(d.get('statusMapping',{})))" 2>/dev/null || echo "{}")
     elif command -v jq &> /dev/null; then
       TEAM_ID=$(jq -r '.provider.teamId // empty' .docflow/config.json)
       PROJECT_ID=$(jq -r '.provider.projectId // empty' .docflow/config.json)
@@ -227,6 +231,8 @@ if [ "$UPDATE_MODE" = true ]; then
       PRODUCT_NAME=$(jq -r '.workspace.product.name // empty' .docflow/config.json)
       PRODUCT_LABEL_ID=$(jq -r '.workspace.product.labelId // empty' .docflow/config.json)
       PRODUCT_ICON=$(jq -r '.workspace.product.icon // empty' .docflow/config.json)
+      PRODUCT_COLOR=$(jq -r '.workspace.product.color // empty' .docflow/config.json)
+      STATUS_MAPPING=$(jq -c '.statusMapping // {}' .docflow/config.json)
     fi
   fi
   
@@ -326,6 +332,11 @@ with open('.docflow/config.json.new', 'r') as f:
 config['provider']['teamId'] = '$TEAM_ID' if '$TEAM_ID' and '$TEAM_ID' != 'None' else None
 config['paths']['content'] = '$CONTENT_FOLDER'
 
+# Preserve statusMapping (custom workflow states)
+preserved_status = $STATUS_MAPPING if '$STATUS_MAPPING' and '$STATUS_MAPPING' != '{}' else {}
+if preserved_status:
+    config['statusMapping'] = preserved_status
+
 # Ensure workspace structure exists (for migration from pre-4.7)
 if 'workspace' not in config:
     config['workspace'] = {
@@ -334,11 +345,14 @@ if 'workspace' not in config:
         'product': {
             'name': None,
             'labelId': None,
-            'icon': None
+            'icon': None,
+            'color': None
         }
     }
 if 'product' not in config['workspace']:
-    config['workspace']['product'] = {'name': None, 'labelId': None, 'icon': None}
+    config['workspace']['product'] = {'name': None, 'labelId': None, 'icon': None, 'color': None}
+if 'color' not in config['workspace'].get('product', {}):
+    config['workspace']['product']['color'] = None
 
 # Handle workspace migration (4.7.0+)
 # Migrate old projectId to activeProjects array if needed
@@ -355,6 +369,7 @@ config['workspace']['defaultMilestoneId'] = '$MILESTONE_ID' if '$MILESTONE_ID' a
 config['workspace']['product']['name'] = '$PRODUCT_NAME' if '$PRODUCT_NAME' and '$PRODUCT_NAME' != 'None' else None
 config['workspace']['product']['labelId'] = '$PRODUCT_LABEL_ID' if '$PRODUCT_LABEL_ID' and '$PRODUCT_LABEL_ID' != 'None' else None
 config['workspace']['product']['icon'] = '$PRODUCT_ICON' if '$PRODUCT_ICON' and '$PRODUCT_ICON' != 'None' else None
+config['workspace']['product']['color'] = '$PRODUCT_COLOR' if '$PRODUCT_COLOR' and '$PRODUCT_COLOR' != 'None' else None
 
 # Remove old projectId from provider if it exists (migrated to workspace)
 if 'projectId' in config.get('provider', {}):
@@ -372,7 +387,74 @@ EOF
   
   # Update version
   echo "$DOCFLOW_VERSION" > .docflow/version
-  
+
+  # =====================================================
+  # PRODUCT CONFIGURATION (4.7.0+)
+  # =====================================================
+  # Check if product config is missing and prompt user
+  NEEDS_PRODUCT_CONFIG=false
+  if command -v python3 &> /dev/null; then
+    NEEDS_PRODUCT_CONFIG=$(python3 -c "
+import json
+with open('.docflow/config.json', 'r') as f:
+    config = json.load(f)
+product = config.get('workspace', {}).get('product', {})
+if not product.get('name') and not product.get('labelId'):
+    print('true')
+else:
+    print('false')
+" 2>/dev/null || echo "false")
+  fi
+
+  if [ "$NEEDS_PRODUCT_CONFIG" = "true" ]; then
+    echo ""
+    echo -e "${YELLOW}📦 Product Configuration (New in 4.7.0)${NC}"
+    echo ""
+    echo "   DocFlow 4.7 supports product identity for new projects."
+    echo "   This applies a consistent label and icon when creating projects."
+    echo ""
+    read -p "   Configure product identity now? (y/n): " CONFIGURE_PRODUCT
+
+    if [[ $CONFIGURE_PRODUCT =~ ^[Yy]$ ]]; then
+      echo ""
+      read -p "   Product name (e.g., StrideApp, FlyDocs): " INPUT_PRODUCT_NAME
+
+      if [ -n "$INPUT_PRODUCT_NAME" ]; then
+        echo ""
+        echo "   To get Label ID: Linear → Settings → Labels → Click label → Copy ID from URL"
+        read -p "   Product label ID (or press Enter to skip): " INPUT_LABEL_ID
+
+        echo ""
+        echo "   Icon: Use lowercase name from Linear's project icon picker (e.g., comment, rocket, code)"
+        read -p "   Project icon (or press Enter to skip): " INPUT_ICON
+
+        echo ""
+        echo "   Colors: Gray, Purple, Blue, Teal, Green, Yellow, Orange, Red, Pink"
+        read -p "   Project color (or press Enter to skip): " INPUT_COLOR
+
+        # Update config with product settings
+        python3 << EOF
+import json
+with open('.docflow/config.json', 'r') as f:
+    config = json.load(f)
+
+config['workspace']['product']['name'] = '$INPUT_PRODUCT_NAME' if '$INPUT_PRODUCT_NAME' else None
+config['workspace']['product']['labelId'] = '$INPUT_LABEL_ID' if '$INPUT_LABEL_ID' else None
+config['workspace']['product']['icon'] = '$INPUT_ICON' if '$INPUT_ICON' else None
+config['workspace']['product']['color'] = '$INPUT_COLOR' if '$INPUT_COLOR' else None
+
+with open('.docflow/config.json', 'w') as f:
+    json.dump(config, f, indent=2)
+    f.write('\n')
+EOF
+        echo ""
+        echo -e "   ${GREEN}✓ Product configured: $INPUT_PRODUCT_NAME${NC}"
+      fi
+    else
+      echo "   ⏭ Skipped - run /docflow-setup later to configure"
+    fi
+  fi
+
   # =====================================================
   # CLEANUP OLD FILES (from migrations)
   # =====================================================
