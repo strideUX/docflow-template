@@ -326,6 +326,20 @@ with open('.docflow/config.json.new', 'r') as f:
 config['provider']['teamId'] = '$TEAM_ID' if '$TEAM_ID' and '$TEAM_ID' != 'None' else None
 config['paths']['content'] = '$CONTENT_FOLDER'
 
+# Ensure workspace structure exists (for migration from pre-4.7)
+if 'workspace' not in config:
+    config['workspace'] = {
+        'activeProjects': [],
+        'defaultMilestoneId': None,
+        'product': {
+            'name': None,
+            'labelId': None,
+            'icon': None
+        }
+    }
+if 'product' not in config['workspace']:
+    config['workspace']['product'] = {'name': None, 'labelId': None, 'icon': None}
+
 # Handle workspace migration (4.7.0+)
 # Migrate old projectId to activeProjects array if needed
 active_projects = $ACTIVE_PROJECTS if '$ACTIVE_PROJECTS' and '$ACTIVE_PROJECTS' != '[]' else []
@@ -341,6 +355,10 @@ config['workspace']['defaultMilestoneId'] = '$MILESTONE_ID' if '$MILESTONE_ID' a
 config['workspace']['product']['name'] = '$PRODUCT_NAME' if '$PRODUCT_NAME' and '$PRODUCT_NAME' != 'None' else None
 config['workspace']['product']['labelId'] = '$PRODUCT_LABEL_ID' if '$PRODUCT_LABEL_ID' and '$PRODUCT_LABEL_ID' != 'None' else None
 config['workspace']['product']['icon'] = '$PRODUCT_ICON' if '$PRODUCT_ICON' and '$PRODUCT_ICON' != 'None' else None
+
+# Remove old projectId from provider if it exists (migrated to workspace)
+if 'projectId' in config.get('provider', {}):
+    del config['provider']['projectId']
 
 with open('.docflow/config.json', 'w') as f:
     json.dump(config, f, indent=2)
