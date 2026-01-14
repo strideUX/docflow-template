@@ -7,10 +7,42 @@
 
 ## Golden Rules
 
-1. **Every status transition gets a comment** — No silent state changes
-2. **Assignment before In Progress** — No unassigned work in progress
-3. **Project update on wrap** — Every session ends with a POST to Linear
-4. **Checkboxes in description** — Never put completion checkmarks in comments
+1. **Product scope filtering** — Only show projects/issues matching `workspace.product.labelIds`
+2. **Every status transition gets a comment** — No silent state changes
+3. **Assignment before In Progress** — No unassigned work in progress
+4. **Project update on wrap** — Every session ends with a POST to Linear
+5. **Checkboxes in description** — Never put completion checkmarks in comments
+
+---
+
+## Product Scope Protocol
+
+### ALWAYS Filter by Product Labels
+
+Every query to Linear MUST be filtered to your product scope:
+
+```
+□ 1. READ config to get labelIds
+     LABEL_IDS=$(jq -c '.workspace.product.labelIds // []' .docflow/config.json)
+
+□ 2. QUERY projects from team
+     Get all projects, include their projectLabels
+
+□ 3. FILTER to only projects with ALL labelIds
+     A project must have EVERY label in labelIds to be visible
+
+□ 4. CATEGORIZE as Active vs Available
+     Active = in workspace.activeProjects array
+     Available = matches labels but not in activeProjects
+
+□ 5. QUERY issues from Active projects ONLY
+     Never show issues from outside activeProjects
+```
+
+**DO NOT:**
+- ❌ Query all team issues without filtering
+- ❌ Show projects that don't match labelIds
+- ❌ Show issues from "available" (non-active) projects
 
 ---
 

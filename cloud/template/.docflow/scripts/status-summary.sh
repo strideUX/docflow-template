@@ -1,6 +1,6 @@
 #!/bin/bash
 # status-summary.sh
-# Queries Linear via API for current state counts
+# Queries Linear via API for current state counts within product scope
 # Returns structured status output for session commands
 # Requires: LINEAR_API_KEY environment variable
 
@@ -10,7 +10,7 @@ set -e
 if [ -z "$LINEAR_API_KEY" ]; then
   # Try to source from .env
   if [ -f ".env" ]; then
-    source .env
+    export $(grep -v '^#' .env | xargs)
   fi
 fi
 
@@ -24,23 +24,57 @@ if [ -z "$LINEAR_API_KEY" ]; then
   exit 0
 fi
 
-# Query Linear for issue counts by state
-# This uses the GraphQL API directly for efficiency
-echo "=== Linear Status Summary ==="
+# Check for jq
+if ! command -v jq &> /dev/null; then
+  echo "⚠️  jq not installed - install with: brew install jq"
+  exit 0
+fi
 
-QUERY='{"query": "{ issues(filter: { state: { type: { in: [\"started\", \"unstarted\", \"backlog\"] } } }) { nodes { state { name type } } } }"}'
+# Read config
+CONFIG_FILE=".docflow/config.json"
+if [ ! -f "$CONFIG_FILE" ]; then
+  echo "⚠️  Config file not found: $CONFIG_FILE"
+  exit 0
+fi
 
-RESPONSE=$(curl -s -X POST https://api.linear.app/graphql \
-  -H "Content-Type: application/json" \
-  -H "Authorization: $LINEAR_API_KEY" \
-  -d "$QUERY")
+TEAM_ID=$(jq -r '.provider.teamId // empty' "$CONFIG_FILE")
+ACTIVE_PROJECTS=$(jq -r '.workspace.activeProjects // [] | .[]' "$CONFIG_FILE")
+PRODUCT_NAME=$(jq -r '.workspace.product.name // "Project"' "$CONFIG_FILE")
 
-if command -v jq &> /dev/null; then
-  echo "$RESPONSE" | jq -r '
-    .data.issues.nodes | group_by(.state.name) | 
-    map({state: .[0].state.name, count: length}) | 
-    .[] | "\(.state): \(.count)"
-  ' 2>/dev/null || echo "Use Linear MCP for detailed status"
-else
-  echo "Install jq for parsed output, or use Linear MCP"
+if [ -z "$TEAM_ID" ]; then
+  echo "⚠️  No teamId configured"
+  exit 0
+fi
+
+echo "=== Status Summary: $PRODUCT_NAME ==="
+echo ""
+
+# Query issues from active projects only
+for PROJECT_ID in $ACTIVE_PROJECTS; do
+  if [ -n "$PROJECT_ID" ]; then
+    RESPONSE=$(curl -s -X POST https://api.linear.app/graphql \
+      -H "Content-Type: application/json" \
+      -H "Authorization: $LINEAR_API_KEY" \
+      -d "{
+        \"query\": \"query(\$projectId: String!) { project(id: \$projectId) { name issues { nodes { state { name type } } } } }\",
+        \"variables\": { \"projectId\": \"$PROJECT_ID\" }
+      }")
+
+    PROJECT_NAME=$(echo "$RESPONSE" | jq -r '.data.project.name // "Unknown"')
+    echo "📁 $PROJECT_NAME"
+
+    echo "$RESPONSE" | jq -r '
+      .data.project.issues.nodes | group_by(.state.name) |
+      map({state: .[0].state.name, count: length}) |
+      sort_by(.state) |
+      .[] | "   \(.state): \(.count)"
+    ' 2>/dev/null || echo "   (no issues or error)"
+
+    echo ""
+  fi
+done
+
+if [ -z "$ACTIVE_PROJECTS" ]; then
+  echo "⚠️  No active projects configured"
+  echo "   Add projects to workspace.activeProjects in config"
 fi

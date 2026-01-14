@@ -18,8 +18,9 @@ DocFlow Cloud is a hybrid spec-driven workflow:
 **Always read `.docflow/config.json` first to get:**
 - `paths.content` - Where context/knowledge lives (default: "docflow")
 - `provider.teamId` - Linear team ID
-- `workspace.activeProjects` - Array of active Linear project IDs
-- `workspace.product` - Product identity (name, labelIds, icon)
+- `workspace.activeProjects` - Array of active Linear project IDs (focused work)
+- `workspace.product.labelIds` - Array of label IDs for product scope filtering
+- `workspace.product.name` - Product name for display
 - `statusMapping` - Maps DocFlow states to Linear states
 
 **Dynamic paths based on config:**
@@ -27,6 +28,48 @@ DocFlow Cloud is a hybrid spec-driven workflow:
 {paths.content}/context/     → e.g., docflow/context/
 {paths.content}/knowledge/   → e.g., docflow/knowledge/
 ```
+
+---
+
+## Product Scope Filtering
+
+**CRITICAL: All Linear queries must be filtered to your product scope.**
+
+### How It Works
+
+```
+Team (e.g., Engineering)
+  └── Product Scope (filtered by workspace.product.labelIds)
+        ├── Active Projects (workspace.activeProjects) → show issues
+        └── Available Projects (same labels, not active) → can activate
+```
+
+### Rules
+
+1. **Projects**: Only show projects that have ALL labels in `workspace.product.labelIds`
+2. **Issues**: Only show issues from `workspace.activeProjects`
+3. **Available**: Projects matching labels but not in activeProjects can be activated
+
+### Example Config
+
+```json
+{
+  "workspace": {
+    "activeProjects": ["project-uuid-1"],
+    "product": {
+      "name": "StrideApp",
+      "labelIds": ["strideapp-label-uuid", "internal-label-uuid"],
+      "icon": "rocket",
+      "color": "Teal"
+    }
+  }
+}
+```
+
+This config means:
+- Only show projects with BOTH "StrideApp" AND "Internal" labels
+- Only show issues from projects in `activeProjects`
+- New projects created via `/new-project` will get these labels applied
 
 ---
 
