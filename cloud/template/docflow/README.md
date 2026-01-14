@@ -11,24 +11,28 @@ This project uses DocFlow Cloud - a hybrid workflow where:
 
 ```
 .docflow/                  # FRAMEWORK (updatable)
-├── config.json            # Provider settings, paths
+├── config.json            # Provider settings, workspace config
 ├── version                # For upgrade detection
 ├── rules/                 # Workflow rules (source of truth)
+│   ├── always.md          # Non-negotiable process rules
 │   ├── core.md            # Essential rules (always loaded)
-│   ├── pm-agent.md        # PM agent responsibilities
-│   ├── implementation-agent.md
-│   ├── qe-agent.md
+│   ├── workflow-agent.md  # PM, Implementation, QE workflows
 │   ├── linear-integration.md
 │   ├── figma-integration.md
-│   └── session-awareness.md
+│   ├── session-awareness.md
+│   └── designer-agent.md
 ├── scripts/               # Automation scripts
 │   ├── status-summary.sh
 │   ├── session-context.sh
-│   └── stale-check.sh
+│   ├── stale-check.sh
+│   ├── activate-issue.sh
+│   ├── transition-issue.sh
+│   └── wrap-session.sh
 ├── skills/                # Portable Agent Skills
 │   ├── linear-workflow/
 │   ├── figma-mcp/         # Figma integration workflow
 │   ├── component-workflow/ # Component patterns & testing
+│   ├── ai-labor-estimate/ # Token/cost estimation
 │   ├── spec-templates/
 │   └── docflow-commands/
 ├── templates/             # Issue templates
@@ -54,11 +58,16 @@ This project uses DocFlow Cloud - a hybrid workflow where:
 .cursor/
 ├── rules/                 # Cursor rule pointers
 │   ├── docflow-core/RULE.md      # Always applied
-│   ├── pm-agent/RULE.md          # Agent-decided
-│   ├── implementation-agent/RULE.md
-│   ├── qe-agent/RULE.md
+│   ├── pm-agent/RULE.md          # Planning triggers
+│   ├── implementation-agent/RULE.md  # Build triggers
+│   ├── qe-agent/RULE.md          # Testing triggers
+│   ├── linear-integration/RULE.md
 │   └── ...
 └── commands/              # Slash commands
+
+.claude/
+├── CLAUDE.md              # Claude Code instructions
+└── commands/              # Symlinks to .cursor/commands/
 ```
 
 **Note:** Content folder name is configurable via `paths.content` in `.docflow/config.json`.
@@ -112,6 +121,7 @@ These are **replaced by Linear**:
 ```
 /start-session    - Check Linear status, plan work
 /capture          - Create new Linear issue
+/new-project      - Create project with product label/icon
 /implement        - Pick up issue from Linear
 /validate         - Test implementation
 /close            - Move issue to Done
@@ -156,8 +166,10 @@ And updates `.docflow/config.json` with:
 See `.docflow/config.json` for:
 - DocFlow version
 - `paths.content` - This folder name (default: "docflow")
-- Linear team/project IDs
-- Status mappings
+- `provider.teamId` - Linear team ID
+- `workspace.activeProjects` - Array of active project IDs
+- `workspace.product` - Product identity (name, labelId, icon, color)
+- `statusMapping` - Workflow state names
 
 See `.cursor/mcp.json` for MCP server configuration.
 

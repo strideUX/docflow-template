@@ -21,7 +21,7 @@ Handles Linear API patterns and issue management.
 ### Create Milestone (EXECUTE THIS):
 ```bash
 LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
-PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+PROJECT_ID=$(jq -r '.workspace.activeProjects[0]' .docflow/config.json)
 curl -s -X POST https://api.linear.app/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: $LINEAR_API_KEY" \

@@ -73,13 +73,14 @@ Do NOT: Continue to review → done → next task without instruction
 
 ## 🚨 CRITICAL: Always Use Configured Project
 
-**ALL issues MUST be created within the configured Linear project. Never create issues outside of it.**
+**ALL issues MUST be created within an active Linear project. Never create issues outside of them.**
 
 ### Get Project IDs from Config:
 ```bash
 # Read from .docflow/config.json
 TEAM_ID=$(jq -r '.provider.teamId' .docflow/config.json)
-PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+PROJECT_ID=$(jq -r '.workspace.activeProjects[0]' .docflow/config.json)
+# Note: If multiple active projects, /capture will prompt user to select
 ```
 
 ### Every create_issue call MUST include:
@@ -87,7 +88,7 @@ PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
 create_issue(
   title: "...",
   teamId: "[TEAM_ID from config]",      # REQUIRED
-  projectId: "[PROJECT_ID from config]", # REQUIRED - never omit this
+  projectId: "[PROJECT_ID from activeProjects]", # REQUIRED - never omit this
   ...
 )
 ```
@@ -111,7 +112,7 @@ create_issue(
 ### Create Milestone (EXECUTE THIS):
 ```bash
 LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
-PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+PROJECT_ID=$(jq -r '.workspace.activeProjects[0]' .docflow/config.json)
 curl -s -X POST https://api.linear.app/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: $LINEAR_API_KEY" \
@@ -121,7 +122,7 @@ curl -s -X POST https://api.linear.app/graphql \
 ### Post Project Update (EXECUTE THIS):
 ```bash
 LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
-PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+PROJECT_ID=$(jq -r '.workspace.activeProjects[0]' .docflow/config.json)
 curl -s -X POST https://api.linear.app/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: $LINEAR_API_KEY" \

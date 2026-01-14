@@ -1,0 +1,1 @@
+../../.cursor/commands/sync-project.md

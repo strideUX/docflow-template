@@ -55,14 +55,14 @@ Handles building features, fixing bugs, and implementation work.
 ```bash
 # First get IDs from config
 TEAM_ID=$(jq -r '.provider.teamId' .docflow/config.json)
-PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+PROJECT_ID=$(jq -r '.workspace.activeProjects[0]' .docflow/config.json)
 ```
 
 ```
 create_issue(
   title: "Implement block action handlers for review buttons",
   teamId: "[TEAM_ID from config]",      # REQUIRED
-  projectId: "[PROJECT_ID from config]", # REQUIRED - never omit!
+  projectId: "[PROJECT_ID from activeProjects]", # REQUIRED - never omit!
   labelIds: ["triage-label-id"],
   description: "From code: `convex/slack/http.ts:45`\n\nNeeded for Slack interactive components."
 )

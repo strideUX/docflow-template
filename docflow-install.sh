@@ -308,7 +308,7 @@ if [ "$UPDATE_MODE" = true ]; then
   
   echo "   Updating adapters..."
   mkdir -p .claude .warp .github
-  download_file "${RAW_BASE}/.claude/rules.md" ".claude/rules.md"
+  download_file "${RAW_BASE}/.claude/CLAUDE.md" ".claude/CLAUDE.md"
   download_file "${RAW_BASE}/.warp/rules.md" ".warp/rules.md"
   download_file "${RAW_BASE}/.github/copilot-instructions.md" ".github/copilot-instructions.md"
   download_file "${RAW_BASE}/AGENTS.md" "AGENTS.md"
@@ -832,7 +832,7 @@ fi
 echo "   [3/7] Installing platform adapters..."
 mkdir -p .claude/commands .warp .github
 
-download_template_file ".claude/rules.md" ".claude/rules.md"
+download_template_file ".claude/CLAUDE.md" ".claude/CLAUDE.md"
 download_template_file ".warp/rules.md" ".warp/rules.md"
 download_template_file ".github/copilot-instructions.md" ".github/copilot-instructions.md"
 download_template_file "AGENTS.md" "AGENTS.md"

@@ -48,10 +48,15 @@ No active projects configured. Would you like to create one first?
 Before creating the issue, check if project has milestones:
 
 ```bash
+# Get project ID from config (or use selected project if multiple)
+LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
+PROJECT_ID=$(jq -r '.workspace.activeProjects[0]' .docflow/config.json)
+
 # Query milestones
 curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
   -H "Authorization: $LINEAR_API_KEY" \
-  -d '{"query": "query($projectId: String!) { project(id: $projectId) { projectMilestones { nodes { id name } } } }", "variables": {"projectId": "..."}}'
+  -d '{"query": "query($projectId: String!) { project(id: $projectId) { projectMilestones { nodes { id name } } } }", "variables": {"projectId": "'"$PROJECT_ID"'"}}'
 ```
 
 **If milestones exist:**

@@ -260,7 +260,7 @@ get_viewer()                    // Get current authenticated user
 Read `.docflow/config.json` for:
 - `paths.content` - Where context/knowledge folders live
 - `provider.teamId` - Required
-- `provider.projectId` - Required for project-scoped work
+- `workspace.activeProjects` - Array of active project IDs
 - `provider.defaultMilestoneId` - Optional auto-assign
 - `statusMapping` - Maps DocFlow states to Linear states
 
@@ -275,7 +275,7 @@ When the user asks to create, query, or assign milestones, **execute these shell
 ```bash
 # Get credentials - run this before any milestone operation
 LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
-PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+PROJECT_ID=$(jq -r '.workspace.activeProjects[0]' .docflow/config.json)
 ```
 
 ### Query Project Milestones
@@ -408,7 +408,7 @@ Get key from: Linear → Settings → API → Personal API keys
 ```bash
 # Read API key and project ID
 LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
-PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+PROJECT_ID=$(jq -r '.workspace.activeProjects[0]' .docflow/config.json)
 
 # Post project update
 curl -s -X POST https://api.linear.app/graphql \
@@ -428,7 +428,7 @@ curl -s -X POST https://api.linear.app/graphql \
 
 ```typescript
 const apiKey = process.env.LINEAR_API_KEY;
-const projectId = config.provider.projectId; // from .docflow/config.json
+const projectId = config.workspace.activeProjects[0]; // from .docflow/config.json
 
 const response = await fetch('https://api.linear.app/graphql', {
   method: 'POST',

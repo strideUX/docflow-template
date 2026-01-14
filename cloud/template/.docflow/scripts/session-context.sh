@@ -17,7 +17,7 @@ if command -v jq &> /dev/null; then
   echo "=== DocFlow Configuration ==="
   echo "Content Path: $(jq -r '.paths.content // "docflow"' "$CONFIG_FILE")"
   echo "Team ID: $(jq -r '.provider.teamId // "not set"' "$CONFIG_FILE")"
-  echo "Project ID: $(jq -r '.provider.projectId // "not set"' "$CONFIG_FILE")"
+  echo "Active Projects: $(jq -r '.workspace.activeProjects // ["not set"]' "$CONFIG_FILE")"
   echo "Version: $(jq -r '.version // "unknown"' "$CONFIG_FILE")"
 else
   echo "=== DocFlow Configuration ==="

@@ -13,7 +13,7 @@
 #
 # Requirements:
 #   - LINEAR_API_KEY in .env file
-#   - provider.projectId in .docflow/config.json
+#   - workspace.activeProjects[0] in .docflow/config.json
 #   - jq installed
 #
 
@@ -64,7 +64,7 @@ fi
 
 # Read credentials
 LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2 | tr -d '"' | tr -d "'")
-PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+PROJECT_ID=$(jq -r '.workspace.activeProjects[0]' .docflow/config.json)
 
 # Validate credentials
 if [ -z "$LINEAR_API_KEY" ] || [ "$LINEAR_API_KEY" == "null" ]; then
@@ -73,7 +73,7 @@ if [ -z "$LINEAR_API_KEY" ] || [ "$LINEAR_API_KEY" == "null" ]; then
 fi
 
 if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" == "null" ]; then
-    echo -e "${RED}Error: provider.projectId not found in config.json${NC}"
+    echo -e "${RED}Error: workspace.activeProjects not found in config.json${NC}"
     exit 1
 fi
 

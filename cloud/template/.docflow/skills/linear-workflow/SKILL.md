@@ -97,7 +97,7 @@ Milestones group issues into project phases. When asked to work with milestones,
 **Setup (run first):**
 ```bash
 LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
-PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+PROJECT_ID=$(jq -r '.workspace.activeProjects[0]' .docflow/config.json)
 ```
 
 **Query milestones - EXECUTE THIS:**

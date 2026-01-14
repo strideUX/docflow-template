@@ -142,7 +142,10 @@ This helps organize your work in Linear.
    - no -> Skip (can add later)
 
 3. **Icon:** What icon should new projects use?
-   Options: Rocket, Code, Bug, Star, Heart, Flag, Lightning, Mountain, etc.
+   Icons: comment, code, bug, rocket, star, heart, flag, lightning, etc.
+
+4. **Color:** What color should new projects use?
+   Colors: Gray, Purple, Blue, Teal, Green, Yellow, Orange, Red, Pink
 ```
 
 Save to config:
@@ -153,7 +156,8 @@ Save to config:
     "product": {
       "name": "FlyDocs",
       "labelId": "label-xyz789",
-      "icon": "Rocket"
+      "icon": "rocket",
+      "color": "Teal"
     }
   }
 }

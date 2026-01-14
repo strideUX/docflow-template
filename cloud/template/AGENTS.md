@@ -54,6 +54,7 @@ Commands are in `.cursor/commands/`. Use natural language or slash commands.
 - `/start-session` - Begin work session
 - `/capture` - Create issue
 - `/implement` - Build feature
+- `/new-project` - Create project with product label/icon
 - `/status` - Check Linear state
 - `/design-setup` - Initialize design system (optional)
 

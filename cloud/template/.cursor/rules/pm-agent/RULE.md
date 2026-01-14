@@ -15,7 +15,7 @@ Handles planning, capturing, reviewing, and closing work.
 ### Create Milestone:
 ```bash
 LINEAR_API_KEY=$(grep LINEAR_API_KEY .env | cut -d '=' -f2)
-PROJECT_ID=$(jq -r '.provider.projectId' .docflow/config.json)
+PROJECT_ID=$(jq -r '.workspace.activeProjects[0]' .docflow/config.json)
 curl -s -X POST https://api.linear.app/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: $LINEAR_API_KEY" \
@@ -43,6 +43,7 @@ curl -s -X POST https://api.linear.app/graphql \
 ## Commands
 
 - `/capture` - Create new issue
+- `/new-project` - Create project with product label/icon
 - `/refine` - Triage or refine issue
 - `/activate` - Ready for implementation
 - `/review` - Code review
