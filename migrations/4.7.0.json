@@ -10,7 +10,7 @@
         "rationale": "Teams often work across multiple projects within the same codebase"
       },
       {
-        "description": "Product identity configuration (name, labelId, icon)",
+        "description": "Product identity configuration (name, labelIds, icon, color)",
         "rationale": "Consistent branding when creating new projects in Linear"
       },
       {
@@ -98,7 +98,7 @@
       "workspace.activeProjects": "Array of project IDs (replaces provider.projectId)",
       "workspace.defaultMilestoneId": "Default milestone for new issues",
       "workspace.product.name": "Product name for project creation",
-      "workspace.product.labelId": "Label ID applied to new projects",
+      "workspace.product.labelIds": "Array of label IDs applied to new projects",
       "workspace.product.icon": "Icon used for new projects (lowercase name from Linear picker)",
       "workspace.product.color": "Color used for new projects (Gray, Purple, Blue, Teal, Green, Yellow, Orange, Red, Pink)"
     },

@@ -16,7 +16,7 @@ Create a new project in Linear with configured product label and icon, and add i
 
 2. **Read Config**
    - Load `.docflow/config.json`
-   - Get: `provider.teamId`, `workspace.product.labelId`, `workspace.product.icon`, `workspace.product.color`
+   - Get: `provider.teamId`, `workspace.product.labelIds`, `workspace.product.icon`, `workspace.product.color`
 
 3. **Create Project in Linear**
 
@@ -35,8 +35,25 @@ curl -s -X POST https://api.linear.app/graphql \
   }'
 ```
 
-4. **Apply Product Label** (if configured)
-   - If `workspace.product.labelId` exists, apply label to project
+4. **Apply Product Labels** (if configured)
+   - If `workspace.product.labelIds` has entries, apply labels to project:
+
+```bash
+# Get labelIds array from config
+LABEL_IDS=$(jq -c '.workspace.product.labelIds // []' .docflow/config.json)
+
+# Apply labels to project (only if array is not empty)
+curl -s -X POST https://api.linear.app/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: $LINEAR_API_KEY" \
+  -d '{
+    "query": "mutation($projectId: String!, $labelIds: [String!]!) { projectUpdate(id: $projectId, input: { labelIds: $labelIds }) { success } }",
+    "variables": {
+      "projectId": "[project ID from step 3]",
+      "labelIds": '"$LABEL_IDS"'
+    }
+  }'
+```
 
 5. **Update Config**
    - Add new project ID to `workspace.activeProjects` array

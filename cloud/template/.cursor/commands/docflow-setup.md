@@ -155,7 +155,7 @@ Save to config:
     "activeProjects": ["[project-id]"],
     "product": {
       "name": "FlyDocs",
-      "labelId": "label-xyz789",
+      "labelIds": ["label-xyz789", "label-abc123"],
       "icon": "rocket",
       "color": "Teal"
     }

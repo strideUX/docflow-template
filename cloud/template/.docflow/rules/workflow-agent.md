@@ -57,7 +57,7 @@ The PM/Planning Agent orchestrates workflow:
 
 [] 2. READ config for product settings
      Load: .docflow/config.json
-     Get: workspace.product.labelId, workspace.product.icon, provider.teamId
+     Get: workspace.product.labelIds, workspace.product.icon, provider.teamId
 
 [] 3. CREATE project in Linear
      create_project({

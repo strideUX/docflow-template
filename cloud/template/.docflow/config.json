@@ -13,7 +13,7 @@
     "defaultMilestoneId": null,
     "product": {
       "name": null,
-      "labelId": null,
+      "labelIds": [],
       "icon": null,
       "color": null
     }

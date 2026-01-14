@@ -168,7 +168,7 @@ See `.docflow/config.json` for:
 - `paths.content` - This folder name (default: "docflow")
 - `provider.teamId` - Linear team ID
 - `workspace.activeProjects` - Array of active project IDs
-- `workspace.product` - Product identity (name, labelId, icon, color)
+- `workspace.product` - Product identity (name, labelIds, icon, color)
 - `statusMapping` - Workflow state names
 
 See `.cursor/mcp.json` for MCP server configuration.

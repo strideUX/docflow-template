@@ -207,7 +207,7 @@ if [ "$UPDATE_MODE" = true ]; then
   MILESTONE_ID=""
   ACTIVE_PROJECTS=""
   PRODUCT_NAME=""
-  PRODUCT_LABEL_ID=""
+  PRODUCT_LABEL_IDS=""
   PRODUCT_ICON=""
   PRODUCT_COLOR=""
   STATUS_MAPPING=""
@@ -219,7 +219,7 @@ if [ "$UPDATE_MODE" = true ]; then
       MILESTONE_ID=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('defaultMilestoneId','') or d.get('provider',{}).get('defaultMilestoneId',''))" 2>/dev/null || echo "")
       ACTIVE_PROJECTS=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(json.dumps(d.get('workspace',{}).get('activeProjects',[])))" 2>/dev/null || echo "[]")
       PRODUCT_NAME=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('product',{}).get('name',''))" 2>/dev/null || echo "")
-      PRODUCT_LABEL_ID=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('product',{}).get('labelId',''))" 2>/dev/null || echo "")
+      PRODUCT_LABEL_IDS=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(json.dumps(d.get('workspace',{}).get('product',{}).get('labelIds',[]) or d.get('workspace',{}).get('product',{}).get('labelId','')))" 2>/dev/null || echo "[]")
       PRODUCT_ICON=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('product',{}).get('icon',''))" 2>/dev/null || echo "")
       PRODUCT_COLOR=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('product',{}).get('color',''))" 2>/dev/null || echo "")
       STATUS_MAPPING=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(json.dumps(d.get('statusMapping',{})))" 2>/dev/null || echo "{}")
@@ -229,7 +229,7 @@ if [ "$UPDATE_MODE" = true ]; then
       MILESTONE_ID=$(jq -r '.workspace.defaultMilestoneId // .provider.defaultMilestoneId // empty' .docflow/config.json)
       ACTIVE_PROJECTS=$(jq -c '.workspace.activeProjects // []' .docflow/config.json)
       PRODUCT_NAME=$(jq -r '.workspace.product.name // empty' .docflow/config.json)
-      PRODUCT_LABEL_ID=$(jq -r '.workspace.product.labelId // empty' .docflow/config.json)
+      PRODUCT_LABEL_IDS=$(jq -c '.workspace.product.labelIds // .workspace.product.labelId // []' .docflow/config.json)
       PRODUCT_ICON=$(jq -r '.workspace.product.icon // empty' .docflow/config.json)
       PRODUCT_COLOR=$(jq -r '.workspace.product.color // empty' .docflow/config.json)
       STATUS_MAPPING=$(jq -c '.statusMapping // {}' .docflow/config.json)
@@ -344,15 +344,23 @@ if 'workspace' not in config:
         'defaultMilestoneId': None,
         'product': {
             'name': None,
-            'labelId': None,
+            'labelIds': [],
             'icon': None,
             'color': None
         }
     }
 if 'product' not in config['workspace']:
-    config['workspace']['product'] = {'name': None, 'labelId': None, 'icon': None, 'color': None}
+    config['workspace']['product'] = {'name': None, 'labelIds': [], 'icon': None, 'color': None}
 if 'color' not in config['workspace'].get('product', {}):
     config['workspace']['product']['color'] = None
+# Migrate old labelId to labelIds array
+if 'labelId' in config['workspace'].get('product', {}) and config['workspace']['product'].get('labelId'):
+    old_label = config['workspace']['product']['labelId']
+    if 'labelIds' not in config['workspace']['product'] or not config['workspace']['product']['labelIds']:
+        config['workspace']['product']['labelIds'] = [old_label]
+    del config['workspace']['product']['labelId']
+if 'labelIds' not in config['workspace'].get('product', {}):
+    config['workspace']['product']['labelIds'] = []
 
 # Handle workspace migration (4.7.0+)
 # Migrate old projectId to activeProjects array if needed
@@ -367,7 +375,11 @@ config['workspace']['defaultMilestoneId'] = '$MILESTONE_ID' if '$MILESTONE_ID' a
 
 # Preserve product settings
 config['workspace']['product']['name'] = '$PRODUCT_NAME' if '$PRODUCT_NAME' and '$PRODUCT_NAME' != 'None' else None
-config['workspace']['product']['labelId'] = '$PRODUCT_LABEL_ID' if '$PRODUCT_LABEL_ID' and '$PRODUCT_LABEL_ID' != 'None' else None
+# Handle labelIds - can be array or migrated from old single labelId
+preserved_labels = $PRODUCT_LABEL_IDS if '$PRODUCT_LABEL_IDS' and '$PRODUCT_LABEL_IDS' != '[]' and '$PRODUCT_LABEL_IDS' != '""' else []
+if isinstance(preserved_labels, str) and preserved_labels:
+    preserved_labels = [preserved_labels]  # Migrate single labelId to array
+config['workspace']['product']['labelIds'] = preserved_labels if preserved_labels else []
 config['workspace']['product']['icon'] = '$PRODUCT_ICON' if '$PRODUCT_ICON' and '$PRODUCT_ICON' != 'None' else None
 config['workspace']['product']['color'] = '$PRODUCT_COLOR' if '$PRODUCT_COLOR' and '$PRODUCT_COLOR' != 'None' else None
 
@@ -399,7 +411,7 @@ import json
 with open('.docflow/config.json', 'r') as f:
     config = json.load(f)
 product = config.get('workspace', {}).get('product', {})
-if not product.get('name') and not product.get('labelId'):
+if not product.get('name') and not product.get('labelIds'):
     print('true')
 else:
     print('false')
@@ -411,7 +423,7 @@ else:
     echo -e "${YELLOW}📦 Product Configuration (New in 4.7.0)${NC}"
     echo ""
     echo "   DocFlow 4.7 supports product identity for new projects."
-    echo "   This applies a consistent label and icon when creating projects."
+    echo "   This applies consistent labels and icon when creating projects."
     echo ""
     read -p "   Configure product identity now? (y/n): " CONFIGURE_PRODUCT
 
@@ -420,9 +432,86 @@ else:
       read -p "   Product name (e.g., StrideApp, FlyDocs): " INPUT_PRODUCT_NAME
 
       if [ -n "$INPUT_PRODUCT_NAME" ]; then
+        # Query project labels from Linear
         echo ""
-        echo "   To get Label ID: Linear → Settings → Labels → Click label → Copy ID from URL"
-        read -p "   Product label ID (or press Enter to skip): " INPUT_LABEL_ID
+        echo "   Fetching project labels from Linear..."
+
+        LINEAR_API_KEY_VAL=$(grep LINEAR_API_KEY .env 2>/dev/null | cut -d '=' -f2 | tr -d '"' | tr -d "'")
+        SELECTED_LABEL_IDS="[]"
+
+        if [ -n "$LINEAR_API_KEY_VAL" ]; then
+          LABELS_JSON=$(curl -s -X POST https://api.linear.app/graphql \
+            -H "Content-Type: application/json" \
+            -H "Authorization: $LINEAR_API_KEY_VAL" \
+            -d '{"query": "{ projectLabels { nodes { id name } } }"}' 2>/dev/null)
+
+          if echo "$LABELS_JSON" | grep -q '"nodes"'; then
+            echo ""
+            echo "   Available project labels:"
+            echo ""
+
+            # Parse and display labels with numbers
+            LABEL_LIST=$(echo "$LABELS_JSON" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+labels = data.get('data', {}).get('projectLabels', {}).get('nodes', [])
+for i, label in enumerate(labels, 1):
+    print(f\"   {i}) {label['name']}\")
+" 2>/dev/null)
+
+            if [ -n "$LABEL_LIST" ]; then
+              echo "$LABEL_LIST"
+              echo ""
+              echo "   Select labels for new projects (comma-separated numbers, e.g. \"1,5\")"
+              read -p "   Labels (or press Enter to skip): " LABEL_SELECTION
+
+              if [ -n "$LABEL_SELECTION" ]; then
+                # Convert selection to label IDs
+                SELECTED_LABEL_IDS=$(echo "$LABELS_JSON" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+labels = data.get('data', {}).get('projectLabels', {}).get('nodes', [])
+selection = '$LABEL_SELECTION'.replace(' ', '').split(',')
+selected_ids = []
+selected_names = []
+for num in selection:
+    try:
+        idx = int(num) - 1
+        if 0 <= idx < len(labels):
+            selected_ids.append(labels[idx]['id'])
+            selected_names.append(labels[idx]['name'])
+    except ValueError:
+        pass
+print(json.dumps(selected_ids))
+" 2>/dev/null)
+
+                # Show selected labels
+                SELECTED_NAMES=$(echo "$LABELS_JSON" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+labels = data.get('data', {}).get('projectLabels', {}).get('nodes', [])
+selection = '$LABEL_SELECTION'.replace(' ', '').split(',')
+selected_names = []
+for num in selection:
+    try:
+        idx = int(num) - 1
+        if 0 <= idx < len(labels):
+            selected_names.append(labels[idx]['name'])
+    except ValueError:
+        pass
+print(', '.join(selected_names))
+" 2>/dev/null)
+                echo -e "   ${GREEN}✓ Selected: $SELECTED_NAMES${NC}"
+              fi
+            else
+              echo "   No project labels found in Linear"
+            fi
+          else
+            echo "   Could not fetch labels (check LINEAR_API_KEY)"
+          fi
+        else
+          echo "   No LINEAR_API_KEY in .env - skipping label selection"
+        fi
 
         echo ""
         echo "   Icon: Use lowercase name from Linear's project icon picker (e.g., comment, rocket, code)"
@@ -439,7 +528,7 @@ with open('.docflow/config.json', 'r') as f:
     config = json.load(f)
 
 config['workspace']['product']['name'] = '$INPUT_PRODUCT_NAME' if '$INPUT_PRODUCT_NAME' else None
-config['workspace']['product']['labelId'] = '$INPUT_LABEL_ID' if '$INPUT_LABEL_ID' else None
+config['workspace']['product']['labelIds'] = $SELECTED_LABEL_IDS if '$SELECTED_LABEL_IDS' != '[]' else []
 config['workspace']['product']['icon'] = '$INPUT_ICON' if '$INPUT_ICON' else None
 config['workspace']['product']['color'] = '$INPUT_COLOR' if '$INPUT_COLOR' else None
 
@@ -508,7 +597,7 @@ EOF
   echo ""
   echo -e "${YELLOW}What's new in $DOCFLOW_VERSION:${NC}"
   echo "   • Multi-project support (workspace.activeProjects array)"
-  echo "   • Product identity config (name, labelId, icon for new projects)"
+  echo "   • Product identity config (name, labelIds, icon for new projects)"
   echo "   • /new-project command for creating projects with product labels"
   echo "   • Consolidated workflow-agent.md (PM, Implementation, QE in one file)"
   echo "   • Updated /capture for multi-project handling"

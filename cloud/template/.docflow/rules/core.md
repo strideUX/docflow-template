@@ -19,7 +19,7 @@ DocFlow Cloud is a hybrid spec-driven workflow:
 - `paths.content` - Where context/knowledge lives (default: "docflow")
 - `provider.teamId` - Linear team ID
 - `workspace.activeProjects` - Array of active Linear project IDs
-- `workspace.product` - Product identity (name, labelId, icon)
+- `workspace.product` - Product identity (name, labelIds, icon)
 - `statusMapping` - Maps DocFlow states to Linear states
 
 **Dynamic paths based on config:**
