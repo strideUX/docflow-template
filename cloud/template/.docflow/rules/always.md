@@ -47,96 +47,94 @@ Copy these templates exactly. Fill in bracketed values.
 
 ### Capture
 ```
-**Captured** — Added to backlog. Type: [feature/bug/chore/idea]. [Brief context].
+**Captured** — [Brief description of what was captured]. Type: [feature/bug/chore/idea].
 ```
 
 ### Triage
 ```
-**Triaged** — Classified as [type], template applied. Priority: P[1-4].
+**Triaged** — Classified as [type]. Priority: P[1-4]. [Any initial observations].
 ```
 
 ### Refine
 ```
-**Refined** — [What was improved]. Priority: P[1-4]. Dependencies: [list or none]. Ready for activation.
+**Refined** — [What was clarified or improved]. Priority: P[1-4]. Dependencies: [list or none].
 ```
 
 ### Activate
 ```
-**Activated** — Assigned to @[name]. Priority: P[1-4]. Estimate: [XS-XL].
+**Activated** — Assigned to @[name]. Estimate: [XS/S/M/L/XL]. Starting implementation.
 ```
 
 ### Progress (during implementation)
 ```
-**Progress** — [What was completed]. [X]/[Y] criteria done.
+**Progress** — [What was completed]. Criteria: [X]/[Y] done.
 ```
 
 ### Blocked
 ```
-**Blocked** — [What is blocking]. Needs: [What is needed to unblock]. Blocking since: [date].
+**Blocked** — [What is blocking progress].
+**Needs:** [Specific action or decision required to unblock].
 ```
 
 ### Unblocked
 ```
-**Unblocked** — [What resolved the blocker]. Resuming implementation.
+**Unblocked** — [How it was resolved]. Resuming work.
 ```
 
 ### Implementation Complete
 ```
 **Ready for Review** —
 
-**Summary:** [What was built/fixed]
-**Files Changed:** [count] files
-**Tests:** [What was tested]
-**Docs:** [Updated/N/A]
+**What changed:** [Brief summary of implementation]
+**Files:** [count] modified
+**Testing:** [How it was verified]
 **Criteria:** [X]/[Y] complete
 ```
 
 ### Code Review Pass
 ```
-**Code Review Passed** — Standards verified, criteria met. Moving to QA.
+**Code Review Passed** — Implementation meets standards. Moving to QA.
 ```
 
 ### Code Review Fail
 ```
 **Code Review: Changes Needed** —
 
-**Issues Found:**
-1. [Issue 1]
-2. [Issue 2]
+1. [Issue and suggested fix]
+2. [Issue and suggested fix]
 
-Moving back to In Progress.
+Returning to implementation.
 ```
 
 ### QE Approval
 ```
-**QE Approved** — User verified acceptance criteria. Ready for /close.
+**QE Approved** — Acceptance criteria verified by user. Ready for close.
 ```
 
 ### QE Issues
 ```
-**QE Issues Found** —
+**QE: Issues Found** —
 
-**Issues:**
-1. [Issue description]
-2. [Issue description]
+1. [What failed or didn't meet expectations]
+2. [What failed or didn't meet expectations]
 
-Moving back to In Progress.
+Returning to implementation.
 ```
 
 ### Close
 ```
-✅ **Closed** — Verified and complete.
+✅ **Closed** — [One-line summary of what was delivered].
 ```
 
 ### Archive/Cancel/Duplicate
 ```
-**Archived** — Deferred to future. Reason: [reason].
+**Archived** — Deferring. Reason: [why not now].
 ```
 ```
-**Canceled** — Will not pursue. Reason: [reason].
+**Canceled** — Not pursuing. Reason: [why].
 ```
 ```
-**Duplicate** — Already exists as [ISSUE-ID].
+**Duplicate** — See [ISSUE-ID].
 ```
 
 ---
@@ -196,27 +194,41 @@ When user wraps session, you MUST:
 
 ## Activate Protocol
 
-### ALWAYS Validate Before Activating
+### ALWAYS Assign Before Starting Work
+
+**This is a hard gate. No exceptions.**
+
+An issue CANNOT move to In Progress without an assignee. This is fundamental to accountability.
 
 ```
-□ 1. GET ASSIGNEE (mandatory)
-     → Try get_viewer() for current user
-     → Or ASK: "Who should this be assigned to?"
-     → DO NOT proceed without assignee
+□ 1. GET ASSIGNEE (mandatory — STOP here if unclear)
+     → Call get_viewer() to get current user ID
+     → This MUST return a valid user ID
+     → If it fails: ASK "Who should this be assigned to?"
+     → DO NOT proceed to step 2 without a confirmed assignee ID
 
-□ 2. ASSIGN ISSUE
-     update_issue({ id: "...", assigneeId: "..." })
+□ 2. ASSIGN ISSUE FIRST (before any state change)
+     update_issue({ id: "...", assigneeId: "[USER_ID]" })
+     → Use the actual user ID from step 1
+     → Not a name, not a placeholder — the real ID
 
-□ 3. VERIFY ASSIGNMENT
-     Query issue, confirm assignee is set
+□ 3. VERIFY ASSIGNMENT (before any state change)
+     → Query the issue: get_issue({ id: "..." })
+     → Check: Is assignee field now populated?
+     → If NOT assigned: STOP, retry step 2
+     → DO NOT proceed until assignment is confirmed
 
-□ 4. CHANGE STATE to In Progress
+□ 4. CHANGE STATE to In Progress (only after assignment verified)
      update_issue({ id: "...", stateId: "..." })
 
 □ 5. ADD COMMENT using Activate template
 
 □ 6. CONFIRM to user with issue link
 ```
+
+**The sequence matters:** Assign → Verify → Then change state.
+
+**If assignment fails:** Do NOT change state. Report the error and retry.
 
 ---
 
@@ -295,10 +307,10 @@ Ask yourself:
 |---------|--------------------------|
 | /capture | Issue created? Comment added? |
 | /refine | State = Todo? Comment added? Priority set? |
-| /activate | Assignee set? State = In Progress? Comment added? |
+| /activate | **Assignee confirmed?** State = In Progress? Comment added? |
 | /implement | Issue loaded? Checklist shown? |
 | /block | State = Blocked? Comment added? |
-| /review | State = QA or In Progress? Comment added? |
+| /review | State = In Review? Comment added? |
 | /validate | Approval/issues documented? State updated? |
 | /close | State = Done? Comment added? |
 | /wrap-session | Project update POSTED? URL received? |
