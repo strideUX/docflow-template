@@ -354,11 +354,11 @@ if 'product' not in config['workspace']:
 if 'color' not in config['workspace'].get('product', {}):
     config['workspace']['product']['color'] = None
 # Migrate old labelId to labelIds array
-if 'labelId' in config['workspace'].get('product', {}) and config['workspace']['product'].get('labelId'):
-    old_label = config['workspace']['product']['labelId']
-    if 'labelIds' not in config['workspace']['product'] or not config['workspace']['product']['labelIds']:
+if 'labelId' in config['workspace'].get('product', {}):
+    old_label = config['workspace']['product'].get('labelId')
+    if old_label and ('labelIds' not in config['workspace']['product'] or not config['workspace']['product']['labelIds']):
         config['workspace']['product']['labelIds'] = [old_label]
-    del config['workspace']['product']['labelId']
+    del config['workspace']['product']['labelId']  # Always remove old field
 if 'labelIds' not in config['workspace'].get('product', {}):
     config['workspace']['product']['labelIds'] = []
 
