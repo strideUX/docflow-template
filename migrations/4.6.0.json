@@ -1,0 +1,84 @@
+{
+  "version": "4.6.0",
+  "date": "2025-01-13",
+  "description": "Process governance refinement - Separates mandatory workflow rules from optional features. AI Labor Estimation is now opt-in.",
+
+  "changes": {
+    "features": [
+      {
+        "description": "AI Labor Estimation is now opt-in (disabled by default)",
+        "rationale": "Separates optional premium features from core process governance"
+      }
+    ],
+    "improvements": [
+      {
+        "description": "Cleaned always.md to focus purely on process governance",
+        "files": [
+          ".docflow/rules/always.md"
+        ],
+        "details": [
+          "Removed Golden Rule #5 (validate AI estimate)",
+          "Removed AI estimate fields from all comment templates",
+          "Simplified Activate Protocol (no estimate validation)",
+          "Simplified Implement Protocol (no estimate checks)",
+          "Removed actuals tracking from verification gates"
+        ]
+      },
+      {
+        "description": "AI Labor skill now checks config before applying rules",
+        "files": [
+          ".docflow/skills/ai-labor-estimate/SKILL.md"
+        ],
+        "details": [
+          "Added opt-in check at top of skill",
+          "Skill is silent when disabled - no warnings, no prompts",
+          "Updated configuration section to show disabled by default"
+        ]
+      },
+      {
+        "description": "Config default changed to aiLabor.enabled: false",
+        "files": [
+          ".docflow/config.json"
+        ]
+      }
+    ]
+  },
+
+  "files_modified": [
+    ".docflow/version",
+    ".docflow/config.json",
+    ".docflow/rules/always.md",
+    ".docflow/skills/ai-labor-estimate/SKILL.md"
+  ],
+
+  "config_changes": {
+    "modified": {
+      "aiLabor.enabled": "Changed default from true to false"
+    }
+  },
+
+  "upgrade_notes": [
+    "AI Labor Estimation is now disabled by default",
+    "To enable AI Labor: set aiLabor.enabled: true in .docflow/config.json",
+    "Comment templates in always.md no longer include AI estimate fields",
+    "Process governance rules in always.md remain mandatory",
+    "Existing projects will preserve their aiLabor settings during update"
+  ],
+
+  "breaking_changes": [],
+
+  "philosophy": {
+    "summary": "Separation of process governance from optional features",
+    "process_governance": [
+      "Status transitions with comments (non-negotiable)",
+      "Assignment before In Progress (non-negotiable)",
+      "Project update on session wrap (non-negotiable)",
+      "Checkboxes in descriptions (non-negotiable)",
+      "Execute scripts, don't describe (non-negotiable)"
+    ],
+    "optional_features": [
+      "AI Labor Estimation (opt-in via config)",
+      "Design System Governance (opt-in via config)"
+    ]
+  }
+}

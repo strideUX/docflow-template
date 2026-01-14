@@ -1,5 +1,5 @@
 {
-  "version": "4.4.0",
+  "version": "4.6.0",
   "sourceRepo": "github.com/strideUX/docflow-template",
   "paths": {
     "content": "docflow"
@@ -24,7 +24,7 @@
   },
   "designSystem": null,
   "aiLabor": {
-    "enabled": true,
+    "enabled": false,
     "defaultProvider": "claude-sonnet-4",
     "thresholds": {
       "warnTokens": 200000,

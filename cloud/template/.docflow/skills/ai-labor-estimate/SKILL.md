@@ -4,6 +4,35 @@
 
 ---
 
+## Opt-In Feature
+
+**This skill is disabled by default.** To enable, set in `.docflow/config.json`:
+
+```json
+{
+  "aiLabor": {
+    "enabled": true
+  }
+}
+```
+
+### Before Using This Skill
+
+```
+□ 1. CHECK config: Read .docflow/config.json
+□ 2. IF aiLabor.enabled !== true:
+     → DO NOT apply any rules from this skill
+     → DO NOT warn about missing estimates
+     → DO NOT add estimate sections to issues
+     → Proceed with standard workflow
+□ 3. IF aiLabor.enabled === true:
+     → Apply all rules below
+```
+
+**When disabled**: This skill is completely silent. No warnings, no prompts, no estimate tracking.
+
+---
+
 ## Overview
 
 This skill enables agents to:
@@ -14,27 +43,26 @@ This skill enables agents to:
 
 ---
 
-## When to Use
+## When to Use (Only if enabled)
 
 | Trigger | Action |
 |---------|--------|
 | `/refine [spec]` | Calculate estimate, add to issue |
-| `/activate [spec]` | **Validate** estimate exists; if missing, offer to calculate; warn on high estimates |
-| `/implement [spec]` | **Validate** estimate exists; if missing, offer to calculate; show estimate in checklist |
+| `/activate [spec]` | Validate estimate exists; if missing, offer to calculate; warn on high estimates |
+| `/implement [spec]` | Show estimate in checklist if present |
 | `/close [spec]` | Record actuals, calculate variance |
 | Implementation complete | Estimate tokens used, update actuals in issue |
 | User asks "how much will this cost?" | Run estimation |
 
-### Validation Flow (for /activate and /implement)
+### Validation Flow (for /activate and /implement) — Only When Enabled
 
 ```
 1. Read issue description
 2. Search for "## AI Effort Estimate" section
 3. IF missing:
-   → WARN: "⚠️ Missing AI Effort Estimate"
-   → OFFER: "Would you like me to calculate one now?"
+   → OFFER: "Would you like me to calculate an AI Effort Estimate?"
    → IF yes: Run estimation, update description
-   → IF no: Proceed with warning about no baseline
+   → IF no: Proceed normally
 4. IF present but has placeholders ([X]k):
    → OFFER: "Estimate exists but incomplete. Fill it now?"
 5. IF estimate exceeds thresholds:
@@ -271,7 +299,7 @@ In `.docflow/config.json`:
 ```json
 {
   "aiLabor": {
-    "enabled": true,
+    "enabled": false,
     "defaultProvider": "claude-sonnet-4",
     "thresholds": {
       "warnTokens": 200000,
@@ -285,6 +313,14 @@ In `.docflow/config.json`:
   }
 }
 ```
+
+**To enable**, change `"enabled": false` to `"enabled": true`.
+
+When enabled, the skill will:
+- Add AI Effort Estimate sections during `/refine`
+- Offer to calculate estimates during `/activate` and `/implement`
+- Track actuals on completion
+- Warn on high-cost estimates based on thresholds
 
 ---
 

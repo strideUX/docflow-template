@@ -1,6 +1,6 @@
 # ALWAYS Rules (Deterministic - No Exceptions)
 
-> **Load with core.md on every interaction.**  
+> **Load with core.md on every interaction.**
 > These rules are mechanical and must be followed exactly every time.
 
 ---
@@ -11,7 +11,6 @@
 2. **Assignment before In Progress** — No unassigned work in progress
 3. **Project update on wrap** — Every session ends with a POST to Linear
 4. **Checkboxes in description** — Never put completion checkmarks in comments
-5. **Validate before activate** — Check AI estimate exists before starting work
 
 ---
 
@@ -24,13 +23,13 @@ For ANY status change, execute these steps in sequence:
 ```
 □ 1. CHANGE STATE via Linear MCP
      update_issue({ id: "...", stateId: "..." })
-     
+
 □ 2. ADD COMMENT using exact template (see below)
      create_comment({ issueId: "...", body: "..." })
-     
+
 □ 3. VERIFY the change
      Query issue, confirm state changed
-     
+
 □ 4. RESPOND to user with confirmation
 ```
 
@@ -58,12 +57,12 @@ Copy these templates exactly. Fill in bracketed values.
 
 ### Refine
 ```
-**Refined** — [What was improved]. Priority: P[1-4]. Dependencies: [list or none]. AI Estimate: ~[X]k tokens ($[X]-$[X]). Ready for activation.
+**Refined** — [What was improved]. Priority: P[1-4]. Dependencies: [list or none]. Ready for activation.
 ```
 
 ### Activate
 ```
-**Activated** — Assigned to @[name]. Priority: P[1-4]. Estimate: [XS-XL]. AI Effort: ~[X]k tokens ($[X]-$[X]).
+**Activated** — Assigned to @[name]. Priority: P[1-4]. Estimate: [XS-XL].
 ```
 
 ### Progress (during implementation)
@@ -90,7 +89,6 @@ Copy these templates exactly. Fill in bracketed values.
 **Tests:** [What was tested]
 **Docs:** [Updated/N/A]
 **Criteria:** [X]/[Y] complete
-**AI Effort:** ~[X]k actual (est. [X]k, [+/-X]%)
 ```
 
 ### Code Review Pass
@@ -127,7 +125,7 @@ Moving back to In Progress.
 
 ### Close
 ```
-✅ **Closed** — Verified and complete. Final AI Effort: ~[X]k tokens ([+/-X]% from estimate).
+✅ **Closed** — Verified and complete.
 ```
 
 ### Archive/Cancel/Duplicate
@@ -152,14 +150,14 @@ When user wraps session, you MUST:
 ```
 □ 1. GATHER session data from Linear
      Query issues touched, completed, blocked
-     
+
 □ 2. COMPOSE summary using template below
-     
+
 □ 3. EXECUTE wrap script (DO NOT just describe it)
      Run: .docflow/scripts/wrap-session.sh "[SUMMARY]" "[HEALTH]"
-     
+
 □ 4. VERIFY the response includes project update URL
-     
+
 □ 5. SHARE the URL with user
      "Session wrapped! Project update posted: [URL]"
 ```
@@ -201,54 +199,38 @@ When user wraps session, you MUST:
 ### ALWAYS Validate Before Activating
 
 ```
-□ 1. CHECK for AI Effort Estimate in description
-     Search for "## AI Effort Estimate"
-     
-□ 2. IF MISSING:
-     → WARN user: "⚠️ Missing AI Effort Estimate"
-     → OFFER: "Calculate now before activation?"
-     → IF yes: Calculate and update description
-     → IF no: Proceed but note limitation
-     
-□ 3. IF EXCEEDS THRESHOLD (>$5):
-     → WARN: "This is a larger task (~$X). Confirm?"
-     → WAIT for user confirmation
-     
-□ 4. GET ASSIGNEE (mandatory)
+□ 1. GET ASSIGNEE (mandatory)
      → Try get_viewer() for current user
      → Or ASK: "Who should this be assigned to?"
      → DO NOT proceed without assignee
-     
-□ 5. ASSIGN ISSUE
+
+□ 2. ASSIGN ISSUE
      update_issue({ id: "...", assigneeId: "..." })
-     
-□ 6. VERIFY ASSIGNMENT
+
+□ 3. VERIFY ASSIGNMENT
      Query issue, confirm assignee is set
-     
-□ 7. CHANGE STATE to In Progress
+
+□ 4. CHANGE STATE to In Progress
      update_issue({ id: "...", stateId: "..." })
-     
-□ 8. ADD COMMENT using Activate template
-     
-□ 9. CONFIRM to user with issue link
+
+□ 5. ADD COMMENT using Activate template
+
+□ 6. CONFIRM to user with issue link
 ```
 
 ---
 
 ## Implement Protocol
 
-### ALWAYS Check Estimate on Pickup
+### ALWAYS On Pickup
 
 ```
 □ 1. READ full issue including description
-     
-□ 2. CHECK for AI Effort Estimate
-     → IF missing: WARN and offer to calculate
-     → IF present: Note estimate for tracking
-     
-□ 3. SHOW implementation checklist with estimate:
+
+□ 2. SHOW implementation checklist:
      "📋 Implementation Checklist
-      AI Effort Estimate: ~Xk tokens ($X-$X)
+      Estimate: [XS-XL]
+      Criteria: [list acceptance criteria]
       ..."
 ```
 
@@ -263,14 +245,14 @@ When completing acceptance criteria:
 ```
 □ 1. READ current description via Linear MCP
      get_issue({ id: "..." })
-     
+
 □ 2. FIND the checkbox: `- [ ] Criterion text`
-     
+
 □ 3. CHANGE to checked: `- [x] Criterion text`
-     
+
 □ 4. SAVE entire updated description
      update_issue({ id: "...", description: "..." })
-     
+
 □ 5. OPTIONALLY add brief progress comment
 ```
 
@@ -290,9 +272,9 @@ When a script is needed:
 ```
 □ 1. RUN the script with proper arguments
      run_terminal_cmd: .docflow/scripts/[script].sh [args]
-     
+
 □ 2. CHECK the output for success/failure
-     
+
 □ 3. REPORT result to user
 ```
 
@@ -318,7 +300,7 @@ Ask yourself:
 | /block | State = Blocked? Comment added? |
 | /review | State = QA or In Progress? Comment added? |
 | /validate | Approval/issues documented? State updated? |
-| /close | State = Done? Comment added? Actuals recorded? |
+| /close | State = Done? Comment added? |
 | /wrap-session | Project update POSTED? URL received? |
 
 **If any verification fails → FIX before responding.**
@@ -349,7 +331,7 @@ Ask yourself:
 
 1. ✅ Status change → Comment → Verify → Respond
 2. ✅ Wrap session → POST project update → Share URL
-3. ✅ Activate → Validate estimate → Assign → Change state → Comment
+3. ✅ Activate → Assign → Change state → Comment
 4. ✅ Checkboxes → Update description, not comments
 5. ✅ Scripts → Execute them, don't describe them
 

@@ -124,7 +124,7 @@ DocFlow uses a **manifest-based update system** to keep projects current while p
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Your Project                                                │
-│  ├── .docflow/version         ← Current version (4.5.0)     │
+│  ├── .docflow/version         ← Current version (4.6.0)     │
 │  ├── .docflow/config.json     ← YOUR Linear IDs (preserved) │
 │  ├── .docflow/rules/*         ← Updated from template       │
 │  ├── .cursor/commands/*       ← Updated from template       │
@@ -202,7 +202,7 @@ BACKLOG → TODO → IN PROGRESS → IN REVIEW → QA → DONE
 your-project/
 ├── .docflow/                    ← DocFlow framework
 │   ├── config.json              ← Linear IDs, settings
-│   ├── version                  ← Current version (4.5.0)
+│   ├── version                  ← Current version (4.6.0)
 │   ├── rules/                   ← Canonical rule content
 │   │   ├── always.md            ← Mandatory deterministic rules
 │   │   ├── core.md
@@ -306,23 +306,31 @@ docflow-template/
     ├── 4.1.0.json               # Priority/dependency workflow
     ├── 4.2.0.json               # Milestone management
     ├── 4.4.0.json               # Design system integration
-    └── 4.5.0.json               # Workflow consistency
+    ├── 4.5.0.json               # Workflow consistency
+    └── 4.6.0.json               # Process governance refinement
 ```
 
 ---
 
-## What's New in v4.5
+## What's New in v4.6
 
-- **AI Labor Estimates** — Token and cost estimation for issues during `/refine`
-- **Deterministic Workflow Rules** — `always.md` with mandatory rules that never vary
-- **Shell Scripts for Consistency** — Atomic operations for `wrap-session`, `transition-issue`, `activate-issue`
-- **Structured Agent Checklists** — Numbered steps with explicit verification in all agent rules
-- **Configurable Cost Thresholds** — Warning and approval limits in config
+- **Process Governance Refinement** — Clear separation between mandatory workflow rules and optional features
+- **AI Labor Estimation Now Opt-In** — Disabled by default, enable via `aiLabor.enabled: true` in config
+- **Cleaner Comment Templates** — Base templates focus on essential information without optional fields
+- **Simplified always.md** — Focused purely on non-negotiable process governance
+
+### Philosophy: Process vs Features
+
+| Category | Nature | Examples |
+|----------|--------|----------|
+| **Process Governance** | Non-negotiable, always enforced | Status comments, assignment rules, session wraps |
+| **Optional Features** | Opt-in via config | AI Labor Estimation, Design System Governance |
 
 ### Recent Versions
 
 | Version | Key Features |
 |---------|--------------|
+| **v4.6** | Process governance refinement, AI Labor opt-in |
 | **v4.5** | Workflow consistency, AI Labor Estimates |
 | **v4.4** | Design system integration, Figma MCP skill |
 | **v4.3** | Project configuration improvements |
@@ -342,6 +350,7 @@ docflow-template/
 - [x] Design system integration (v4.4)
 - [x] AI Labor Estimates (v4.5)
 - [x] Workflow consistency enforcement (v4.5)
+- [x] Process governance refinement (v4.6)
 - [ ] Jira provider
 - [ ] GitHub Issues provider
 
