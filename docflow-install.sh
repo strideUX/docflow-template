@@ -20,7 +20,7 @@
 
 set -e
 
-DOCFLOW_VERSION="4.4.0"
+DOCFLOW_VERSION="4.7.0"
 RAW_BASE_LOCAL="https://raw.githubusercontent.com/strideUX/docflow-template/main/local/template"
 RAW_BASE_CLOUD="https://raw.githubusercontent.com/strideUX/docflow-template/main/cloud/template"
 RAW_BASE_ROOT="https://raw.githubusercontent.com/strideUX/docflow-template/main"
@@ -205,15 +205,28 @@ if [ "$UPDATE_MODE" = true ]; then
   TEAM_ID=""
   PROJECT_ID=""
   MILESTONE_ID=""
+  ACTIVE_PROJECTS=""
+  PRODUCT_NAME=""
+  PRODUCT_LABEL_ID=""
+  PRODUCT_ICON=""
   if [ -f ".docflow/config.json" ]; then
     if command -v python3 &> /dev/null; then
       TEAM_ID=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('provider',{}).get('teamId',''))" 2>/dev/null || echo "")
+      # Support both old projectId and new activeProjects
       PROJECT_ID=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('provider',{}).get('projectId',''))" 2>/dev/null || echo "")
-      MILESTONE_ID=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('provider',{}).get('defaultMilestoneId',''))" 2>/dev/null || echo "")
+      MILESTONE_ID=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('defaultMilestoneId','') or d.get('provider',{}).get('defaultMilestoneId',''))" 2>/dev/null || echo "")
+      ACTIVE_PROJECTS=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(json.dumps(d.get('workspace',{}).get('activeProjects',[])))" 2>/dev/null || echo "[]")
+      PRODUCT_NAME=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('product',{}).get('name',''))" 2>/dev/null || echo "")
+      PRODUCT_LABEL_ID=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('product',{}).get('labelId',''))" 2>/dev/null || echo "")
+      PRODUCT_ICON=$(python3 -c "import json; d=json.load(open('.docflow/config.json')); print(d.get('workspace',{}).get('product',{}).get('icon',''))" 2>/dev/null || echo "")
     elif command -v jq &> /dev/null; then
       TEAM_ID=$(jq -r '.provider.teamId // empty' .docflow/config.json)
       PROJECT_ID=$(jq -r '.provider.projectId // empty' .docflow/config.json)
-      MILESTONE_ID=$(jq -r '.provider.defaultMilestoneId // empty' .docflow/config.json)
+      MILESTONE_ID=$(jq -r '.workspace.defaultMilestoneId // .provider.defaultMilestoneId // empty' .docflow/config.json)
+      ACTIVE_PROJECTS=$(jq -c '.workspace.activeProjects // []' .docflow/config.json)
+      PRODUCT_NAME=$(jq -r '.workspace.product.name // empty' .docflow/config.json)
+      PRODUCT_LABEL_ID=$(jq -r '.workspace.product.labelId // empty' .docflow/config.json)
+      PRODUCT_ICON=$(jq -r '.workspace.product.icon // empty' .docflow/config.json)
     fi
   fi
   
@@ -230,14 +243,14 @@ if [ "$UPDATE_MODE" = true ]; then
   echo "   [1/5] Updating .docflow/rules..."
   rm -rf .docflow/rules
   mkdir -p .docflow/rules
-  for rule in core pm-agent implementation-agent qe-agent linear-integration figma-integration session-awareness designer-agent; do
+  for rule in always core workflow-agent linear-integration figma-integration session-awareness designer-agent; do
     download_file "${RAW_BASE}/.docflow/rules/${rule}.md" ".docflow/rules/${rule}.md"
   done
   
   echo "   [2/5] Updating .docflow/scripts..."
   rm -rf .docflow/scripts
   mkdir -p .docflow/scripts
-  for script in status-summary session-context stale-check; do
+  for script in status-summary session-context stale-check activate-issue transition-issue wrap-session; do
     download_file "${RAW_BASE}/.docflow/scripts/${script}.sh" ".docflow/scripts/${script}.sh"
   done
   chmod +x .docflow/scripts/*.sh
@@ -245,7 +258,7 @@ if [ "$UPDATE_MODE" = true ]; then
   echo "   [3/5] Updating .docflow/skills..."
   rm -rf .docflow/skills
   mkdir -p .docflow/skills/linear-workflow .docflow/skills/spec-templates .docflow/skills/docflow-commands
-  mkdir -p .docflow/skills/figma-mcp .docflow/skills/component-workflow
+  mkdir -p .docflow/skills/figma-mcp .docflow/skills/component-workflow .docflow/skills/ai-labor-estimate
   download_file "${RAW_BASE}/.docflow/skills/linear-workflow/SKILL.md" ".docflow/skills/linear-workflow/SKILL.md"
   download_file "${RAW_BASE}/.docflow/skills/spec-templates/SKILL.md" ".docflow/skills/spec-templates/SKILL.md"
   download_file "${RAW_BASE}/.docflow/skills/docflow-commands/SKILL.md" ".docflow/skills/docflow-commands/SKILL.md"
@@ -255,6 +268,7 @@ if [ "$UPDATE_MODE" = true ]; then
   download_file "${RAW_BASE}/.docflow/skills/component-workflow/SKILL.md" ".docflow/skills/component-workflow/SKILL.md"
   download_file "${RAW_BASE}/.docflow/skills/component-workflow/CHECKLIST.md" ".docflow/skills/component-workflow/CHECKLIST.md"
   download_file "${RAW_BASE}/.docflow/skills/component-workflow/PATTERNS.md" ".docflow/skills/component-workflow/PATTERNS.md"
+  download_file "${RAW_BASE}/.docflow/skills/ai-labor-estimate/SKILL.md" ".docflow/skills/ai-labor-estimate/SKILL.md"
   
   echo "   [4/5] Updating .docflow/templates..."
   rm -rf .docflow/templates
@@ -282,7 +296,7 @@ if [ "$UPDATE_MODE" = true ]; then
   echo ""
   echo "   Updating commands..."
   mkdir -p .cursor/commands
-  for cmd in activate attach block capture close docflow-setup docflow-update implement project-update refine review start-session status sync-project validate wrap-session design-setup; do
+  for cmd in activate attach block capture close docflow-setup docflow-update implement new-project project-update refine review start-session status sync-project validate wrap-session design-setup; do
     download_file "${RAW_BASE}/.cursor/commands/${cmd}.md" ".cursor/commands/${cmd}.md"
   done
   
@@ -299,7 +313,7 @@ if [ "$UPDATE_MODE" = true ]; then
   # =====================================================
   echo "   Updating config (preserving project settings)..."
   download_file "${RAW_BASE}/.docflow/config.json" ".docflow/config.json.new"
-  
+
   if command -v python3 &> /dev/null; then
     python3 << EOF
 import json
@@ -310,9 +324,23 @@ with open('.docflow/config.json.new', 'r') as f:
 
 # Restore preserved values
 config['provider']['teamId'] = '$TEAM_ID' if '$TEAM_ID' and '$TEAM_ID' != 'None' else None
-config['provider']['projectId'] = '$PROJECT_ID' if '$PROJECT_ID' and '$PROJECT_ID' != 'None' else None
-config['provider']['defaultMilestoneId'] = '$MILESTONE_ID' if '$MILESTONE_ID' and '$MILESTONE_ID' != 'None' else None
 config['paths']['content'] = '$CONTENT_FOLDER'
+
+# Handle workspace migration (4.7.0+)
+# Migrate old projectId to activeProjects array if needed
+active_projects = $ACTIVE_PROJECTS if '$ACTIVE_PROJECTS' and '$ACTIVE_PROJECTS' != '[]' else []
+if not active_projects and '$PROJECT_ID' and '$PROJECT_ID' != 'None' and '$PROJECT_ID' != '':
+    # Migrate old single projectId to array
+    active_projects = ['$PROJECT_ID']
+    print("   ✓ Migrated projectId to workspace.activeProjects")
+
+config['workspace']['activeProjects'] = active_projects
+config['workspace']['defaultMilestoneId'] = '$MILESTONE_ID' if '$MILESTONE_ID' and '$MILESTONE_ID' != 'None' else None
+
+# Preserve product settings
+config['workspace']['product']['name'] = '$PRODUCT_NAME' if '$PRODUCT_NAME' and '$PRODUCT_NAME' != 'None' else None
+config['workspace']['product']['labelId'] = '$PRODUCT_LABEL_ID' if '$PRODUCT_LABEL_ID' and '$PRODUCT_LABEL_ID' != 'None' else None
+config['workspace']['product']['icon'] = '$PRODUCT_ICON' if '$PRODUCT_ICON' and '$PRODUCT_ICON' != 'None' else None
 
 with open('.docflow/config.json', 'w') as f:
     json.dump(config, f, indent=2)
@@ -379,12 +407,12 @@ EOF
   echo -e "   Version: ${YELLOW}$CURRENT_VERSION${NC} → ${GREEN}$DOCFLOW_VERSION${NC}"
   echo ""
   echo -e "${YELLOW}What's new in $DOCFLOW_VERSION:${NC}"
-  echo "   • Enhanced Figma integration with 5-phase workflow (figma-mcp skill)"
-  echo "   • Component workflow skill with patterns and checklists"
-  echo "   • Optional design system integration with token enforcement"
-  echo "   • Designer agent for design system setup and token extraction"
-  echo "   • /design-setup command to initialize design system"
-  echo "   • Validation script template for automated design checks"
+  echo "   • Multi-project support (workspace.activeProjects array)"
+  echo "   • Product identity config (name, labelId, icon for new projects)"
+  echo "   • /new-project command for creating projects with product labels"
+  echo "   • Consolidated workflow-agent.md (PM, Implementation, QE in one file)"
+  echo "   • Updated /capture for multi-project handling"
+  echo "   • Automatic projectId → activeProjects migration"
   echo ""
   
   exit 0
@@ -695,7 +723,7 @@ done
 
 # Cloud-specific commands
 if [ "$MODE" == "cloud" ]; then
-  for cmd in docflow-update sync-project project-update attach refine design-setup; do
+  for cmd in docflow-update sync-project project-update attach refine design-setup new-project; do
     download_template_file ".cursor/commands/${cmd}.md" ".cursor/commands/${cmd}.md"
   done
 fi
@@ -717,7 +745,7 @@ for cmd in start-session wrap-session capture review activate implement validate
   ln -sf "../../.cursor/commands/${cmd}.md" "${cmd}.md" 2>/dev/null || true
 done
 if [ "$MODE" == "cloud" ]; then
-  for cmd in docflow-update sync-project project-update attach refine design-setup; do
+  for cmd in docflow-update sync-project project-update attach refine design-setup new-project; do
     ln -sf "../../.cursor/commands/${cmd}.md" "${cmd}.md" 2>/dev/null || true
   done
 fi
@@ -747,12 +775,12 @@ if [ "$MODE" == "cloud" ]; then
   download_template_file ".docflow/templates/scripts/check-design-system.template.mjs" ".docflow/templates/scripts/check-design-system.template.mjs"
   
   # Download rules
-  for rule in core linear-integration pm-agent implementation-agent qe-agent figma-integration session-awareness designer-agent; do
+  for rule in always core workflow-agent linear-integration figma-integration session-awareness designer-agent; do
     download_template_file ".docflow/rules/${rule}.md" ".docflow/rules/${rule}.md"
   done
   
   # Download scripts
-  for script in status-summary session-context stale-check; do
+  for script in status-summary session-context stale-check activate-issue transition-issue wrap-session; do
     download_template_file ".docflow/scripts/${script}.sh" ".docflow/scripts/${script}.sh"
   done
   chmod +x .docflow/scripts/*.sh
@@ -762,13 +790,14 @@ if [ "$MODE" == "cloud" ]; then
   download_template_file ".docflow/skills/spec-templates/SKILL.md" ".docflow/skills/spec-templates/SKILL.md"
   download_template_file ".docflow/skills/docflow-commands/SKILL.md" ".docflow/skills/docflow-commands/SKILL.md"
   # Figma and component workflow skills
-  mkdir -p .docflow/skills/figma-mcp .docflow/skills/component-workflow
+  mkdir -p .docflow/skills/figma-mcp .docflow/skills/component-workflow .docflow/skills/ai-labor-estimate
   download_template_file ".docflow/skills/figma-mcp/SKILL.md" ".docflow/skills/figma-mcp/SKILL.md"
   download_template_file ".docflow/skills/figma-mcp/PROMPTING.md" ".docflow/skills/figma-mcp/PROMPTING.md"
   download_template_file ".docflow/skills/figma-mcp/TROUBLESHOOTING.md" ".docflow/skills/figma-mcp/TROUBLESHOOTING.md"
   download_template_file ".docflow/skills/component-workflow/SKILL.md" ".docflow/skills/component-workflow/SKILL.md"
   download_template_file ".docflow/skills/component-workflow/CHECKLIST.md" ".docflow/skills/component-workflow/CHECKLIST.md"
   download_template_file ".docflow/skills/component-workflow/PATTERNS.md" ".docflow/skills/component-workflow/PATTERNS.md"
+  download_template_file ".docflow/skills/ai-labor-estimate/SKILL.md" ".docflow/skills/ai-labor-estimate/SKILL.md"
   
   # Update content path in config if customized
   if [ "$CONTENT_FOLDER" != "docflow" ]; then
