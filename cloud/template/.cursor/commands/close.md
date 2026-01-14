@@ -25,4 +25,4 @@ Move an issue to a terminal state.
 
 ## Full Rules
 
-See `.docflow/rules/pm-agent.md` and `.docflow/rules/linear-integration.md`
+See `.docflow/rules/workflow-agent.md` and `.docflow/rules/linear-integration.md`

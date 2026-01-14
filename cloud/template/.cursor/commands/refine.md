@@ -71,7 +71,7 @@ Ready for activation after PLA-70 completes.
 
 ## Full Rules
 
-See `.docflow/rules/pm-agent.md` and `.docflow/skills/spec-templates/SKILL.md`
+See `.docflow/rules/workflow-agent.md` → PM section and `.docflow/skills/spec-templates/SKILL.md`
 
 
 

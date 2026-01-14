@@ -29,4 +29,4 @@ When unblocked, run `/implement` to move back to In Progress.
 
 ## Full Rules
 
-See `.docflow/rules/implementation-agent.md`
+See `.docflow/rules/workflow-agent.md` → Implementation section

@@ -26,4 +26,4 @@ Test and validate implementations with user.
 
 ## Full Rules
 
-See `.docflow/rules/qe-agent.md`
+See `.docflow/rules/workflow-agent.md` → QE section

@@ -52,4 +52,4 @@ curl -s -X POST https://api.linear.app/graphql \
 
 ## Full Rules
 
-See `.docflow/rules/pm-agent.md` for complete behavior.
+See `.docflow/rules/workflow-agent.md` → PM section for complete behavior.

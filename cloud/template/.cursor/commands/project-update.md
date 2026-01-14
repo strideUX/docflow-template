@@ -19,7 +19,7 @@ Post a project health update to Linear.
 
 ## Full Rules
 
-See `.docflow/rules/pm-agent.md`
+See `.docflow/rules/workflow-agent.md` → PM section
 
 
 

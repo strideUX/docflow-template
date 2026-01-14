@@ -93,4 +93,4 @@ Which would you like to activate?
 
 ## Full Rules
 
-See `.docflow/rules/pm-agent.md` and `.docflow/rules/linear-integration.md`
+See `.docflow/rules/workflow-agent.md` and `.docflow/rules/linear-integration.md`

@@ -18,7 +18,8 @@ DocFlow Cloud is a hybrid spec-driven workflow:
 **Always read `.docflow/config.json` first to get:**
 - `paths.content` - Where context/knowledge lives (default: "docflow")
 - `provider.teamId` - Linear team ID
-- `provider.projectId` - Linear project ID
+- `workspace.activeProjects` - Array of active Linear project IDs
+- `workspace.product` - Product identity (name, labelId, icon)
 - `statusMapping` - Maps DocFlow states to Linear states
 
 **Dynamic paths based on config:**
@@ -105,9 +106,10 @@ Load these from `.docflow/rules/` based on context:
   - Contains non-negotiable workflow steps
 
 ### Agent-Specific Rules
-- **pm-agent.md** - When planning, capturing, reviewing, closing
-- **implementation-agent.md** - When building features
-- **qe-agent.md** - When testing/validating
+- **workflow-agent.md** - Consolidated workflow rules
+  - PM section: planning, capturing, reviewing, closing
+  - Implementation section: building features
+  - QE section: testing/validating
 
 ### Integration Rules
 - **linear-integration.md** - When working with Linear API directly

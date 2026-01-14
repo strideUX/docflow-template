@@ -30,4 +30,4 @@ Run `.docflow/scripts/status-summary.sh` for quick counts.
 
 ## Full Rules
 
-See `.docflow/rules/pm-agent.md` and `.docflow/rules/session-awareness.md`
+See `.docflow/rules/workflow-agent.md` and `.docflow/rules/session-awareness.md`

@@ -122,7 +122,7 @@ When creating or refining issues with UI work:
 ## Related Rules
 
 - **Designer Agent** (`designer-agent.md`) - Design system setup and token extraction
-- **Implementation Agent** (`implementation-agent.md`) - Building features
+- **Workflow Agent** (`workflow-agent.md`) - Implementation, PM, and QE workflows
 
 ## Related Skills
 

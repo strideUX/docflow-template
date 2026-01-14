@@ -1,0 +1,132 @@
+{
+  "version": "4.7.0",
+  "date": "2025-01-14",
+  "description": "Multi-project support and consolidated workflow agent. Adds workspace configuration for managing multiple active projects and product identity.",
+
+  "changes": {
+    "features": [
+      {
+        "description": "Multi-project support with workspace.activeProjects array",
+        "rationale": "Teams often work across multiple projects within the same codebase"
+      },
+      {
+        "description": "Product identity configuration (name, labelId, icon)",
+        "rationale": "Consistent branding when creating new projects in Linear"
+      },
+      {
+        "description": "New /new-project command for creating projects with product label",
+        "rationale": "Streamlined project creation with automatic product labeling"
+      }
+    ],
+    "improvements": [
+      {
+        "description": "Consolidated workflow agent rules",
+        "files": [
+          ".docflow/rules/workflow-agent.md"
+        ],
+        "details": [
+          "Merged pm-agent.md, implementation-agent.md, qe-agent.md into single file",
+          "Maintains clear section headers for PM, Implementation, and QE roles",
+          "Reduces context fragmentation while preserving all behavior"
+        ]
+      },
+      {
+        "description": "Updated /capture command for multi-project handling",
+        "files": [
+          ".cursor/commands/capture.md"
+        ],
+        "details": [
+          "Single active project: uses automatically",
+          "Multiple projects: prompts user to select",
+          "No projects: prompts to create first"
+        ]
+      },
+      {
+        "description": "Updated /docflow-setup with product configuration phase",
+        "files": [
+          ".cursor/commands/docflow-setup.md"
+        ],
+        "details": [
+          "Added Phase 2.5: Configure Product Identity",
+          "Sets product name, label ID, and icon for new projects"
+        ]
+      }
+    ]
+  },
+
+  "files_added": [
+    ".docflow/rules/workflow-agent.md",
+    ".cursor/commands/new-project.md"
+  ],
+
+  "files_modified": [
+    ".docflow/version",
+    ".docflow/config.json",
+    ".cursor/commands/capture.md",
+    ".cursor/commands/docflow-setup.md",
+    ".cursor/commands/activate.md",
+    ".cursor/commands/block.md",
+    ".cursor/commands/close.md",
+    ".cursor/commands/implement.md",
+    ".cursor/commands/project-update.md",
+    ".cursor/commands/refine.md",
+    ".cursor/commands/review.md",
+    ".cursor/commands/start-session.md",
+    ".cursor/commands/sync-project.md",
+    ".cursor/commands/validate.md",
+    ".cursor/commands/wrap-session.md",
+    ".cursor/commands/attach.md",
+    ".cursor/rules/pm-agent/RULE.md",
+    ".cursor/rules/implementation-agent/RULE.md",
+    ".cursor/rules/qe-agent/RULE.md",
+    ".docflow/rules/figma-integration.md",
+    ".docflow/rules/core.md",
+    ".claude/rules.md",
+    ".warp/rules.md",
+    "AGENTS.md"
+  ],
+
+  "files_removed": [
+    ".docflow/rules/pm-agent.md",
+    ".docflow/rules/implementation-agent.md",
+    ".docflow/rules/qe-agent.md"
+  ],
+
+  "config_changes": {
+    "added": {
+      "workspace": "New object for workspace-level settings",
+      "workspace.activeProjects": "Array of project IDs (replaces provider.projectId)",
+      "workspace.defaultMilestoneId": "Default milestone for new issues",
+      "workspace.product.name": "Product name for project creation",
+      "workspace.product.labelId": "Label ID applied to new projects",
+      "workspace.product.icon": "Icon used for new projects"
+    },
+    "removed": {
+      "provider.projectId": "Replaced by workspace.activeProjects array"
+    }
+  },
+
+  "upgrade_notes": [
+    "Config migration: provider.projectId value should be moved to workspace.activeProjects array",
+    "All agent file references now point to workflow-agent.md with section indicators",
+    "Old agent files (pm-agent.md, implementation-agent.md, qe-agent.md) have been removed",
+    "Run /docflow-setup to configure product identity for new project creation"
+  ],
+
+  "breaking_changes": [
+    {
+      "change": "provider.projectId replaced by workspace.activeProjects",
+      "migration": "Move projectId value into workspace.activeProjects array: [\"old-project-id\"]"
+    }
+  ],
+
+  "philosophy": {
+    "summary": "Streamlined multi-project workflow with consolidated rules",
+    "key_principles": [
+      "Single source of truth for workflow rules (workflow-agent.md)",
+      "Flexible project management (array supports 0-N active projects)",
+      "Product-centric organization (consistent labeling and icons)",
+      "Reduced cognitive overhead (one file to understand workflow)"
+    ]
+  }
+}

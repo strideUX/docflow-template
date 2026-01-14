@@ -19,9 +19,9 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 
 | Agent | Purpose | Rules |
 |-------|---------|-------|
-| **PM/Planning** | Planning, reviewing, closing | `.docflow/rules/pm-agent.md` |
-| **Implementation** | Building features | `.docflow/rules/implementation-agent.md` |
-| **QE/Validation** | Testing with user | `.docflow/rules/qe-agent.md` |
+| **PM/Planning** | Planning, reviewing, closing | `.docflow/rules/workflow-agent.md` (PM section) |
+| **Implementation** | Building features | `.docflow/rules/workflow-agent.md` (Implementation section) |
+| **QE/Validation** | Testing with user | `.docflow/rules/workflow-agent.md` (QE section) |
 | **Designer** | Design system, tokens | `.docflow/rules/designer-agent.md` |
 
 ---

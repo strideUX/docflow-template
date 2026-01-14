@@ -29,4 +29,4 @@ Run `/block` to document and move to Blocked state.
 
 ## Full Rules
 
-See `.docflow/rules/implementation-agent.md`
+See `.docflow/rules/workflow-agent.md` → Implementation section

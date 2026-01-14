@@ -121,8 +121,43 @@ I'll now fill out your context files. Ready to continue?
 
 1. **Get Team ID** - Query Linear teams, let user select
 2. **Get/Create Project** - Query existing or create new
-3. **Update Config** - Save to `.docflow/config.json`
-4. **Verify** - Test connection
+3. **Configure Product Identity** - Set product label and icon
+4. **Update Config** - Save to `.docflow/config.json`
+5. **Verify** - Test connection
+
+### Product Configuration
+
+After connecting to Linear, configure the product identity for this codebase:
+
+```markdown
+**Product Configuration**
+
+This helps organize your work in Linear.
+
+1. **Product Name:** What product/app does this codebase represent?
+   Example: "FlyDocs", "StrideApp", "Website"
+
+2. **Product Label:** Do you have a label group (like "Pods") to categorize projects?
+   - yes -> Which label should I use for projects from this codebase?
+   - no -> Skip (can add later)
+
+3. **Icon:** What icon should new projects use?
+   Options: Rocket, Code, Bug, Star, Heart, Flag, Lightning, Mountain, etc.
+```
+
+Save to config:
+```json
+{
+  "workspace": {
+    "activeProjects": ["[project-id]"],
+    "product": {
+      "name": "FlyDocs",
+      "labelId": "label-xyz789",
+      "icon": "Rocket"
+    }
+  }
+}
+```
 
 ---
 
@@ -390,4 +425,4 @@ If you have a Figma design system with tokens, run `/design-setup` to enable:
 
 ## Full Rules
 
-See `.docflow/rules/pm-agent.md`
+See `.docflow/rules/workflow-agent.md`

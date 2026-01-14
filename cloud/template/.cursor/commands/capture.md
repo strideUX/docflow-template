@@ -6,12 +6,42 @@ Quickly capture new work to Linear backlog without context switching.
 
 1. **Identify Type** - feature, bug, chore, or idea
 2. **Gather Context** - title, description, user value
-3. **Apply Template** from `.docflow/templates/`
-4. **Set Metadata** - priority (1-4), estimate (1-5, optional)
-5. **Check for Milestones** - Query project milestones
-6. **Assign Milestone** - If milestones exist, ask which one
-7. **Create Linear Issue** - Backlog state with milestone
-8. **Confirm** with issue link
+3. **Determine Project** - Check active projects in config
+4. **Apply Template** from `.docflow/templates/`
+5. **Set Metadata** - priority (1-4), estimate (1-5, optional)
+6. **Check for Milestones** - Query project milestones
+7. **Assign Milestone** - If milestones exist, ask which one
+8. **Create Linear Issue** - Backlog state with milestone
+9. **Confirm** with issue link
+
+## Project Selection
+
+Before creating the issue, check `workspace.activeProjects` in config:
+
+**If single project:**
+- Use it automatically
+
+**If multiple projects:**
+```markdown
+Which project should this issue go in?
+
+1. [Project 1 name]
+2. [Project 2 name]
+3. Create new project...
+
+Select:
+```
+
+**If no projects:**
+```markdown
+No active projects configured. Would you like to create one first?
+- yes -> Run /new-project flow
+- no -> Cannot capture without a project
+```
+
+**If user selects "Create new project":**
+- Trigger `/new-project` flow
+- After project created, continue with capture
 
 ## Milestone Assignment
 
@@ -55,4 +85,4 @@ For fast capture: minimal issue, refine later with `/refine`.
 
 ## Full Rules
 
-See `.docflow/rules/pm-agent.md` and `.docflow/skills/spec-templates/SKILL.md`
+See `.docflow/rules/workflow-agent.md` and `.docflow/skills/spec-templates/SKILL.md`

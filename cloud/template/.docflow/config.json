@@ -1,14 +1,21 @@
 {
-  "version": "4.6.0",
+  "version": "4.7.0",
   "sourceRepo": "github.com/strideUX/docflow-template",
   "paths": {
     "content": "docflow"
   },
   "provider": {
     "type": "linear",
-    "teamId": null,
-    "projectId": null,
-    "defaultMilestoneId": null
+    "teamId": null
+  },
+  "workspace": {
+    "activeProjects": [],
+    "defaultMilestoneId": null,
+    "product": {
+      "name": null,
+      "labelId": null,
+      "icon": null
+    }
   },
   "statusMapping": {
     "BACKLOG": "Backlog",

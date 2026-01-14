@@ -42,9 +42,9 @@ Consider Cursor for:
 
 | Agent | Best Tool | Rules |
 |-------|-----------|-------|
-| PM/Planning | Cursor, Claude | `.docflow/rules/pm-agent.md` |
-| Implementation | **Warp**, Cursor | `.docflow/rules/implementation-agent.md` |
-| QE/Validation | Cursor, Claude | `.docflow/rules/qe-agent.md` |
+| PM/Planning | Cursor, Claude | `.docflow/rules/workflow-agent.md` (PM section) |
+| Implementation | **Warp**, Cursor | `.docflow/rules/workflow-agent.md` (Implementation section) |
+| QE/Validation | Cursor, Claude | `.docflow/rules/workflow-agent.md` (QE section) |
 
 ---
 

@@ -38,4 +38,4 @@ Sync local context files to Linear project description.
 
 ## Full Rules
 
-See `.docflow/rules/pm-agent.md` → "When Syncing Project"
+See `.docflow/rules/workflow-agent.md` → PM section

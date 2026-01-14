@@ -112,4 +112,4 @@ Run `.docflow/scripts/status-summary.sh` for current state.
 
 ## Full Rules
 
-See `.docflow/rules/pm-agent.md` and `.docflow/rules/session-awareness.md`
+See `.docflow/rules/workflow-agent.md` and `.docflow/rules/session-awareness.md`

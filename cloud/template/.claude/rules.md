@@ -15,9 +15,9 @@ This project uses **DocFlow Cloud** with Linear integration.
 
 | Agent | Rules File |
 |-------|------------|
-| PM/Planning | `.docflow/rules/pm-agent.md` |
-| Implementation | `.docflow/rules/implementation-agent.md` |
-| QE/Validation | `.docflow/rules/qe-agent.md` |
+| PM/Planning | `.docflow/rules/workflow-agent.md` (PM section) |
+| Implementation | `.docflow/rules/workflow-agent.md` (Implementation section) |
+| QE/Validation | `.docflow/rules/workflow-agent.md` (QE section) |
 
 ---
 

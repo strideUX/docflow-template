@@ -74,4 +74,4 @@ create_issue(
 
 ## Full Rules
 
-See `.docflow/rules/implementation-agent.md` for complete behavior.
+See `.docflow/rules/workflow-agent.md` → Implementation section for complete behavior.

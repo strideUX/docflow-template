@@ -24,4 +24,4 @@ Code review for completed implementations.
 
 ## Full Rules
 
-See `.docflow/rules/pm-agent.md`
+See `.docflow/rules/workflow-agent.md` → PM section
