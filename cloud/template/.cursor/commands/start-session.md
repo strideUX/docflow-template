@@ -2,13 +2,22 @@
 
 Begin a work session by checking Linear status within your product scope.
 
-## Product Scope Filtering
+## Product Scope Filtering — HARD GATE
 
-**CRITICAL: All queries must be filtered to your product scope.**
+**CRITICAL: All queries must be filtered to your product scope. NO EXCEPTIONS.**
 
 The agent should only see:
-- **Projects** that have ALL labels in `workspace.product.labelIds`
+- **Projects** that have **ALL** labels in `workspace.product.labelIds`
 - **Issues** from `workspace.activeProjects` only
+
+### What This Means
+
+If `labelIds: ["StrideApp-uuid", "Internal-uuid"]`:
+- ✅ Show: Projects with BOTH StrideApp AND Internal labels
+- ❌ Hide: Projects with only StrideApp (missing Internal)
+- ❌ Hide: Projects with QoL, Cook, FlyDocs, etc. (different product)
+
+**This is a HARD filter. Even if user asks about "all projects", only show matching ones.**
 
 ## Steps
 
@@ -117,18 +126,38 @@ The agent should only see:
 
 - "let's start" / "what's next" / "where are we"
 
-## MCP Alternative
+## MCP Alternative — MUST FILTER CLIENT-SIDE
 
-If using Linear MCP instead of curl:
+Linear MCP returns ALL team projects. **You MUST filter client-side.**
+
 ```
-# Get team projects
+# Step 1: Get all team projects
 list_projects(teamId: "[team-id]")
+# Returns: ALL projects including QoL, Cook, FlyDocs, etc.
 
-# Then filter client-side by labels
-# Only show issues from projects in activeProjects
+# Step 2: READ config labelIds
+configLabelIds = ["30023a7a-...", "e8a0851a-..."]  # from workspace.product.labelIds
+
+# Step 3: FILTER — Only keep projects with ALL labelIds
+For each project in response:
+  projectLabelIds = project.projectLabels.nodes.map(label => label.id)
+
+  # Check if project has ALL required labels
+  hasAllLabels = configLabelIds.every(reqId => projectLabelIds.includes(reqId))
+
+  if (!hasAllLabels):
+    EXCLUDE this project from results
+
+# Step 4: ONLY show filtered projects to user
 ```
 
-**Always filter results by `workspace.product.labelIds` and `workspace.activeProjects`.**
+**Example:**
+- Config: `labelIds: ["StrideApp-uuid", "Internal-uuid"]`
+- Project "Post Launch Clean Up" has labels: [StrideApp, Internal] → ✅ SHOW
+- Project "MVP - Beta Launch" has labels: [Cook] → ❌ HIDE
+- Project "Hire Fullstack Dev" has labels: [QoL] → ❌ HIDE
+
+**NEVER skip the filter step. NEVER show projects that don't match ALL labelIds.**
 
 ## Full Rules
 

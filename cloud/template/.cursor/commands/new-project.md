@@ -81,13 +81,16 @@ You can now use `/capture` to add issues to this project.
 
 ## Linear Icons & Colors
 
-**Icons** (use lowercase name from Linear's icon picker):
-- comment, code, bug, rocket, star, heart, flag, bookmark
-- lightning, mountain, sun, moon, cloud, fire, leaf, globe
-- (many more - check Linear's project icon picker for full list)
+**Icons** (use lowercase name only - NO colons):
+- ✅ `"comment"`, `"code"`, `"bug"`, `"rocket"`
+- ❌ `":comment:"`, `":code:"` (wrong - this is Slack syntax)
+- Available: comment, code, bug, rocket, star, heart, flag, bookmark, lightning, mountain, sun, moon, cloud, fire, leaf, globe
+- (check Linear's project icon picker for full list)
 
-**Colors** (use the color name):
+**Colors** (use the color name, capitalized):
 - Gray, Purple, Blue, Teal, Green, Yellow, Orange, Red, Pink
+
+**IMPORTANT**: When reading icon from config, use the value directly. Do NOT add colons around it.
 
 ## Full Rules
 

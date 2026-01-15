@@ -17,32 +17,60 @@
 
 ## Product Scope Protocol
 
-### ALWAYS Filter by Product Labels
+### ALWAYS Filter by Product Labels — HARD GATE
 
-Every query to Linear MUST be filtered to your product scope:
+**This is non-negotiable. Every project list MUST be filtered.**
+
+When showing projects to the user, a project is ONLY visible if it has **ALL** labels from `workspace.product.labelIds`.
+
+**Example:** If config has `labelIds: ["StrideApp-uuid", "Internal-uuid"]`:
+- ✅ Show: Project with labels [StrideApp, Internal]
+- ❌ Hide: Project with labels [StrideApp] only (missing Internal)
+- ❌ Hide: Project with labels [QoL] (wrong product)
+- ❌ Hide: Project with labels [Cook] (wrong product)
+- ❌ Hide: Project with no labels
+
+### Filtering Steps (MUST FOLLOW)
 
 ```
-□ 1. READ config to get labelIds
-     LABEL_IDS=$(jq -c '.workspace.product.labelIds // []' .docflow/config.json)
+□ 1. READ config to get labelIds array
+     labelIds = workspace.product.labelIds (e.g., ["uuid1", "uuid2"])
 
-□ 2. QUERY projects from team
-     Get all projects, include their projectLabels
+□ 2. QUERY projects from team (MCP or API)
+     Response includes ALL team projects
 
-□ 3. FILTER to only projects with ALL labelIds
-     A project must have EVERY label in labelIds to be visible
+□ 3. CLIENT-SIDE FILTER — REQUIRED
+     For each project:
+       - Get project's label IDs (from projectLabels)
+       - Check: Does project have ALL IDs from config labelIds?
+       - If ANY labelId is missing → EXCLUDE project
 
-□ 4. CATEGORIZE as Active vs Available
+     Example filter logic:
+       configLabelIds = ["30023a7a-...", "e8a0851a-..."]
+       projectLabelIds = project.projectLabels.map(l => l.id)
+       isVisible = configLabelIds.every(id => projectLabelIds.includes(id))
+
+□ 4. CATEGORIZE filtered projects
      Active = in workspace.activeProjects array
-     Available = matches labels but not in activeProjects
+     Available = matches ALL labels but not in activeProjects
 
 □ 5. QUERY issues from Active projects ONLY
-     Never show issues from outside activeProjects
 ```
 
-**DO NOT:**
-- ❌ Query all team issues without filtering
-- ❌ Show projects that don't match labelIds
-- ❌ Show issues from "available" (non-active) projects
+### DO NOT (Hard Rules)
+
+- ❌ **NEVER** show projects that don't have ALL labelIds — even if user asks
+- ❌ **NEVER** skip the client-side filter step
+- ❌ **NEVER** show QoL, Cook, FlyDocs, etc. if they don't match labelIds
+- ❌ **NEVER** query issues from non-active projects
+
+### When User Asks About "Other Projects"
+
+Only show projects matching ALL labelIds. If user asks about projects outside scope:
+```
+"I can only show projects within the StrideApp + Internal scope.
+The available projects matching this criteria are: [filtered list]"
+```
 
 ---
 
