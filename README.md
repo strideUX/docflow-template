@@ -124,7 +124,7 @@ DocFlow uses a **manifest-based update system** to keep projects current while p
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Your Project                                                │
-│  ├── .docflow/version         ← Current version (4.6.0)     │
+│  ├── .docflow/version         ← Current version (4.8.0)     │
 │  ├── .docflow/config.json     ← YOUR Linear IDs (preserved) │
 │  ├── .docflow/rules/*         ← Updated from template       │
 │  ├── .cursor/commands/*       ← Updated from template       │
@@ -202,20 +202,26 @@ BACKLOG → TODO → IN PROGRESS → IN REVIEW → QA → DONE
 your-project/
 ├── .docflow/                    ← DocFlow framework
 │   ├── config.json              ← Linear IDs, settings
-│   ├── version                  ← Current version (4.6.0)
+│   ├── version                  ← Current version (4.8.0)
 │   ├── rules/                   ← Canonical rule content
 │   │   ├── always.md            ← Mandatory deterministic rules
 │   │   ├── core.md
-│   │   ├── pm-agent.md
-│   │   ├── implementation-agent.md
-│   │   ├── qe-agent.md
+│   │   ├── workflow-agent.md    ← PM, Implementation, QE workflows
 │   │   ├── linear-integration.md
 │   │   ├── figma-integration.md
 │   │   └── session-awareness.md
 │   ├── scripts/                 ← Shell scripts for atomic operations
-│   ├── skills/                  ← Portable agent skills
-│   │   └── ai-labor-estimate/   ← Token/cost estimation
 │   └── templates/               ← Issue templates
+│
+├── .claude/
+│   ├── commands/                ← Symlinks to .cursor/commands/
+│   ├── skills/                  ← Agent Skills (auto-discovered)
+│   │   ├── linear-workflow/
+│   │   ├── figma-mcp/
+│   │   ├── component-workflow/
+│   │   ├── ai-labor-estimate/
+│   │   └── spec-templates/
+│   └── CLAUDE.md                ← Claude Code configuration
 │
 ├── .cursor/
 │   ├── commands/                ← 16 slash commands
@@ -307,34 +313,49 @@ docflow-template/
     ├── 4.2.0.json               # Milestone management
     ├── 4.4.0.json               # Design system integration
     ├── 4.5.0.json               # Workflow consistency
-    └── 4.6.0.json               # Process governance refinement
+    ├── 4.6.0.json               # Process governance refinement
+    ├── 4.7.0.json               # Multi-project support
+    └── 4.8.0.json               # Agent Skills standard
 ```
 
 ---
 
-## What's New in v4.6
+## What's New in v4.8
 
-- **Process Governance Refinement** — Clear separation between mandatory workflow rules and optional features
-- **AI Labor Estimation Now Opt-In** — Disabled by default, enable via `aiLabor.enabled: true` in config
-- **Cleaner Comment Templates** — Base templates focus on essential information without optional fields
-- **Simplified always.md** — Focused purely on non-negotiable process governance
+- **Skills moved to `.claude/skills/`** — Now follows the Agent Skills standard for auto-discovery
+- **Auto-discovery by Claude Code and Cursor** — Skills are automatically found and invoked
+- **Supporting files in `references/` subfolders** — Better organization per Agent Skills spec
+- **`.cursor/skills/` symlinks** — Full Cursor compatibility
+- **All skills have proper frontmatter** — Required `name` and `description` fields
 
-### Philosophy: Process vs Features
+### Agent Skills Standard
 
-| Category | Nature | Examples |
-|----------|--------|----------|
-| **Process Governance** | Non-negotiable, always enforced | Status comments, assignment rules, session wraps |
-| **Optional Features** | Opt-in via config | AI Labor Estimation, Design System Governance |
+DocFlow 4.8 aligns with the [Agent Skills](https://agentskills.io) specification:
+
+```
+.claude/skills/
+├── linear-workflow/
+│   └── SKILL.md              ← Auto-discovered
+├── figma-mcp/
+│   ├── SKILL.md
+│   └── references/           ← Supporting docs
+│       ├── PROMPTING.md
+│       └── TROUBLESHOOTING.md
+└── ai-labor-estimate/
+    ├── SKILL.md
+    └── references/
+        └── provider-costs.md
+```
 
 ### Recent Versions
 
 | Version | Key Features |
 |---------|--------------|
+| **v4.8** | Skills to `.claude/skills/`, Agent Skills standard, auto-discovery |
+| **v4.7** | Multi-project support, product identity config, `/new-project` command |
 | **v4.6** | Process governance refinement, AI Labor opt-in |
 | **v4.5** | Workflow consistency, AI Labor Estimates |
 | **v4.4** | Design system integration, Figma MCP skill |
-| **v4.3** | Project configuration improvements |
-| **v4.2** | Milestone management, smart activation |
 
 ---
 
@@ -351,6 +372,8 @@ docflow-template/
 - [x] AI Labor Estimates (v4.5)
 - [x] Workflow consistency enforcement (v4.5)
 - [x] Process governance refinement (v4.6)
+- [x] Multi-project support (v4.7)
+- [x] Agent Skills standard alignment (v4.8)
 - [ ] Jira provider
 - [ ] GitHub Issues provider
 

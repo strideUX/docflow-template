@@ -11,7 +11,7 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 1. **`.docflow/config.json`** - Configuration (read first for paths)
 2. **`.docflow/rules/core.md`** - Essential workflow rules
 3. **`.docflow/rules/`** - Role-specific rules (load as needed)
-4. **`.docflow/skills/`** - Portable workflow skills
+4. **`.claude/skills/`** - Portable workflow skills (auto-discovered)
 
 ---
 
@@ -30,9 +30,9 @@ This project uses **DocFlow Cloud**, a spec-driven development workflow with Lin
 
 | Skill | Purpose | Path |
 |-------|---------|------|
-| **figma-mcp** | Figma integration workflow | `.docflow/skills/figma-mcp/` |
-| **component-workflow** | Component patterns & testing | `.docflow/skills/component-workflow/` |
-| **linear-workflow** | Linear MCP integration | `.docflow/skills/linear-workflow/` |
+| **figma-mcp** | Figma integration workflow | `.claude/skills/figma-mcp/` |
+| **component-workflow** | Component patterns & testing | `.claude/skills/component-workflow/` |
+| **linear-workflow** | Linear MCP integration | `.claude/skills/linear-workflow/` |
 
 ---
 

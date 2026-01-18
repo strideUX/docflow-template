@@ -33,4 +33,4 @@ Located in `.docflow/templates/`:
 
 ## Skill
 
-See `.docflow/skills/spec-templates/SKILL.md` for detailed guidance.
+See `.claude/skills/spec-templates/SKILL.md` for detailed guidance.

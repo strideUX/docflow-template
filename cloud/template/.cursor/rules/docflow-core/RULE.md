@@ -204,7 +204,7 @@ Update checkboxes as you complete criteria (not just at the end):
 1. `.docflow/config.json` - Configuration (paths, provider settings)
 2. `.docflow/rules/core.md` - Essential workflow rules
 3. `.docflow/rules/` - Role-specific rules (load as needed)
-4. `.docflow/skills/` - Portable workflow skills
+4. `.claude/skills/` - Portable workflow skills (auto-discovered)
 
 ## Quick Reference
 

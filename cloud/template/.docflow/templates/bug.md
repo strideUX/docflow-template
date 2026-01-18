@@ -129,7 +129,7 @@ Remove these instructions when creating the final issue.
 ## AI Effort Estimate
 <!-- 
 AGENT: Fill this section during /refine using the ai-labor-estimate skill.
-See .docflow/skills/ai-labor-estimate/SKILL.md for calculation details.
+See .claude/skills/ai-labor-estimate/SKILL.md for calculation details.
 Update Actuals section during /close for calibration.
 -->
 

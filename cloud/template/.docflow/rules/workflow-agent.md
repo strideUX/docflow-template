@@ -188,7 +188,7 @@ The PM/Planning Agent orchestrates workflow:
      Create blocking relationships if needed
 
 [] 8. CALCULATE AI Effort Estimate (if aiLabor.enabled)
-     See .docflow/skills/ai-labor-estimate/SKILL.md
+     See .claude/skills/ai-labor-estimate/SKILL.md
 
 [] 9. UPDATE description with all changes
      update_issue({ id: "...", description: "..." })

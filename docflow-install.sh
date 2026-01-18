@@ -20,7 +20,7 @@
 
 set -e
 
-DOCFLOW_VERSION="4.7.0"
+DOCFLOW_VERSION="4.8.0"
 RAW_BASE_LOCAL="https://raw.githubusercontent.com/strideUX/docflow-template/main/local/template"
 RAW_BASE_CLOUD="https://raw.githubusercontent.com/strideUX/docflow-template/main/cloud/template"
 RAW_BASE_ROOT="https://raw.githubusercontent.com/strideUX/docflow-template/main"
@@ -261,20 +261,37 @@ if [ "$UPDATE_MODE" = true ]; then
   done
   chmod +x .docflow/scripts/*.sh
   
-  echo "   [3/5] Updating .docflow/skills..."
-  rm -rf .docflow/skills
-  mkdir -p .docflow/skills/linear-workflow .docflow/skills/spec-templates .docflow/skills/docflow-commands
-  mkdir -p .docflow/skills/figma-mcp .docflow/skills/component-workflow .docflow/skills/ai-labor-estimate
-  download_file "${RAW_BASE}/.docflow/skills/linear-workflow/SKILL.md" ".docflow/skills/linear-workflow/SKILL.md"
-  download_file "${RAW_BASE}/.docflow/skills/spec-templates/SKILL.md" ".docflow/skills/spec-templates/SKILL.md"
-  download_file "${RAW_BASE}/.docflow/skills/docflow-commands/SKILL.md" ".docflow/skills/docflow-commands/SKILL.md"
-  download_file "${RAW_BASE}/.docflow/skills/figma-mcp/SKILL.md" ".docflow/skills/figma-mcp/SKILL.md"
-  download_file "${RAW_BASE}/.docflow/skills/figma-mcp/PROMPTING.md" ".docflow/skills/figma-mcp/PROMPTING.md"
-  download_file "${RAW_BASE}/.docflow/skills/figma-mcp/TROUBLESHOOTING.md" ".docflow/skills/figma-mcp/TROUBLESHOOTING.md"
-  download_file "${RAW_BASE}/.docflow/skills/component-workflow/SKILL.md" ".docflow/skills/component-workflow/SKILL.md"
-  download_file "${RAW_BASE}/.docflow/skills/component-workflow/CHECKLIST.md" ".docflow/skills/component-workflow/CHECKLIST.md"
-  download_file "${RAW_BASE}/.docflow/skills/component-workflow/PATTERNS.md" ".docflow/skills/component-workflow/PATTERNS.md"
-  download_file "${RAW_BASE}/.docflow/skills/ai-labor-estimate/SKILL.md" ".docflow/skills/ai-labor-estimate/SKILL.md"
+  echo "   [3/5] Updating .claude/skills..."
+  # Remove old skill locations
+  rm -rf .docflow/skills .claude/skills .cursor/skills
+
+  # Create skill directories with references subfolders
+  mkdir -p .claude/skills/linear-workflow
+  mkdir -p .claude/skills/spec-templates
+  mkdir -p .claude/skills/docflow-commands
+  mkdir -p .claude/skills/figma-mcp/references
+  mkdir -p .claude/skills/component-workflow/references
+  mkdir -p .claude/skills/ai-labor-estimate/references
+
+  # Download skills
+  download_file "${RAW_BASE}/.claude/skills/linear-workflow/SKILL.md" ".claude/skills/linear-workflow/SKILL.md"
+  download_file "${RAW_BASE}/.claude/skills/spec-templates/SKILL.md" ".claude/skills/spec-templates/SKILL.md"
+  download_file "${RAW_BASE}/.claude/skills/docflow-commands/SKILL.md" ".claude/skills/docflow-commands/SKILL.md"
+  download_file "${RAW_BASE}/.claude/skills/figma-mcp/SKILL.md" ".claude/skills/figma-mcp/SKILL.md"
+  download_file "${RAW_BASE}/.claude/skills/figma-mcp/references/PROMPTING.md" ".claude/skills/figma-mcp/references/PROMPTING.md"
+  download_file "${RAW_BASE}/.claude/skills/figma-mcp/references/TROUBLESHOOTING.md" ".claude/skills/figma-mcp/references/TROUBLESHOOTING.md"
+  download_file "${RAW_BASE}/.claude/skills/component-workflow/SKILL.md" ".claude/skills/component-workflow/SKILL.md"
+  download_file "${RAW_BASE}/.claude/skills/component-workflow/references/CHECKLIST.md" ".claude/skills/component-workflow/references/CHECKLIST.md"
+  download_file "${RAW_BASE}/.claude/skills/component-workflow/references/PATTERNS.md" ".claude/skills/component-workflow/references/PATTERNS.md"
+  download_file "${RAW_BASE}/.claude/skills/ai-labor-estimate/SKILL.md" ".claude/skills/ai-labor-estimate/SKILL.md"
+  download_file "${RAW_BASE}/.claude/skills/ai-labor-estimate/references/provider-costs.md" ".claude/skills/ai-labor-estimate/references/provider-costs.md"
+
+  # Create .cursor/skills symlinks
+  mkdir -p .cursor/skills
+  for skill in .claude/skills/*/; do
+    skillname=$(basename "$skill")
+    ln -sf "../../.claude/skills/$skillname" ".cursor/skills/$skillname"
+  done
   
   echo "   [4/5] Updating .docflow/templates..."
   rm -rf .docflow/templates
@@ -545,14 +562,59 @@ EOF
   fi
 
   # =====================================================
+  # SKILLS MIGRATION (4.8.0+)
+  # =====================================================
+  if [ -d ".docflow/skills" ] && [ ! -d ".claude/skills" ]; then
+    echo ""
+    echo -e "${YELLOW}📦 Skills Migration (4.8.0)${NC}"
+    echo "   Skills are now in .claude/skills/ (Agent Skills standard)"
+    echo "   Moving skills from .docflow/skills/ to .claude/skills/..."
+
+    # Create new structure
+    mkdir -p .claude/skills
+
+    # Move each skill
+    for skill_dir in .docflow/skills/*/; do
+      if [ -d "$skill_dir" ]; then
+        skillname=$(basename "$skill_dir")
+        mkdir -p ".claude/skills/$skillname/references"
+
+        # Move SKILL.md
+        if [ -f "$skill_dir/SKILL.md" ]; then
+          mv "$skill_dir/SKILL.md" ".claude/skills/$skillname/"
+        fi
+
+        # Move reference files to references/ subfolder
+        for ref_file in "$skill_dir"/*.md; do
+          if [ -f "$ref_file" ] && [ "$(basename "$ref_file")" != "SKILL.md" ]; then
+            mv "$ref_file" ".claude/skills/$skillname/references/"
+          fi
+        done
+      fi
+    done
+
+    # Remove old skills directory
+    rm -rf .docflow/skills
+
+    # Create .cursor/skills symlinks
+    mkdir -p .cursor/skills
+    for skill in .claude/skills/*/; do
+      skillname=$(basename "$skill")
+      ln -sf "../../.claude/skills/$skillname" ".cursor/skills/$skillname" 2>/dev/null || true
+    done
+
+    echo -e "   ${GREEN}✓ Skills migrated to .claude/skills/${NC}"
+  fi
+
+  # =====================================================
   # CLEANUP OLD FILES (from migrations)
   # =====================================================
   echo ""
   echo "   Checking for deprecated files..."
-  
+
   OLD_FILES_FOUND=false
   FILES_TO_DELETE=()
-  
+
   # Check for files removed in 4.0.0
   if [ -f ".docflow.json" ]; then
     OLD_FILES_FOUND=true
@@ -562,7 +624,12 @@ EOF
     OLD_FILES_FOUND=true
     FILES_TO_DELETE+=(".cursor/rules/docflow.mdc")
   fi
-  
+  # Check for old skills location (4.8.0+)
+  if [ -d ".docflow/skills" ]; then
+    OLD_FILES_FOUND=true
+    FILES_TO_DELETE+=(".docflow/skills/")
+  fi
+
   if [ "$OLD_FILES_FOUND" = true ]; then
     echo ""
     echo -e "${YELLOW}🧹 Found deprecated files:${NC}"
@@ -571,10 +638,10 @@ EOF
     done
     echo ""
     read -p "   Delete these old files? (y/n): " DELETE_OLD
-    
+
     if [[ $DELETE_OLD =~ ^[Yy]$ ]]; then
       for f in "${FILES_TO_DELETE[@]}"; do
-        rm -f "$f"
+        rm -rf "$f"
         echo -e "   ${GREEN}✓ Deleted $f${NC}"
       done
     else
@@ -596,12 +663,12 @@ EOF
   echo -e "   Version: ${YELLOW}$CURRENT_VERSION${NC} → ${GREEN}$DOCFLOW_VERSION${NC}"
   echo ""
   echo -e "${YELLOW}What's new in $DOCFLOW_VERSION:${NC}"
-  echo "   • Multi-project support (workspace.activeProjects array)"
-  echo "   • Product identity config (name, labelIds, icon for new projects)"
-  echo "   • /new-project command for creating projects with product labels"
-  echo "   • Consolidated workflow-agent.md (PM, Implementation, QE in one file)"
-  echo "   • Updated /capture for multi-project handling"
-  echo "   • Automatic projectId → activeProjects migration"
+  echo "   • Skills moved to .claude/skills/ (Agent Skills standard)"
+  echo "   • Auto-discovery by Claude Code and Cursor"
+  echo "   • Supporting files reorganized into references/ subfolders"
+  echo "   • .cursor/skills/ symlinks for Cursor compatibility"
+  echo "   • Added frontmatter to ai-labor-estimate skill"
+  echo "   • Invoke skills with /skill [name] or auto-selection"
   echo ""
   
   exit 0
@@ -946,12 +1013,11 @@ cd ../..
 if [ "$MODE" == "cloud" ]; then
   echo "   [4/7] Installing .docflow/ framework..."
   mkdir -p .docflow/templates .docflow/rules .docflow/scripts
-  mkdir -p .docflow/skills/linear-workflow .docflow/skills/spec-templates .docflow/skills/docflow-commands
-  
+
   # Download config, version
   download_template_file ".docflow/config.json" ".docflow/config.json"
   download_template_file ".docflow/version" ".docflow/version"
-  
+
   # Download templates
   for template in README feature bug chore idea quick-capture; do
     download_template_file ".docflow/templates/${template}.md" ".docflow/templates/${template}.md"
@@ -962,31 +1028,46 @@ if [ "$MODE" == "cloud" ]; then
     download_template_file ".docflow/templates/design-system/${ds_template}.md" ".docflow/templates/design-system/${ds_template}.md"
   done
   download_template_file ".docflow/templates/scripts/check-design-system.template.mjs" ".docflow/templates/scripts/check-design-system.template.mjs"
-  
+
   # Download rules
   for rule in always core workflow-agent linear-integration figma-integration session-awareness designer-agent; do
     download_template_file ".docflow/rules/${rule}.md" ".docflow/rules/${rule}.md"
   done
-  
+
   # Download scripts
   for script in status-summary session-context stale-check activate-issue transition-issue wrap-session; do
     download_template_file ".docflow/scripts/${script}.sh" ".docflow/scripts/${script}.sh"
   done
   chmod +x .docflow/scripts/*.sh
-  
-  # Download skills
-  download_template_file ".docflow/skills/linear-workflow/SKILL.md" ".docflow/skills/linear-workflow/SKILL.md"
-  download_template_file ".docflow/skills/spec-templates/SKILL.md" ".docflow/skills/spec-templates/SKILL.md"
-  download_template_file ".docflow/skills/docflow-commands/SKILL.md" ".docflow/skills/docflow-commands/SKILL.md"
-  # Figma and component workflow skills
-  mkdir -p .docflow/skills/figma-mcp .docflow/skills/component-workflow .docflow/skills/ai-labor-estimate
-  download_template_file ".docflow/skills/figma-mcp/SKILL.md" ".docflow/skills/figma-mcp/SKILL.md"
-  download_template_file ".docflow/skills/figma-mcp/PROMPTING.md" ".docflow/skills/figma-mcp/PROMPTING.md"
-  download_template_file ".docflow/skills/figma-mcp/TROUBLESHOOTING.md" ".docflow/skills/figma-mcp/TROUBLESHOOTING.md"
-  download_template_file ".docflow/skills/component-workflow/SKILL.md" ".docflow/skills/component-workflow/SKILL.md"
-  download_template_file ".docflow/skills/component-workflow/CHECKLIST.md" ".docflow/skills/component-workflow/CHECKLIST.md"
-  download_template_file ".docflow/skills/component-workflow/PATTERNS.md" ".docflow/skills/component-workflow/PATTERNS.md"
-  download_template_file ".docflow/skills/ai-labor-estimate/SKILL.md" ".docflow/skills/ai-labor-estimate/SKILL.md"
+
+  # Download skills to .claude/skills/ (Agent Skills standard)
+  echo "   Installing skills to .claude/skills/..."
+  mkdir -p .claude/skills/linear-workflow
+  mkdir -p .claude/skills/spec-templates
+  mkdir -p .claude/skills/docflow-commands
+  mkdir -p .claude/skills/figma-mcp/references
+  mkdir -p .claude/skills/component-workflow/references
+  mkdir -p .claude/skills/ai-labor-estimate/references
+
+  download_template_file ".claude/skills/linear-workflow/SKILL.md" ".claude/skills/linear-workflow/SKILL.md"
+  download_template_file ".claude/skills/spec-templates/SKILL.md" ".claude/skills/spec-templates/SKILL.md"
+  download_template_file ".claude/skills/docflow-commands/SKILL.md" ".claude/skills/docflow-commands/SKILL.md"
+  download_template_file ".claude/skills/figma-mcp/SKILL.md" ".claude/skills/figma-mcp/SKILL.md"
+  download_template_file ".claude/skills/figma-mcp/references/PROMPTING.md" ".claude/skills/figma-mcp/references/PROMPTING.md"
+  download_template_file ".claude/skills/figma-mcp/references/TROUBLESHOOTING.md" ".claude/skills/figma-mcp/references/TROUBLESHOOTING.md"
+  download_template_file ".claude/skills/component-workflow/SKILL.md" ".claude/skills/component-workflow/SKILL.md"
+  download_template_file ".claude/skills/component-workflow/references/CHECKLIST.md" ".claude/skills/component-workflow/references/CHECKLIST.md"
+  download_template_file ".claude/skills/component-workflow/references/PATTERNS.md" ".claude/skills/component-workflow/references/PATTERNS.md"
+  download_template_file ".claude/skills/ai-labor-estimate/SKILL.md" ".claude/skills/ai-labor-estimate/SKILL.md"
+  download_template_file ".claude/skills/ai-labor-estimate/references/provider-costs.md" ".claude/skills/ai-labor-estimate/references/provider-costs.md"
+
+  # Create .cursor/skills symlinks
+  echo "   Creating Cursor skill symlinks..."
+  mkdir -p .cursor/skills
+  for skill in .claude/skills/*/; do
+    skillname=$(basename "$skill")
+    ln -sf "../../.claude/skills/$skillname" ".cursor/skills/$skillname"
+  done
   
   # Update content path in config if customized
   if [ "$CONTENT_FOLDER" != "docflow" ]; then

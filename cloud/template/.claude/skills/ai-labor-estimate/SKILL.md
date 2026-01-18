@@ -1,3 +1,8 @@
+---
+name: ai-labor-estimate
+description: "Estimates token usage and API costs for AI development tasks. Apply when refining issues, activating work, or when user asks about costs. Opt-in feature controlled by aiLabor.enabled in config."
+---
+
 # AI Labor Estimate Skill
 
 > **Purpose**: Estimate token usage and API costs for AI-driven development tasks before implementation begins.
@@ -150,7 +155,7 @@ Where:
   output_ratio = 0.30 (typical for development)
 ```
 
-See `provider-costs.md` for current pricing.
+See `references/provider-costs.md` for current pricing.
 
 ---
 
@@ -231,7 +236,7 @@ Add to issue comment on completion:
    - Assess criteria specificity → clarity
    - Reference `stack.md` → codebase complexity
 4. **Calculate estimate** using formula
-5. **Look up provider costs** from `provider-costs.md` or `.docflow/config.json`
+5. **Look up provider costs** from `references/provider-costs.md` or `.docflow/config.json`
 6. **Add estimate section** to issue description (replace placeholders with values)
 7. **If estimate exceeds threshold**, flag for human review:
    - \> 200k tokens → Consider breaking down the issue

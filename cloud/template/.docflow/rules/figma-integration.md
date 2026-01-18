@@ -16,13 +16,13 @@ Load this rule when:
 ## Core Skill Reference
 
 **For complete Figma workflow, load the `figma-mcp` skill:**
-- `.docflow/skills/figma-mcp/SKILL.md` - Full 5-phase workflow
-- `.docflow/skills/figma-mcp/PROMPTING.md` - Prompting strategies
-- `.docflow/skills/figma-mcp/TROUBLESHOOTING.md` - Common issues
+- `.claude/skills/figma-mcp/SKILL.md` - Full 5-phase workflow
+- `.claude/skills/figma-mcp/references/PROMPTING.md` - Prompting strategies
+- `.claude/skills/figma-mcp/references/TROUBLESHOOTING.md` - Common issues
 
 **For component patterns, load the `component-workflow` skill:**
-- `.docflow/skills/component-workflow/SKILL.md` - Component patterns
-- `.docflow/skills/component-workflow/CHECKLIST.md` - Validation checklist
+- `.claude/skills/component-workflow/SKILL.md` - Component patterns
+- `.claude/skills/component-workflow/references/CHECKLIST.md` - Validation checklist
 
 ---
 

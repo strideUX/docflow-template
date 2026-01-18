@@ -74,4 +74,4 @@ See `.docflow/rules/linear-integration.md` for complete API patterns.
 
 ## Skill
 
-See `.docflow/skills/linear-workflow/SKILL.md` for workflow guidance.
+See `.claude/skills/linear-workflow/SKILL.md` for workflow guidance.

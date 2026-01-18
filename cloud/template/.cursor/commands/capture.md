@@ -121,4 +121,4 @@ For fast capture: minimal issue, refine later with `/refine`.
 
 ## Full Rules
 
-See `.docflow/rules/workflow-agent.md` and `.docflow/skills/spec-templates/SKILL.md`
+See `.docflow/rules/workflow-agent.md` and `.claude/skills/spec-templates/SKILL.md`

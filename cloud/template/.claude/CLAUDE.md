@@ -62,11 +62,17 @@ Commands are in `.claude/commands/` (symlinks to `.cursor/commands/`).
 
 ## Skills
 
-Load situationally from `.docflow/skills/`:
+Skills are auto-discovered from `.claude/skills/` (symlinked to `.cursor/skills/`).
+
+Available skills:
 - `figma-mcp` - Figma integration workflow
 - `component-workflow` - Component patterns & testing
 - `linear-workflow` - Linear MCP operations
 - `ai-labor-estimate` - Token/cost estimation (if enabled)
+- `spec-templates` - Issue spec templates
+- `docflow-commands` - Command reference
+
+Invoke with `/skill [name]` or let the agent auto-select based on context.
 
 ---
 

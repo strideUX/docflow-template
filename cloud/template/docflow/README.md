@@ -179,5 +179,5 @@ See `.cursor/mcp.json` for MCP server configuration.
 
 - `AGENTS.md` - AI agent instructions
 - `.docflow/rules/` - Complete workflow rules (source of truth)
-- `.docflow/skills/` - Portable agent skills
+- `.claude/skills/` - Portable agent skills (auto-discovered)
 - `knowledge/INDEX.md` - Knowledge base inventory

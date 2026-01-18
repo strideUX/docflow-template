@@ -345,7 +345,7 @@ export function cn(...inputs: ClassValue[]) {
 ## See Also
 
 - **figma-mcp skill** - Design extraction and token mapping
-- **CHECKLIST.md** - Detailed validation checklist
-- **PATTERNS.md** - Extended code patterns
+- **references/CHECKLIST.md** - Detailed validation checklist
+- **references/PATTERNS.md** - Extended code patterns
 
 

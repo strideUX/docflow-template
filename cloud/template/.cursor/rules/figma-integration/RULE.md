@@ -39,6 +39,6 @@ If `.docflow/config.json` has `designSystem.enabled: true`:
 
 ## Full Documentation
 
-- **Skills:** `.docflow/skills/figma-mcp/SKILL.md` - Complete workflow
+- **Skills:** `.claude/skills/figma-mcp/SKILL.md` - Complete workflow
 - **Rules:** `.docflow/rules/figma-integration.md` - Full patterns
 - **Designer Agent:** `.docflow/rules/designer-agent.md` - Token extraction
